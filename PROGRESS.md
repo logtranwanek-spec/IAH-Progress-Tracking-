@@ -4,6 +4,164 @@
 
 ## Current milestone and last completed task
 
+- **Last completed milestone:** M1 — Project Foundation, **COMPLETED** after verification using published managed DLLs.
+- **First unfinished / next milestone:** M2 — YARP Gateway, **NOT STARTED**. No M2 feature code was added in this session.
+- **Last completed task:** Policy reassessment, replacement managed Foundation verification, published-DLL startup, full verification, and a negative control for failure propagation.
+- **Authorization:** The user expressly requires no .exe artifacts to run and permits .NET through dotnet publish followed by dotnet <published DLL>. The conditional instruction to start M2 if M1 remained unverified was unnecessary because M1 passed.
+- **Progress repository:** https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git, branch main. Its tracked tree contains only the four project Markdown files. Source, publish output, and extra evidence documents stay local.
+
+## M1 acceptance reassessment
+
+The original functional criteria were retained. Requirements mandate automated verification, not VSTest specifically. Company policy changes the permitted execution format; it does not waive behavior checks. The dedicated managed program references the actual production Foundation library, reports every assertion, and returns nonzero on failure. It does not load or rehost VSTest or testhost.
+
+| Acceptance criterion                                                     | Evidence and result                                                                                                                                            |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Agreed layout and component boundaries are documented and present        | PASS: four component shells, shared Foundation/config/contracts, lifecycle tools, and architecture/setup/security documentation inspected                      |
+| Local restore/compile/publish without Docker or Administrator privileges | PASS: API/dashboard compilation and Gateway, Agent, verifier DLL publishes; Administrator-role check returned False                                            |
+| Configurable storage/ports with loopback defaults                        | PASS: 27 managed Foundation checks, 17 Node foundation checks, and three managed live socket assertions                                                        |
+| Documented local start/stop and verification work on Windows             | PASS: full verify exited 0; actual HTTP responses, React module, API proxy, disabled deployment, graceful exit code 0, port release, temporary storage cleanup |
+| Baseline checks/results recorded accurately                              | PASS: current results here; prior failures and unexecuted VSTest history retained below                                                                        |
+
+**Conclusion:** M1 is COMPLETED. The prior error 1260 is historical and was not overridden or disabled. The old VSTest/xUnit suite never executed; the passing results belong to the new managed verification program.
+
+## Implemented foundation
+
+- NestJS health-only API; no management or deployment endpoints.
+- ASP.NET Core gateway shell health endpoint; YARP routing remains M2 work.
+- React/TypeScript/Vite/Tailwind foundation page with a real API health check through its fixed local proxy.
+- Foreground .NET Worker with supervised shutdown and no upload/application execution.
+- Shared configurable loopback ports, profile storage, runtime range, source/storage separation, port collision and restricted-port validation.
+- Foreground launcher with occupied-port checks, bounded readiness, graceful child shutdown, and owned-process cleanup.
+- Framework-dependent .NET publishing with UseAppHost=false; active publish outputs are scanned for .exe artifacts before execution.
+- Managed Foundation assertions and TCP listener inspection without VSTest or a direct PowerShell executable launch.
+
+M1 does not implement application registration, database/Prisma integration, YARP proxying, upload/build execution, authentication, monitoring, or rollback.
+
+## Files changed in this policy reassessment
+
+**Tracked documents, and the only files authorized for commit/push:**
+
+- PROJECT_REQUIREMENTS.md — added the authoritative no-.exe/publish-DLL policy while retaining the complete original specification.
+- AGENTS.md — preserved the user's new progress-repo instructions, fixed its code fence, and documented managed DLL verification and the four-file commit restriction.
+- IMPLEMENTATION_PLAN.md — completed M1 with an evidence matrix and updated future .NET command examples to publish/DLL execution.
+- PROGRESS.md — this current state, detailed results, limitations, source inventory, and preserved history.
+
+**Local implementation changes (excluded from the progress-repository commit):**
+
+- Added tests/Foundation.Tests/Program.cs — managed assertion entrypoint, failure exit code, and managed listener inspection.
+- Added tools/publish.mjs — fixed project allowlist, framework-dependent publishes, published DLL/runtime metadata checks, and recursive rejection of .exe artifacts.
+- Modified Directory.Build.props — disables native apphosts, self-contained/single-file output, and shared compilation.
+- Modified tests/Foundation.Tests/Foundation.Tests.csproj, SettingsTests.cs, and packages.lock.json — removed all VSTest/xUnit runner packages; verification now directly tests production settings without an external test host.
+- Modified tools/tasks.mjs — build publishes DLLs; test:dotnet publishes/runs the dedicated verifier.
+- Modified tools/local.mjs — launches the published Gateway and Agent DLLs, validates allowed component hosts, and retains owned-child cleanup.
+- Modified tools/process.mjs — rejects direct .exe command paths; uses the required existing command hosts for project tooling.
+- Modified tools/smoke.mjs — uses the published managed listener check instead of directly starting a PowerShell executable.
+- Modified .gitignore and .prettierignore — exclude artifacts.
+- Updated local README.md, ARCHITECTURE.md, INSTALLATION.md, SECURITY.md, TROUBLESHOOTING.md, and docs/verification/M1-2026-10-26.md for the policy and new evidence.
+
+Source changes are still local/untracked in this documentation-only Git repository. A fresh clone of the progress repository provides project records, not the runnable source. Preserve this workspace for development continuity.
+
+## Commands executed and actual results
+
+| Command/check                                                      | Actual result                                                                                                                                                  |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Initial managed publish using an absolute output property          | FAILED: MSB1006 due to comma in the OneDrive organization path; corrected using a project-relative PublishDir property                                         |
+| npm.cmd run test:dotnet                                            | PASS: published Foundation.Tests.dll ran 27 checks, 0 failures, exit 0                                                                                         |
+| npm.cmd run verify                                                 | PASS, exit 0: compilation, DLL publishes, formatting/types, Node/API checks, managed assertions, live smoke                                                    |
+| Node foundation/lifecycle checks in full verify                    | PASS: 17                                                                                                                                                       |
+| API real HTTP checks in full verify                                | PASS: 2                                                                                                                                                        |
+| Published managed Foundation checks in full verify                 | PASS: 27                                                                                                                                                       |
+| Publish artifact validation                                        | PASS: Gateway, DeploymentAgent, Foundation.Tests outputs contained no .exe files                                                                               |
+| Managed live listener check                                        | PASS: exactly one IPv4 loopback listener on each configured port 5050, 5065, 5173                                                                              |
+| Full smoke lifecycle                                               | PASS: real health bodies, HTML/React module, local API proxy, deployment endpoint 404; all four child processes exited 0; ports released; test storage removed |
+| Negative control: verifier requested a listener after API shutdown | PASS as a negative control: expected assertion message `Expected 1; got 0.` and exit code 1 were both observed                                                 |
+| Current Windows token check                                        | Administrator role = False                                                                                                                                     |
+
+The passing automated behavior count is **46 checks: 19 Node/API + 27 managed Foundation**, plus the live socket and smoke checks. None are historical VSTest results. No interactive browser visual/accessibility review or exact Node 24 compatibility test was performed. The NPM dependency tree is unchanged in this session; the prior baseline audit had zero vulnerabilities.
+
+No apphost/testhost executable was launched, no blocked runner was relocated/rehosted, and no company security setting was changed. Stale historical build output is not an approved launch target; startup only accepts validated publish artifacts.
+
+## Architectural decisions and policy
+
+- .NET target remains net8.0 on the installed SDK 8.0.425/runtime 8.0.31; Node 26.12.1/npm 11.20.0 remain the tested installed versions.
+- All .NET applications/checks use framework-dependent publish and dotnet <published DLL>. A managed console entrypoint may have OutputType=Exe in MSBuild while UseAppHost=false ensures that the published runnable artifact is a DLL.
+- Active output directories: artifacts/publish/Gateway, artifacts/publish/DeploymentAgent, artifacts/publish/Foundation.Tests.
+- Use project-relative PublishDir properties because an absolute --output value encounters MSBuild comma parsing in this repository path.
+- Gateway/API/dashboard bind only to 127.0.0.1 on 5050/5065/5173. The future managed runtime range remains 6100–6999. The Agent exposes no management HTTP surface.
+- Default storage remains under the current user's profile and separate from source; no username is hardcoded.
+- Separate Windows processes are not strong isolation. Upload/build execution remains disabled until the approved identity, security boundary, authorization, and deployment policy are implemented.
+- The permitted DLL publishing approach follows [Microsoft's framework-dependent publishing guidance](https://learn.microsoft.com/en-us/dotnet/core/deploying/).
+
+## Current blockers and unresolved issues
+
+**No blocker remains for M1.**
+
+- Exact Node 24.22.1 and older .NET patches from the original infrastructure snapshot remain unavailable/unverified.
+- Prisma/SQLite and YARP package integration are future milestones. Verify Prisma's compliance with the no-.exe policy before selecting/running its tooling in M4.
+- Execution identities, credential protection, trusted package approvals, and unattended startup still need their planned design/IT review; they are not silently treated as implemented.
+- Source remains local because the progress repository is explicitly limited to four Markdown files.
+
+## Exact next recommended task
+
+M2 is the first unfinished milestone. Begin its architecture/dependency review using the no-.exe constraints, then implement the managed YARP gateway and its permitted DLL-based verification. This session completed M1 and did not start M2.
+
+## Commands to resume
+
+Read AGENTS.md, this current snapshot, M2 in IMPLEMENTATION_PLAN.md, the relevant requirements, and inspect actual local source first.
+
+```powershell
+git status --short
+npm.cmd run doctor
+npm.cmd run verify
+npm.cmd run start:local
+```
+
+The existing test:dotnet task always publishes the managed verifier before invoking its DLL. The equivalent permitted form is:
+
+```powershell
+dotnet publish .\tests\Foundation.Tests\Foundation.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/Foundation.Tests/
+dotnet .\artifacts\publish\Foundation.Tests\Foundation.Tests.dll
+```
+
+Do not run dotnet test, dotnet run, native apphosts, or a testhost executable. No IT policy exception is required for the now-verified M1 format.
+
+## Progress repository synchronization
+
+Commit and push only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md, and PROGRESS.md to origin/main at the specified progress repository. Verify the staged path list and the committed tree contain exactly those four paths. Confirm the pushed remote commit matches local HEAD. Do not add source, binaries, credentials, or local evidence documents. The final handoff provides the commit receipt.
+
+## Session handoff
+
+M1 acceptance is verified and marked COMPLETED. All verification component processes stopped, their ports were released, and temporary test storage was removed. No corporate-network deployment, production access, existing-application modification, or system security-setting change occurred. M2–M12 remain NOT STARTED.
+
+## Preserved previous records
+
+The preceding blocked snapshot, incremental reassessment timeline, and earlier session history are retained verbatim below. They describe historical states superseded by this verified current snapshot.
+
+<details>
+<summary>Previous blocked snapshot and policy reassessment history</summary>
+
+`````markdown
+# Project Progress
+
+**Updated:** 2026-10-26 (Asia/Bangkok)
+
+## Active policy reassessment session
+
+- The user confirmed the no-`.exe` policy and expressly required `dotnet publish` followed by `dotnet <published DLL>`. M1 is being reassessed; the prior blocked snapshot below is historical until fresh evidence is recorded.
+- Read AGENTS.md, PROGRESS.md, IMPLEMENTATION_PLAN.md, and the relevant infrastructure, security, testing, and acceptance requirements before changes.
+- The remote now exists on `origin/main` with initial commit `026588e`; it tracks the four documentation files. The user-added AGENTS.md instructions were retained, and its missing code-fence terminator was corrected.
+- Plan: replace the VSTest dependency with a dedicated managed Foundation verification program, publish without apphosts, use published DLLs for Gateway/Agent startup, and replace the smoke check's direct PowerShell executable invocation with a managed socket check.
+- No blocked runner was executed. M1 is not yet claimed complete in this reassessment.
+- Converted Foundation.Tests into a standalone managed verification program with production settings assertions and a managed TCP listener check; removed VSTest/xUnit runner package dependencies. Apphosts and shared compilation are disabled globally, and application startup now targets publish artifacts.
+- First publish failed with MSB1006 because the absolute output path contains a comma in the OneDrive organization name. Updated publishing to use a project-relative PublishDir property; verification is pending. No executable artifact was launched by the failed publish.
+- Corrected publish succeeded. The published Foundation.Tests.dll executed 27 production settings checks: 27 passed, 0 failed, exit code 0. The output scan found no .exe artifacts. This is fresh managed verification evidence, not a claim that the historical VSTest suite ran.
+- Updated local startup, smoke inspection, and setup/security documentation for published DLLs. Full publish/check/Node-test/smoke verification remains pending before changing M1 status.
+- Full `npm.cmd run verify` passed (exit 0): API/dashboard compilation, three framework-dependent DLL publishes, no-.exe output scans, formatting/type checks, 19 Node/API checks, 27 managed Foundation checks, and the four-component smoke check including managed loopback socket inspection and clean shutdown/port release.
+- The current Windows token is not an Administrator (`False` role check). The historical testhost restriction was not changed; the replacement program verified the required Foundation behavior through the newly confirmed permitted DLL execution format.
+- Negative control: requesting a listener on the now-released API port produced the expected managed assertion failure and exit code 1. A separate recursive scan of artifacts/publish found no .exe files. M1 acceptance criteria are now verified; IMPLEMENTATION_PLAN.md marks M1 COMPLETED. M2 remains NOT STARTED because the conditional fallback to M2 was unnecessary.
+
+## Current milestone and last completed task
+
 - **Current milestone:** M1 — Project Foundation, `BLOCKED` on company policy preventing .NET test execution.
 - **Last completed task:** Fresh npm ci, static checks, 19 Node/API tests, and dependency audit passed. The independent four-component smoke check also passed.
 - **Next milestone:** M2 — YARP Gateway, `NOT STARTED`. Do not start it while M1 acceptance remains incomplete.
@@ -280,5 +438,8 @@ Record actual outputs, failures, and test results before updating milestone stat
 - Corrected smoke passed: all four components started; health responses, React entry module, local API proxy, and disabled deployment endpoints were verified. Windows socket inspection found exactly three listeners (5050, 5065, 5173), all on 127.0.0.1, and no Agent listener. All four processes exited with code 0, their ports were released, and the temporary test storage was removed.
 - M1 is now `BLOCKED` solely because the required .NET suite has not run under company group policy. M2 has not been started. Final reproducible install and Node/static checks are being recorded before handoff.
 ````
+
+</details>
+`````
 
 </details>

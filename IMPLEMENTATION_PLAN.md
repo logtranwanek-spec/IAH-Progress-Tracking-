@@ -28,7 +28,7 @@ src/Foundation/              shared .NET host configuration
 packages/config/             shared Node configuration
 packages/contracts/          TypeScript contracts
 tools/                       local development lifecycle and checks
-tests/Foundation.Tests/      .NET foundation tests (execution blocked by IT policy)
+tests/Foundation.Tests/      published managed Foundation verification program
 tests/foundation/            Node foundation tests
 samples/DemoNode/            planned M3
 samples/DemoDotnet/          planned M3
@@ -44,6 +44,7 @@ M1 commands below refer to existing artifacts. Commands for later milestones rem
 - Begin with localhost. The gateway's initial URL is `http://127.0.0.1:5050`. Do not enable the corporate-network listener or deploy to the corporate network without local verification and explicit authorization.
 - Port 5050 is the only intended network-facing entry point. Application processes must bind to loopback, using an internal port in the planned `6100–6999` range. Do not expose runtime ports to the corporate network.
 - Do not use Docker or require Administrator privileges for normal operation. Do not alter firewall rules, execution policy, endpoint protection, registry settings, or other IT controls.
+- Do not run .exe artifacts. All .NET applications and verification programs must use framework-dependent dotnet publish with UseAppHost=false, followed by dotnet <published DLL>. Do not use VSTest/testhost, native apphosts, or dotnet run. Publish outputs must be checked for forbidden executable artifacts.
 - Treat uploads as untrusted. Do not execute arbitrary uploaded code or manifest commands without the approved deployment policy and security boundary. Where available permissions cannot provide adequate isolation, restrict deployment to reviewed, trusted applications and record the limitation.
 - Do not modify existing applications. Use only platform-owned storage and sample applications.
 - Keep secrets out of browser responses and logs. Validate routes and destinations; proxy only to approved loopback destinations.
@@ -62,7 +63,7 @@ M1 commands below refer to existing artifacts. Commands for later milestones rem
 - Record component boundaries and data/control flows for Gateway, NestJS API, .NET Deployment Agent, React dashboard, SQLite registry, and application processes.
 - Create the monorepo structure and shared development configuration without requiring administrator access or Docker.
 - Define local-only startup and shutdown instructions, configurable storage paths, ports, and environment-specific settings; do not hardcode a Windows username.
-- Establish formatting, lint/build/test entry points and a safe local verification procedure. Use `npm.cmd` in PowerShell.
+- Establish formatting, lint/publish/verification entry points and a safe local verification procedure. Use `npm.cmd` in PowerShell. Publish a managed Foundation assertion program that exercises production code, exits nonzero on failures, and needs no VSTest executable.
 - Record security assumptions, deployment approval gates, and the limits of process isolation on Windows without Docker.
 
 **Dependencies:** Documentation review and user approval to begin implementation; local toolchain availability. Later application milestones depend on the foundation created here.
@@ -70,7 +71,7 @@ M1 commands below refer to existing artifacts. Commands for later milestones rem
 **Acceptance criteria:**
 
 - The agreed source layout and component boundaries are documented and present in the repository.
-- Developers can restore/build the empty component shells locally without Docker, Administrator privileges, system security changes, or corporate-network access.
+- Developers can restore/compile and publish the component shells locally without Docker, Administrator privileges, system security changes, or corporate-network access. .NET applications and checks are run from published DLLs; no native executable artifacts are launched.
 - Configuration and storage locations are user-configurable; runtime and gateway defaults are loopback-only.
 - Local start/stop and verification commands are documented and work on the target Windows environment.
 - The repo's baseline checks and their actual results are recorded in `PROGRESS.md`.
@@ -88,9 +89,21 @@ npm.cmd run smoke
 npm.cmd run verify
 ```
 
-**Status:** BLOCKED
+**Status:** COMPLETED
 
-**Task/acceptance evidence:** Component shells, configuration, local lifecycle tooling, architecture/security/setup documentation, builds, Node/API tests, and the four-component smoke check have been implemented and verified. The current user token is not an Administrator. Full verification cannot pass: Windows group policy blocked VSTest's `testhost.exe` (Win32 error 1260) before any .NET tests ran. An IT-approved test execution arrangement is required. No policy workaround was attempted. Keep M1 incomplete and do not begin M2 until the remaining tests pass. See `PROGRESS.md` and `docs/verification/M1-2026-10-26.md` for command results.
+**Policy reassessment:** The original behavior criteria are unchanged. The 2026-10-26 instruction permits published managed verification DLLs, so VSTest is not a required acceptance dependency. A dedicated verifier now exercises the production Foundation library without loading/rehosting the blocked runner.
+
+| M1 acceptance criterion                                            | Verified evidence                                                                                                                       |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Source layout and component boundaries exist                       | Four source shells, shared Foundation/config/contracts, local tooling, and architecture documentation inspected                         |
+| Restore/compile/publish without Docker or Administrator privileges | Full npm verification exited 0; three framework-dependent publishes succeeded; current token Administrator check was False              |
+| Configurable storage/ports and loopback defaults                   | 27 managed production settings checks, 17 Node foundation checks, and three live managed listener assertions passed                     |
+| Local start/stop and verification commands work                    | Published Gateway/Agent DLLs and Node components passed real health/page/module/proxy checks; all four exited 0 and ports were released |
+| Baseline results recorded accurately                               | Full command/results, negative control, changes, prior blocked evidence, and resume instructions are recorded in PROGRESS.md            |
+
+**Full verification:** `npm.cmd run verify` passed: API/dashboard compilation, three DLL publishes, publish scans reporting no .exe artifacts, formatting/type checks, **19 Node/API checks + 27 managed Foundation checks**, and local smoke. A negative control on an absent listener returned the expected assertion failure and exit code 1. No legacy VSTest test is reported as executed. Historical error 1260 remains part of the record; no security settings were changed.
+
+**Scope:** This completes M1 only. M2–M12 remain NOT STARTED. The user's conditional permission to start M2 while M1 is unverified was not needed.
 
 ### M2 — YARP Gateway
 
@@ -117,8 +130,10 @@ npm.cmd run verify
 **Verification commands (planned):**
 
 ```powershell
-dotnet test .\tests\Gateway.Tests\Gateway.Tests.csproj
-dotnet run --project .\src\Gateway\Gateway.csproj
+dotnet publish .\tests\Gateway.Tests\Gateway.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Gateway.Tests\bin\Release\net8.0\publish\Gateway.Tests.dll
+dotnet publish .\src\Gateway\Gateway.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\src\Gateway\bin\Release\net8.0\publish\Gateway.dll
 Invoke-RestMethod http://127.0.0.1:5050/_platform/health
 ```
 
@@ -150,8 +165,10 @@ Invoke-RestMethod http://127.0.0.1:5050/_platform/health
 ```powershell
 npm.cmd --prefix .\samples\DemoNode install
 npm.cmd --prefix .\samples\DemoNode test
-dotnet test .\samples\DemoDotnet\DemoDotnet.Tests.csproj
-dotnet run --project .\samples\DemoDotnet\DemoDotnet.csproj
+dotnet publish .\samples\DemoDotnet\DemoDotnet.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\samples\DemoDotnet\bin\Release\net8.0\publish\DemoDotnet.Tests.dll
+dotnet publish .\samples\DemoDotnet\DemoDotnet.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\samples\DemoDotnet\bin\Release\net8.0\publish\DemoDotnet.dll
 Invoke-WebRequest http://127.0.0.1:6101/health
 Invoke-WebRequest http://127.0.0.1:6102/health
 ```
@@ -166,6 +183,7 @@ Start the Node.js and ASP.NET Core samples in separate terminals with their conf
 
 **Tasks:**
 
+- Verify the selected Prisma toolchain is compatible with the no-.exe policy before use; do not execute native engine artifacts. Define policy-compatible package scripts for schema validation/migrations.
 - Define normalized Prisma models for users, applications, deployments, runtime instances, routes, database connections, deployment logs, audit logs, application secrets, and approvals.
 - Add versioned migrations, constraints, indexes, foreign keys, and unique application slugs.
 - Implement validated application registry and read APIs, pagination/filtering foundations, consistent errors, request logging, and OpenAPI documentation.
@@ -188,7 +206,7 @@ Start the Node.js and ASP.NET Core samples in separate terminals with their conf
 
 ```powershell
 npm.cmd --prefix .\src\Api run test
-npm.cmd --prefix .\src\Api exec prisma validate -- --schema prisma\schema.prisma
+npm.cmd --prefix .\src\Api run prisma:validate
 npm.cmd --prefix .\src\Api run migration:test
 npm.cmd --prefix .\src\Api run build
 ```
@@ -221,8 +239,10 @@ npm.cmd --prefix .\src\Api run build
 **Verification commands (planned):**
 
 ```powershell
-dotnet test .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj
-dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj --filter Category=ProcessLifecycle
+dotnet publish .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\DeploymentAgent.Tests\bin\Release\net8.0\publish\DeploymentAgent.Tests.dll
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
 ```
 
 **Status:** NOT STARTED
@@ -253,8 +273,10 @@ dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj
 **Verification commands (planned):**
 
 ```powershell
-dotnet test .\tests\Gateway.Tests\Gateway.Tests.csproj
-dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj --filter Category=DynamicRouting
+dotnet publish .\tests\Gateway.Tests\Gateway.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Gateway.Tests\bin\Release\net8.0\publish\Gateway.Tests.dll
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
 Invoke-WebRequest http://127.0.0.1:5050/demo-node/
 Invoke-WebRequest http://127.0.0.1:5050/demo-dotnet/
 ```
@@ -287,9 +309,11 @@ Invoke-WebRequest http://127.0.0.1:5050/demo-dotnet/
 **Verification commands (planned):**
 
 ```powershell
-npm.cmd --prefix .\src\Api run test -- --testPathPattern upload
-dotnet test .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj --filter Category=PackageValidation
-dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj --filter Category=ApprovedBuild
+npm.cmd --prefix .\src\Api run test
+dotnet publish .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\DeploymentAgent.Tests\bin\Release\net8.0\publish\DeploymentAgent.Tests.dll
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
 ```
 
 **Status:** NOT STARTED
@@ -321,7 +345,8 @@ dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj
 ```powershell
 npm.cmd --prefix .\src\Dashboard run test
 npm.cmd --prefix .\src\Dashboard run build
-dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj --filter Category=DashboardGateway
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
 ```
 
 **Status:** NOT STARTED
@@ -351,9 +376,10 @@ dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj
 **Verification commands (planned):**
 
 ```powershell
-npm.cmd --prefix .\src\Api run test -- --testPathPattern monitoring
-npm.cmd --prefix .\src\Dashboard run test -- --run monitoring
-dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj --filter Category=Monitoring
+npm.cmd --prefix .\src\Api run test
+npm.cmd --prefix .\src\Dashboard run test
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
 ```
 
 **Status:** NOT STARTED
@@ -383,9 +409,11 @@ dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj
 **Verification commands (planned):**
 
 ```powershell
-npm.cmd --prefix .\src\Api run test -- --testPathPattern deployment
-dotnet test .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj --filter Category=Rollback
-dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj --filter Category=VersionManagement
+npm.cmd --prefix .\src\Api run test
+dotnet publish .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\DeploymentAgent.Tests\bin\Release\net8.0\publish\DeploymentAgent.Tests.dll
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
 ```
 
 **Status:** NOT STARTED
@@ -415,9 +443,10 @@ dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj
 **Verification commands (planned):**
 
 ```powershell
-npm.cmd --prefix .\src\Api run test -- --testPathPattern auth
-npm.cmd --prefix .\src\Dashboard run test -- --run auth
-dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj --filter Category=Authorization
+npm.cmd --prefix .\src\Api run test
+npm.cmd --prefix .\src\Dashboard run test
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
 ```
 
 **Status:** NOT STARTED
@@ -449,9 +478,12 @@ dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj
 **Verification commands (planned):**
 
 ```powershell
-dotnet test .\tests\Gateway.Tests\Gateway.Tests.csproj
-dotnet test .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj
-dotnet test .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj
+dotnet publish .\tests\Gateway.Tests\Gateway.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Gateway.Tests\bin\Release\net8.0\publish\Gateway.Tests.dll
+dotnet publish .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\DeploymentAgent.Tests\bin\Release\net8.0\publish\DeploymentAgent.Tests.dll
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
+dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
 npm.cmd --prefix .\src\Api run test
 npm.cmd --prefix .\src\Dashboard run test
 npm.cmd --prefix .\src\Dashboard run build
@@ -478,4 +510,4 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
-M1 is `BLOCKED` on .NET test execution under the current Windows policy. M2–M12 remain `NOT STARTED`. Change a status only with a matching progress entry and verified evidence.
+M1 is `COMPLETED` with published-DLL verification under the confirmed company policy. M2–M12 remain `NOT STARTED`. Future .NET verification projects must be managed DLL programs; the publish/run commands above remain planned until those projects exist. Change a status only with a matching progress entry and verified evidence.

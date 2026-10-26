@@ -58,3 +58,38 @@ The user approved the documentation and authorized local implementation on 2026-
 ## Authorization boundary
 
 Do not access production systems, deploy to the corporate network, change network exposure, modify Windows security settings, or alter existing applications without explicit authorization. Local development, read-only inspection, and project-owned documentation/source changes may proceed within the approved milestone and repository scope.
+
+## Mandatory rules after every task
+
+After completing any task, the Agent must:
+
+1. Update `PROGRESS.md` in detail (what was done, actual test results, remaining issues, and the exact next task).
+2. Update `IMPLEMENTATION_PLAN.md` whenever a milestone status changes.
+3. Commit and push **only** the following 4 files to the progress tracking repository:
+   - `PROJECT_REQUIREMENTS.md`
+   - `AGENTS.md`
+   - `IMPLEMENTATION_PLAN.md`
+   - `PROGRESS.md`
+
+**Progress repository:**
+
+- Remote: `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git`
+- Branch: `main`
+
+Use these exact commands (or equivalent):
+
+```powershell
+git add PROJECT_REQUIREMENTS.md AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md
+git commit -m "Update progress after completing [task name]"
+git push origin main
+```
+
+Do not commit any source code or other project files into this progress repository.
+
+### Company policy restrictions
+
+- Company policy strictly prohibits running `.exe` artifacts. Do not attempt to bypass this policy.
+- For .NET applications and verification programs, publish framework-dependent output with `UseAppHost=false`, then run the published DLL using `dotnet <filename>.dll`. Never execute apphosts or testhost executables directly.
+- Do not use `dotnet run`, VSTest, or `dotnet test` if they require an executable runner. A dedicated published managed assertion program may verify production Foundation code and must return nonzero on failure; it is not a rehosted VSTest runner.
+- The user authorizes starting M2 if M1 remains impossible to verify within policy; record the exact unverified criteria and this exception before proceeding.
+- Verify that staged and pushed paths contain only the four named Markdown files. Never stage source code, binaries, credentials, or other documents in this progress repository.

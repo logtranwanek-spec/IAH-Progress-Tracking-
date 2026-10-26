@@ -6,6 +6,16 @@
 **Development Approach:** Production-oriented, modular architecture  
 **Primary Objective:** Self-service deployment of Node.js and ASP.NET Core applications through a centralized hosting platform.
 
+## Authoritative company policy update — 2026-10-26
+
+- Company policy prohibits running `.exe` artifacts. Do not execute application apphosts, VSTest/testhost executables, or dependency executables, and do not change security policy to enable them.
+- For .NET, publish framework-dependent output with `dotnet publish -c Release --no-self-contained -p:UseAppHost=false`, then run the published application or verification DLL with `dotnet <filename>.dll`.
+- Automated .NET checks may use a dedicated published managed verification program that exercises production code, reports each check, and returns failure when any assertion fails. Running or rehosting the blocked VSTest runner is not required or authorized.
+- Re-evaluate M1 against the original functional acceptance criteria using this permitted execution format. If M1 still cannot be fully verified safely, document its exact limitation and proceed with M2 under the user's explicit exception.
+- Commit and push only `PROJECT_REQUIREMENTS.md`, `AGENTS.md`, `IMPLEMENTATION_PLAN.md`, and `PROGRESS.md` to `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git` on `main`. Source code and other files remain local.
+
+This update takes precedence over earlier command examples or historical verification notes that use native executables, `dotnet run`, or VSTest. All other requirements remain in force.
+
 ---
 
 # 1. PROJECT OVERVIEW
