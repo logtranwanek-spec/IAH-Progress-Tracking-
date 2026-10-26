@@ -101,3 +101,10 @@ Do not commit any source code or other project files into this progress reposito
 - Keep application route data out of `Program.cs`. Preserve the approved route-source/config-provider boundary, reserved platform paths, loopback destination validation, and explicit request budgets.
 - M2 loads an immutable operator-reviewed startup snapshot. Do not describe it as registry-backed live routing; those updates belong to M6.
 - Verify Gateway changes using `npm.cmd run test:gateway`, which publishes and runs the managed verification DLL. Trusted test fixtures must bind only to loopback and be stopped afterward. Do not create later-milestone sample deployments during M2.
+
+## Sample development rules
+
+- M3 is explicitly authorized after M1/M2 completion. Implement only the trusted samples and their run/verification support; do not start M4 or later milestones in the M3 session.
+- Samples must bind exclusively to `127.0.0.1` using validated configurable ports in `6100–6999`. Reject unsafe settings before binding. Do not modify existing applications.
+- Publish DemoDotnet and the managed Samples.Tests verifier with `UseAppHost=false`, then run their published DLLs through `dotnet`. Use Node directly for the dependency-free DemoNode sample.
+- Verify real concurrent processes, health/release identity, loopback sockets, prefix compatibility, graceful shutdown, and port release. Stop only processes owned by the verification session.

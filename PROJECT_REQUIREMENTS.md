@@ -20,6 +20,10 @@ This update takes precedence over earlier command examples or historical verific
 
 For M2, the Gateway must listen exclusively on `127.0.0.1:5050`. Implement the health endpoint, reserved platform path protection, path-prefix forwarding foundation, a route provider boundary with no application routes hardcoded in Program.cs, request limits, consistent proxy errors, structured logs, and WebSocket support foundation. Verify through a dedicated published managed Gateway program. Do not start later milestones or enable corporate-network access. Only the four named project Markdown files may be committed and pushed to the progress repository.
 
+## Authorized M3 scope — 2026-10-26
+
+After completed M1/M2, implement trusted minimal `samples/DemoNode` (Node.js) and `samples/DemoDotnet` (ASP.NET Core 8). Both must expose a healthy success endpoint, identify the sample and release/build in responses, bind only to `127.0.0.1` on configurable ports in `6100–6999`, run concurrently on distinct ports, and stop cleanly. Provide clear run instructions. Do not require Docker or Administrator privileges, modify existing applications/security settings, or deploy to the company network. For .NET always publish with `UseAppHost=false` and run the published DLL; prefer managed verification over VSTest/testhost. Finish and verify M3 only. Commit/push only the four named progress documents to the progress repository.
+
 ---
 
 # 1. PROJECT OVERVIEW

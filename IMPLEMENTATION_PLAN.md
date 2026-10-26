@@ -17,7 +17,7 @@ Do not mark a milestone complete based on code being written alone. Verification
 
 ## Repository layout
 
-M1 created the four component shells and shared foundations shown below. Samples and the later milestone test projects remain planned. Keep future verification commands aligned with actual paths as those projects are added.
+M1 created the four component shells and shared foundations shown below. M2 added Gateway verification; M3 added both trusted samples and managed sample verification. Later milestone projects remain planned. Keep verification commands aligned with actual paths.
 
 ```text
 src/Gateway/                 ASP.NET Core 8 + YARP
@@ -30,8 +30,9 @@ packages/contracts/          TypeScript contracts
 tools/                       local development lifecycle and checks
 tests/Foundation.Tests/      published managed Foundation verification program
 tests/foundation/            Node foundation tests
-samples/DemoNode/            planned M3
-samples/DemoDotnet/          planned M3
+samples/DemoNode/            trusted dependency-free Node.js sample
+samples/DemoDotnet/          trusted ASP.NET Core 8 sample
+tests/Samples.Tests/         published managed sample/process verification
 tests/Gateway.Tests/         managed YARP HTTP/WebSocket verification
 tests/DeploymentAgent.Tests/ planned M5
 tests/Platform.Integration.Tests/ planned integration suite
@@ -42,7 +43,7 @@ M1 commands below refer to existing artifacts. Commands for later milestones rem
 ## Cross-milestone constraints and gates
 
 - The Gateway is fixed to `http://127.0.0.1:5050` for the current authorized scope; alternate ports/hosts are rejected at startup. Do not enable the corporate-network listener or deploy to the corporate network without local verification and explicit authorization.
-- Port 5050 is the only intended network-facing entry point. Application processes must bind to loopback, using an internal port in the planned `6100–6999` range. Do not expose runtime ports to the corporate network.
+- Port 5050 is the only intended network-facing entry point. Application processes must bind to loopback, using an internal port in the approved `6100–6999` range. Do not expose runtime ports to the corporate network.
 - Do not use Docker or require Administrator privileges for normal operation. Do not alter firewall rules, execution policy, endpoint protection, registry settings, or other IT controls.
 - Do not run .exe artifacts. All .NET applications and verification programs must use framework-dependent dotnet publish with UseAppHost=false, followed by dotnet <published DLL>. Do not use VSTest/testhost, native apphosts, or dotnet run. Publish outputs must be checked for forbidden executable artifacts.
 - Treat uploads as untrusted. Do not execute arbitrary uploaded code or manifest commands without the approved deployment policy and security boundary. Where available permissions cannot provide adequate isolation, restrict deployment to reviewed, trusted applications and record the limitation.
@@ -175,22 +176,39 @@ dotnet .\artifacts\publish\Gateway.Tests\Gateway.Tests.dll
 - Both sample processes can run concurrently on distinct ports and stop cleanly.
 - Sample instructions do not require Docker, Administrator privileges, or changes to existing applications.
 
-**Verification commands (planned):**
+**Verification commands (implemented):**
 
 ```powershell
-npm.cmd --prefix .\samples\DemoNode install
-npm.cmd --prefix .\samples\DemoNode test
-dotnet publish .\samples\DemoDotnet\DemoDotnet.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\samples\DemoDotnet\bin\Release\net8.0\publish\DemoDotnet.Tests.dll
-dotnet publish .\samples\DemoDotnet\DemoDotnet.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\samples\DemoDotnet\bin\Release\net8.0\publish\DemoDotnet.dll
-Invoke-WebRequest http://127.0.0.1:6101/health
-Invoke-WebRequest http://127.0.0.1:6102/health
+npm.cmd run test:samples
+npm.cmd run verify
+npm.cmd run doctor
 ```
 
-Start the Node.js and ASP.NET Core samples in separate terminals with their configured ports before running the two HTTP checks. Record observed output and exit codes.
+The dedicated task runs Node configuration tests, publishes Gateway/DemoDotnet/Samples.Tests with UseAppHost=false, scans their output for executable artifacts, and runs the managed Samples.Tests DLL. No npm install is needed for DemoNode. Run instructions are in samples/README.md and each sample's README.md. Direct run commands from the repository root:
 
-**Status:** NOT STARTED
+```powershell
+node .\samples\DemoNode\server.mjs
+dotnet publish .\samples\DemoDotnet\DemoDotnet.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/DemoDotnet/
+dotnet .\artifacts\publish\DemoDotnet\DemoDotnet.dll
+```
+
+Run the samples in separate terminals. Defaults are 6101/6102; IHP_SAMPLE_PORT accepts only 6100–6999. Both listeners are fixed to 127.0.0.1. Direct health paths default to /health. An optional canonical base path moves root/health under that prefix. Release/build labels are configurable safe tokens.
+
+**Status:** COMPLETED
+
+**Acceptance evidence (2026-10-26):**
+
+| Criterion                                | Verified result                                                                                                                                                                                       |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Separate sample processes, loopback-only | PASS: distinct simultaneously live PIDs, real sockets exclusively 127.0.0.1:6411 and :6421; hostile generic URL/host settings did not override binding                                                |
+| Both health endpoints succeed            | PASS: real GET/HEAD, status=ok, correct sample/runtime/release/build/port/basePath/healthPath; root identity and 404/405 checks                                                                       |
+| Concurrent execution and clean shutdown  | PASS: both direct and prefixed phases; stdin command and EOF yielded exit 0, listeners removed and ports successfully rebound                                                                         |
+| Safe run instructions                    | PASS: dependency-free Node and framework-dependent ASP.NET Core DLL published/run in ordinary Windows session; Administrator=False; no Docker, system-security changes, or existing-app modifications |
+| Later-prefix foundation                  | PASS: real /demo-node/ and /demo-dotnet/ root/health through published M2 Gateway at 127.0.0.1:5050 using an owned temporary startup routes file; custom release/build metadata preserved             |
+
+**Final results:** npm.cmd run verify exited 0 with **215 passing checks**: 25 Node (including six sample tests), two API, 27 Foundation, 79 Gateway, and **82 managed sample checks**, plus full platform smoke. No skipped/failed checks. All six publish roots passed no-.exe scans; formatting, type checks, and doctor passed. The first dedicated run passed 6+80 checks; the final suite adds two malformed-target regressions requiring HTTP 400 and continued Node health. Detailed commands, actual evidence, and preserved history are in PROGRESS.md; local evidence also lives in docs/verification/M3-2026-10-26.md.
+
+**Scope limits:** Trusted minimal JSON HTTP samples only. No deployment engine/registry, persistent port allocation, dynamic routing, uploads/build execution, authentication, assets/cookies/redirect rewrites, or later milestone was implemented. Shutdown-command and EOF were automated; interactive terminal Ctrl+C was documented but not manually exercised. Exact Node 24 from the specification remains unverified; installed Node 26.12.1 was used. No M3 blocker remains.
 
 ### M4 — Platform API and Database
 
@@ -525,4 +543,4 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
-M1 and M2 are `COMPLETED` with published-DLL verification. M3–M12 remain `NOT STARTED`. Future .NET verification projects must be managed DLL programs; the publish/run commands above remain planned until those projects exist. Change a status only with a matching progress entry and verified evidence.
+M1, M2, and M3 are `COMPLETED` with published-DLL verification. M4–M12 remain `NOT STARTED`. Future .NET verification projects must be managed DLL programs; later milestone publish/run commands remain planned until those projects exist. Change a status only with a matching progress entry and verified evidence.

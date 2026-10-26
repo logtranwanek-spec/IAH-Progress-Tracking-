@@ -4,6 +4,187 @@
 
 ## Current milestone and session handoff
 
+- **Last completed milestone:** M3 — Node.js and ASP.NET Core Sample Deployments, **COMPLETED**.
+- **Previously completed:** M1 and M2 remain COMPLETED; their regression checks passed.
+- **First unfinished milestone:** M4 — Platform API and Database, **NOT STARTED**. No M4 implementation was started.
+- **Last completed task:** Real concurrent sample/process and prefix verification, malformed-target regression, full build/static/test/smoke pipeline, and M3 run documentation.
+- **Final gate:** `npm.cmd run verify` exited 0: **215 passing checks**, zero failures/skips, plus real platform smoke.
+- **Blockers:** None for completed M3. M4 must first assess the Prisma toolchain against the no-.exe policy.
+- **Git scope:** Only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md, and PROGRESS.md may be committed/pushed to `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git`, branch main. All implementation source and additional docs remain local/untracked. Preserve this workspace: a fresh progress-repository clone contains no runnable implementation.
+
+## M3 acceptance evidence
+
+| Criterion                                     | Actual result                                                                                                                                                                                                               |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Two separate real sample processes            | PASS: Node source and published ASP.NET Core DLL ran concurrently with distinct PIDs                                                                                                                                        |
+| Loopback-only runtime listeners               | PASS: managed TCP inspection found exactly one IPv4 loopback listener per selected port, 127.0.0.1:6411 and :6421; hostile generic HOST/PORT/ASPNETCORE_URLS did not override the binding                                   |
+| Configurable approved ports                   | PASS: actual nondefault ports 6411/6421; settings accept boundaries 6100/6999 and reject malformed/out-of-range/component ports                                                                                             |
+| Healthy success endpoints                     | PASS: real GET/HEAD /health; correct status=ok, sample, runtime, release, build, port, basePath, healthPath; root returns status=running                                                                                    |
+| Concurrency and clean termination             | PASS: both direct and prefixed phases; supervised shutdown command and stdin EOF yielded exit code 0; listeners disappeared and ports successfully rebound                                                                  |
+| Prefix foundation                             | PASS: real /demo-node/health, /demo-dotnet/health, and their roots through published M2 Gateway at 127.0.0.1:5050; prefix-mode unprefixed health returned 404                                                               |
+| Safe instructions and ordinary-user operation | PASS: sample/shared README instructions; dependency-free Node and installed ASP.NET Core 8 shared framework; Administrator=False; no elevation, Docker, security changes, existing-app modifications, or network deployment |
+
+The prefix check uses a new test-owned temporary JSON file with the existing immutable M2 route provider. It never edits config/gateway.routes.json. The verifier stops its owned Gateway, verifies port 5050 release, and deletes that exact temporary file. No dynamic route registration/removal feature was implemented.
+
+## Features implemented
+
+- `samples/DemoNode`: minimal real HTTP server using Node built-in modules, no external dependencies/install step.
+- `samples/DemoDotnet`: real ASP.NET Core 8 Kestrel server, framework-dependent published DLL, existing managed ConsoleShutdown helper.
+- Validated environment settings shared in meaning across both runtimes: fixed literal 127.0.0.1; ports 6100–6999; optional canonical lowercase base path; bounded release/build tokens.
+- Defaults: Node 6101, .NET 6102, empty base path, release 0.1.0, build m3. These are demonstration implementation defaults, not inferred business requirements.
+- GET/HEAD health and root identity; no-store responses; known-path method rejection 405 and unknown-path 404. Node malformed URL targets return 400 and the process remains healthy.
+- Normal terminal shutdown handlers and supervised stdin command/EOF. Automated verification covers the supervised paths; interactive Ctrl+C was not manually exercised.
+- Managed Samples.Tests assertion program with controlled process launch through installed node/dotnet hosts, redirected streams, bounded readiness/exit waits, owned-process cleanup, and real HTTP/socket assertions.
+- Strict startup failures for unsafe host/port/base-path configuration and port conflicts; failure exit code 1, no attempt to stop an existing occupant.
+- Publish allowlist and root test flow include DemoDotnet/Samples.Tests; every .NET launch uses a previously published DLL after no-.exe scanning.
+- Shared/per-sample instructions and root README link. The existing platform launcher still starts only its original four platform components; samples run separately.
+
+## Actual commands and results
+
+| Command/check                                                                                                              | Actual final result                                                                                                                                                                 |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dotnet sln InternalHostingPlatform.sln add samples/DemoDotnet/DemoDotnet.csproj tests/Samples.Tests/Samples.Tests.csproj` | Exit 0; projects added                                                                                                                                                              |
+| `npm.cmd run test:samples` (initial dedicated run)                                                                         | Exit 0; six Node and 80 managed checks; no failures                                                                                                                                 |
+| `npm.cmd run format`                                                                                                       | Exit 0; project formatting applied                                                                                                                                                  |
+| `dotnet format InternalHostingPlatform.sln --no-restore`                                                                   | Exit 0                                                                                                                                                                              |
+| `npm.cmd run verify` (first full regression)                                                                               | Exit 0; 213 checks plus platform smoke                                                                                                                                              |
+| `npm.cmd run verify` (final after malformed-target handling/regressions)                                                   | **Exit 0; 215 checks plus platform smoke**                                                                                                                                          |
+| Node foundation/lifecycle + sample configuration                                                                           | 25 passed (19 existing + six sample), zero failed/skipped                                                                                                                           |
+| Real API checks                                                                                                            | Two passed, zero failed/skipped                                                                                                                                                     |
+| Managed Foundation checks                                                                                                  | 27 passed, zero failed                                                                                                                                                              |
+| Managed Gateway checks                                                                                                     | 79 passed, zero failed                                                                                                                                                              |
+| Managed sample checks                                                                                                      | **82 passed, zero failed**                                                                                                                                                          |
+| Publish output                                                                                                             | Gateway, DeploymentAgent, Foundation.Tests, Gateway.Tests, DemoDotnet, Samples.Tests all scanned; no .exe artifacts                                                                 |
+| Static checks                                                                                                              | Prettier, TypeScript, and solution dotnet format all passed                                                                                                                         |
+| Real platform smoke                                                                                                        | Published Gateway structured JSON logs; 127.0.0.1 listeners on 5050/5065/5173; HTTP/React/API checks; all four owned components exited 0; ports released; temporary storage removed |
+| `npm.cmd run doctor`                                                                                                       | Exit 0: Windows x64 build 22631; Node 26.12.1, npm 11.20.0, SDK 8.0.425, ASP.NET/.NET runtime 8.0.31                                                                                |
+| Current Windows principal role check                                                                                       | Administrator=False                                                                                                                                                                 |
+| `git fetch origin main` before synchronization                                                                             | Exit 0; local and origin/main matched 1114ff50b766d941076c7d7d9686b7e7f35ecb6c                                                                                                      |
+
+The final check count is 25 + 2 + 27 + 79 + 82 = 215. Smoke assertions are additional and are not counted as a test suite.
+
+Actual lifecycle evidence printed by Samples.Tests:
+
+```text
+EVIDENCE direct/shutdown Node=6411, .NET=6421; exit=0 each; sockets released.
+EVIDENCE prefix/EOF Node=6411, .NET=6421; exit=0 each; sockets released.
+Sample checks: 82 passed, 0 failed.
+```
+
+The direct phase verifies defaults for identity labels and empty base paths; the prefix phase verifies release=2.3.4 and build=reviewed-42. The original six Node tests cover safe defaults, boundary/configurable settings, invalid ports, unsafe hosts, reserved/noncanonical paths, and invalid release/build tokens. Managed checks independently validate .NET settings, published artifacts, concurrent processes, direct/prefixed HTTP identity, HEAD, 405/Allow, 404, live sockets, real YARP forwarding, safe startup failures, occupied ports, shutdown, and port release. Two final Node socket cases send an actual malformed absolute request target, require HTTP 400, and then require a healthy response.
+
+The publishing helper's actual argument shape (run for each allowlisted project) is:
+
+```powershell
+dotnet publish <project.csproj> --configuration Release --framework net8.0 --no-self-contained --disable-build-servers -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/<name>/
+dotnet .\artifacts\publish\<name>\<name>.dll
+```
+
+PublishDir is relative to the project (all declared projects are two directories beneath the repository root), avoiding MSBuild's comma parsing in the company OneDrive absolute path. No native apphost, testhost, VSTest, dotnet run, Docker, or security-policy workaround was used.
+
+## Files created or modified during M3
+
+**Tracked progress documents — the entire commit/push scope:**
+
+- PROJECT_REQUIREMENTS.md: preserved specification plus explicit authorized M3 scope.
+- AGENTS.md: persistent sample/policy/verification rules.
+- IMPLEMENTATION_PLAN.md: actual sample/test layout, real commands, verified M3 criteria/status, M4 next.
+- PROGRESS.md: this self-contained handoff and all preserved previous records.
+
+**New local source, lockfiles, and documentation:**
+
+- samples/README.md
+- samples/DemoNode/package.json
+- samples/DemoNode/server.mjs
+- samples/DemoNode/settings.test.mjs
+- samples/DemoNode/README.md
+- samples/DemoDotnet/DemoDotnet.csproj
+- samples/DemoDotnet/Program.cs
+- samples/DemoDotnet/SampleSettings.cs
+- samples/DemoDotnet/packages.lock.json
+- samples/DemoDotnet/README.md
+- tests/Samples.Tests/Samples.Tests.csproj
+- tests/Samples.Tests/Program.cs
+- tests/Samples.Tests/Checks.cs
+- tests/Samples.Tests/OwnedProcess.cs
+- tests/Samples.Tests/packages.lock.json
+- docs/verification/M3-2026-10-26.md
+
+**Modified local implementation support:** InternalHostingPlatform.sln, package.json, tools/publish.mjs, tools/tasks.mjs, README.md.
+
+Generated artifacts remain ignored/local. No application registry, database, Deployment Engine, or later-milestone product code was changed.
+
+## Decisions, corrections, limitations, and unfinished work
+
+- Samples are trusted reviewed demonstrations. They do not execute manifests, uploaded scripts, dependency installs, or source builds.
+- Sample release/build labels are explicit bounded operator values. Build=m3 is a demonstration label, not an inferred source commit or reproducible build identifier.
+- Base paths are explicitly configured and prefixes are preserved. No application assets, cookies, redirects, WebSockets, database dependencies, or frontend framework compatibility is claimed.
+- Test-only free-port probes and owned process supervision are not persistent port allocation or deployment-engine functionality. Bind conflicts/races fail safely.
+- No observed M3 build/test failure remains. An initial documentation patch context did not match; it made no changes and was reapplied correctly.
+- After the first passing full pipeline, code review found an uncaught URL parse boundary in the Node handler. Added controlled 400 handling plus real socket regressions; the final complete pipeline passed. This was a review finding, not a reproduced pre-fix test failure.
+- No confirmed M3 bug or blocker remains. Interactive Ctrl+C was documented but not manually exercised; clean shutdown was verified through the production supervised command/EOF paths.
+- Exact Node 24.22.1 from the requirements remains unverified; this machine has Node 26.12.1. ASP.NET Core 8 was verified using installed 8.0.31.
+- No corporate-network listener/deployment, production access, service installation, firewall/registry/endpoint-policy change, or existing-application modification occurred.
+- M4–M12 remain NOT STARTED. The Prisma native-engine compatibility issue is an assessment gate for M4, not a failed M3 criterion.
+
+## Exact next recommended task and resume commands
+
+At the next authorized M4 session, read all four project records and inspect actual source/artifacts. First evaluate whether the selected Prisma schema/migration/SQLite toolchain can operate under the strict no-.exe policy **before installing or executing any native engine**. Record an unavailable/forbidden dependency as a blocker and continue safe M4 tasks. Do not claim database functionality until verified. This M3 session does not start M4.
+
+```powershell
+git status --short --branch
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+npm.cmd run doctor
+npm.cmd run test:samples
+npm.cmd run verify
+```
+
+For interactive sample use, follow samples/README.md. Default direct run commands, in separate terminals from the root:
+
+```powershell
+node .\samples\DemoNode\server.mjs
+dotnet publish .\samples\DemoDotnet\DemoDotnet.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/DemoDotnet/
+dotnet .\artifacts\publish\DemoDotnet\DemoDotnet.dll
+```
+
+Sample verification requires port 5050 plus two free runtime ports selected from 6411–6999. It never terminates an unrelated port occupant. A fresh clone of the progress repository cannot run these commands without the locally retained implementation.
+
+## Progress repository synchronization
+
+The session commit includes only the four authorized Markdown paths. Inspect staged paths and the resulting commit tree before pushing; compare remote main with local HEAD afterward. The final handoff provides the commit receipt. Source and extra documentation remain local.
+
+```powershell
+git diff --cached --name-only
+git diff-tree --no-commit-id --name-only -r HEAD
+git ls-tree -r --name-only HEAD
+git ls-remote origin refs/heads/main
+```
+
+## Preserved previous records
+
+The complete previous snapshot, M3 work-in-progress notes, M2/M1 results, failures, and older history are preserved below as historical text. Older milestone/status and next-task statements are superseded by the verified current snapshot above.
+
+```````text
+# Project Progress
+
+## Active M3 implementation — 2026-10-26
+
+M3 is now IN PROGRESS under explicit user authorization. Read all four project records, inspected the actual repository, and confirmed there are no existing samples to duplicate. M1/M2 remain completed. The previous M2 handoff below is historical; its M3-not-started status is superseded by this entry.
+
+Design: two trusted minimal HTTP processes, fixed IPv4 loopback binding, validated ports 6100–6999, configurable release/build metadata and optional explicit base paths. Reuse the existing supervised stdin shutdown convention and no-apphost publishing. Add a published managed process verifier; no VSTest, Docker, Administrator privileges, network deployment, or system-security changes.
+
+Source step: created dependency-free DemoNode, ASP.NET Core 8 DemoDotnet, and Samples.Tests. Added safe configuration validation, GET/HEAD health and identity endpoints, supervised graceful shutdown, and test-only owned process supervision. Wired root publishing/testing to publish DLLs with no apphost and reject executable artifacts. Tests are written but have not yet run; M3 remains IN PROGRESS. Next task: publish, run dedicated checks, fix failures, and document actual run commands.
+
+Dedicated verification step: `npm.cmd run test:samples` exited 0: six Node checks and **80 managed sample checks**, zero failures. Actual processes ran concurrently on 127.0.0.1:6411 and 127.0.0.1:6421. Verified real health/root metadata, HEAD/405/404, loopback listeners, custom release/build labels, prefix forwarding through the published Gateway on 127.0.0.1:5050, shutdown-command and stdin-EOF exits 0, and released ports. Unsafe startup settings and occupied-port startup failed safely with exit 1. All three publish roots passed no-.exe scans. Created shared and per-sample run instructions. Strengthened the generic ASP.NET URL override probe to target the sample's actual port; this final adjustment is pending the full regression run. Next task: format, run the complete verification pipeline, then update acceptance evidence and milestone status.
+
+First full regression: `npm.cmd run verify` exited 0 with 213 checks (25 Node + 2 API + 27 Foundation + 79 Gateway + 80 Samples) and successful real platform smoke. Doctor passed on Windows build 22631, Node 26.12.1, npm 11.20.0, SDK 8.0.425/runtime 8.0.31; Administrator=False. Final code review identified an uncaught malformed-URL parse boundary in DemoNode (not an observed test failure). Added controlled HTTP 400 handling and real malformed-target/socket checks requiring subsequent healthy responses in direct and prefix modes. These additions require final regression before M3 completion.
+
+**Updated:** 2026-10-26 (Asia/Bangkok)
+
+## Current milestone and session handoff
+
 - **Last completed milestone:** M2 — YARP Gateway, **COMPLETED** after published-DLL verification.
 - **Previously completed:** M1 remains COMPLETED.
 - **First unfinished milestone:** M3 — Node.js and ASP.NET Core Sample Deployments, **NOT STARTED**. This session implemented M2 only.
@@ -647,3 +828,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 ``````
 
 </details>
+```````
