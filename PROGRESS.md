@@ -2,6 +2,207 @@
 
 **Updated:** 2026-10-26 (Asia/Bangkok)
 
+## Current milestone and session handoff
+
+- **Last completed milestone:** M2 — YARP Gateway, **COMPLETED** after published-DLL verification.
+- **Previously completed:** M1 remains COMPLETED.
+- **First unfinished milestone:** M3 — Node.js and ASP.NET Core Sample Deployments, **NOT STARTED**. This session implemented M2 only.
+- **Last completed implementation task:** Real YARP gateway, strict startup route-provider boundary, request/error/logging controls, WebSocket forwarding, managed verification, and final full regression.
+- **Final gate:** npm.cmd run verify exited 0 with **127 passing checks** plus real platform smoke.
+- **Execution policy:** Framework-dependent dotnet publish with UseAppHost=false, followed by dotnet <published DLL>. No native apphost/testhost execution, elevation, Docker, or security-setting changes.
+- **Git scope:** Only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md, and PROGRESS.md are tracked/authorized for commit and push to origin/main at https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git. Source/binaries/additional docs stay local.
+
+## M2 acceptance evidence
+
+| Acceptance criterion                                                             | Actual verification                                                                                                                                     |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gateway publishes/starts on loopback port 5050 without Administrator privileges  | PASS: dedicated managed verification and actual published-process smoke; alternative host/port rejected before binding; Administrator token check=False |
+| Gateway health endpoint succeeds locally                                         | PASS: GET JSON and HEAD on /_platform/health; unsupported health methods return structured 405                                                          |
+| Gateway is not corporate-facing                                                  | PASS: live managed socket inspection found exactly one listener at 127.0.0.1:5050                                                                       |
+| Reserved paths, invalid destinations, proxy errors, prefixes, WebSockets covered | PASS: managed unit and real HTTP/WebSocket cases; details below                                                                                         |
+| Application test runtime ports remain loopback                                   | PASS: trusted fixture bound to a free 127.0.0.1:6100–6119 port; socket inspected and fixture stopped                                                    |
+
+The Gateway data lives behind IApprovedGatewayRouteSource and ValidatedProxyConfigProvider (IProxyConfigProvider). Program.cs contains startup/shutdown handling, with no application route definitions. The default config file enables no application routes.
+
+## Features implemented
+
+- Pinned Yarp.ReverseProxy 2.3.0 with its net8.0 assets and versioned NuGet lockfiles.
+- Fixed 127.0.0.1:5050 Kestrel host; alternate bind addresses/ports fail before startup. The local launcher and doctor enforce the same runtime rule.
+- GET/HEAD /_platform/health response: component=gateway, status=ok, milestone=gateway.
+- Reserved /admin and /_platform segments and descendants cannot become application routes; non-health management requests are rejected instead of forwarded.
+- Strict startup JSON route source: unknown/missing/duplicate properties, malformed/null/oversized data, duplicate IDs/prefixes, unsafe path forms, and control characters are rejected.
+- Destinations are constructed only from literal 127.0.0.1 plus a validated runtime-range port. DNS/other IPs, other schemes, userinfo, destination paths/query/fragment, component ports, and out-of-range ports are rejected.
+- Immutable startup YARP route/cluster snapshot with an explicitly non-changing token. No configuration watcher, route-management HTTP API, or registry-backed live updates were added.
+- Segment-based prefix matching preserves the incoming path, query, and body; trusted X-Forwarded headers and prefix replace client-supplied values. Competing Forwarded is removed.
+- Proxy system-proxy use, automatic redirect following, and proxy-side cookie storage are disabled. Application redirects/cookie paths and application-generated errors pass through.
+- Known-length and streaming/chunked body budgets, header and line limits, timeouts, and connection caps.
+- Sanitized application/problem+json gateway errors with a matching X-Request-Id/traceId. Failures after committed response headers terminate the stream.
+- Timestamped structured JSON request/error logs with method, route ID, status, elapsed time, trace, and controlled error codes. Gateway logs omit request body/query/credential values and raw transport exception messages.
+- Actual HTTP/1.1 WebSocket upgrade, subprotocol negotiation, echo, and normal-close forwarding verified through YARP.
+- Dedicated managed Gateway verification program; no external/native test runner.
+
+## Final build and test results
+
+| Command/check                    | Actual final result                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| npm.cmd run verify               | PASS, exit 0; complete publish, static checks, managed/Node checks, platform smoke                                        |
+| Node foundation/lifecycle checks | 19 passed, 0 failed                                                                                                       |
+| Real API HTTP checks             | 2 passed, 0 failed                                                                                                        |
+| Managed Foundation checks        | 27 passed, 0 failed                                                                                                       |
+| Managed Gateway checks           | 79 passed, 0 failed                                                                                                       |
+| Combined check count             | 127 passed, 0 failed, no skipped checks                                                                                   |
+| DLL publishing                   | Gateway, DeploymentAgent, Foundation.Tests, Gateway.Tests all published framework-dependent                               |
+| Publish output scan              | All four active publish roots contained no .exe artifacts                                                                 |
+| Formatting/type checks           | Prettier, TypeScript, and dotnet format passed                                                                            |
+| Doctor                           | PASS on installed Node 26.12.1/npm 11.20.0/.NET SDK 8.0.425, runtime 8.0.31                                               |
+| Production log smoke             | PASS: actual published Gateway output parsed as timestamped structured JSON with status and trace                         |
+| Live smoke sockets               | PASS: 5050/5065/5173 each bound only to 127.0.0.1                                                                         |
+| Smoke lifecycle                  | PASS: real health/page/React module/API responses; all four children exited 0; ports released; owned test storage removed |
+| Non-Administrator check          | False for Administrator role                                                                                              |
+
+The Gateway check set exercises default deny, fixed listener guards, reserved/conflicting prefixes, arbitrary destination rejection, strict JSON, immutable source snapshots, explicit request limits, GET/HEAD/405 health behavior, 404/400 errors, path/query/body preservation, forwarding-header spoof resistance, cookie/redirect handling, upstream application errors, controlled 502 and 504 failures, interrupted response streams, known-length/chunked 413, parser 431/414, WebSocket negotiation/echo/close, loopback sockets, structured logs/credential omission, and shutdown.
+
+The known-length oversize check uses Expect: 100-continue and still requires a 413 problem plus zero upstream requests. The chunked check transmits actual oversized data. The partial-response fixture releases its abort only after the client receives 200 headers, then requires a truncated-body transport error.
+
+## Current M2 configuration and defaults
+
+The local launcher uses config/gateway.routes.json. It defaults to:
+
+```json
+{ "routes": [] }
+```
+
+An approved route document has id, pathPrefix, and destination fields. Prefixes are one canonical lowercase ASCII segment (maximum 63 characters). Destination syntax is http://127.0.0.1:<approved runtime port>/; the effective URI is rebuilt after validation. Files are limited to 64 KiB and 100 routes.
+
+IHP_GATEWAY_ROUTES_PATH may select a trusted operator-reviewed file; standalone published startup otherwise uses its packaged empty file. A changed source requires restart. Route approval/process ownership is an operator responsibility in M2; registry/deployment authorization integration belongs to later milestones.
+
+Implementation defaults, not newly inferred business requirements:
+
+| Budget                                | Current default                                                     |
+| ------------------------------------- | ------------------------------------------------------------------- |
+| Body                                  | 1 MiB; IHP_GATEWAY_MAX_REQUEST_BYTES permits 1 byte–64 MiB          |
+| Total headers                         | 16 KiB; IHP_GATEWAY_MAX_HEADER_BYTES permits 1–64 KiB               |
+| Request line                          | 8 KiB                                                               |
+| Request headers / keep-alive timeouts | 15 / 60 seconds                                                     |
+| Proxy activity timeout                | 30 seconds; IHP_GATEWAY_PROXY_TIMEOUT_SECONDS permits 1–120 seconds |
+| HTTP / upgraded connections           | 128 / 64                                                            |
+
+Tests use a 2-second proxy activity timeout for deterministic stalled-upstream verification. Production retains the 30-second default.
+
+## Files created or modified during M2
+
+**Tracked progress documents (the only commit/push scope):** PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md, PROGRESS.md.
+
+**New local implementation/evidence files:**
+
+- config/gateway.routes.json
+- src/Gateway/GatewayHost.cs
+- src/Gateway/GatewayLimits.cs
+- src/Gateway/GatewayProblem.cs
+- src/Gateway/Routing/GatewayRoutes.cs
+- src/Gateway/Routing/ValidatedProxyConfigProvider.cs
+- src/Gateway/packages.lock.json
+- tests/Gateway.Tests/Gateway.Tests.csproj
+- tests/Gateway.Tests/Program.cs
+- tests/Gateway.Tests/Verification.cs
+- tests/Gateway.Tests/UnitChecks.cs
+- tests/Gateway.Tests/Fixtures.cs
+- tests/Gateway.Tests/IntegrationChecks.cs
+- tests/Gateway.Tests/packages.lock.json
+- GATEWAY.md
+- docs/verification/M2-2026-10-26.md
+
+**Modified local files:** src/Gateway/Program.cs and Gateway.csproj; InternalHostingPlatform.sln; tools/publish.mjs, tasks.mjs, local.mjs, doctor.mjs, smoke.mjs; package.json; tests/foundation/lifecycle.test.mjs; packages/contracts/index.d.ts; README.md, ARCHITECTURE.md, INSTALLATION.md, SECURITY.md, TROUBLESHOOTING.md.
+
+The Gateway health milestone changed from foundation to gateway; shared TypeScript contracts and smoke expectations were updated accordingly. M1 Foundation checks continue to pass.
+
+Source and extra evidence documents remain local/untracked in the four-document progress repository. A fresh clone contains project records, not runnable implementation; preserve this workspace for continuity.
+
+## Failures encountered and corrections
+
+1. Initial publish failed on the .NET 8 WriteAsJsonAsync overload; supplied explicit serializer options and republished successfully.
+2. First Gateway run: 74 passes/2 failures. Replaced a callback-advertising cancellation wrapper with NullChangeToken, and replaced a Windows timing-dependent closed-port expectation with a controlled upstream disconnection for 502 while keeping the separate stalled-upstream 504 test.
+3. Added a post-header failure case. Immediate upstream abort could occur before Gateway headers were committed; synchronized the fixture with client receipt of headers so the intended incomplete-stream boundary is now verified.
+4. An intermediate full pipeline passed 126 checks. Final validation review then tightened full-string regex anchors and added a control-character regression.
+5. Next full run passed 78/79 Gateway checks; early known-length rejection raced the client's upload writer before the response/upstream-count assertions. Added Expect: 100-continue without removing those assertions. Streaming enforcement still uses actual chunked data.
+6. Final full pipeline passed all 127 checks and platform smoke. No failure was skipped or represented as complete before its correction.
+
+## Known bugs, blockers, and practical limits
+
+**No confirmed M2 bug or blocker remains.**
+
+- Startup routes are trusted local configuration, default empty. No live registry routes or route update API exist; that is M6.
+- Prefixes are preserved. Applications still need explicit base-path compatibility; the Gateway does not guess at asset, redirect, cookie, or response-body rewrites.
+- Kestrel parser errors such as oversized headers/lines can use native response bodies before the application pipeline. Gateway-generated pre-header proxy problems are structured JSON; post-header/upgrade failures close the stream instead of replacing committed headers.
+- An oversized upload already in flight can be observed by a client as a reset; Expect: 100-continue permits clean early rejection for a known Content-Length.
+- HTTP/2/SPDY, per-message WebSocket resource budgets, broad load/security hardening, log retention/search, and interactive browser review were not verified in M2.
+- Exact Node 24 and older runtime patches from the specification remain unverified; testing used the installed versions above.
+- Authentication, credential storage, upload/build approval, process isolation, registry/database, and unattended startup remain later milestone/IT design work.
+
+No existing application was modified or deployed. No corporate-network access/listener was enabled and no security setting was changed.
+
+## Exact next recommended task
+
+M3 is the first unfinished milestone: build the trusted Node.js and ASP.NET Core sample applications under the existing loopback/published-DLL rules, then verify their documented health and prefix behavior. **Do not start it as part of this M2-only session.**
+
+## Commands to resume
+
+Read AGENTS.md, this current snapshot, M3 in IMPLEMENTATION_PLAN.md, relevant requirements, and inspect actual source first.
+
+```powershell
+git status --short
+npm.cmd run doctor
+npm.cmd run verify
+npm.cmd run test:gateway
+npm.cmd run start:local
+```
+
+The dedicated Gateway command publishes and runs the managed DLL. Equivalent manual verification:
+
+```powershell
+dotnet publish .\tests\Gateway.Tests\Gateway.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/Gateway.Tests/
+dotnet .\artifacts\publish\Gateway.Tests\Gateway.Tests.dll
+```
+
+Do not run native apphosts, testhost, dotnet run, or VSTest. The Gateway verification fixtures need port 5050 and one free port in 6100–6119; existing occupants are never terminated.
+
+## Progress repository synchronization
+
+This snapshot is limited to the four authorized Markdown paths. Before committing, inspect the staged list and commit tree; after pushing origin/main, compare its remote hash to local HEAD. Never include source, binaries, local config/evidence documents, or credentials. The final handoff provides the commit receipt.
+
+## Preserved previous records
+
+The previous M1-complete snapshot, M2 implementation timeline, intermediate failures, and older history are retained below. Historical statuses are superseded by the current verified snapshot above.
+
+<details>
+<summary>Previous snapshots and M2 implementation timeline</summary>
+
+``````markdown
+# Project Progress
+
+**Updated:** 2026-10-26 (Asia/Bangkok)
+
+## Active M2 session
+
+- User authorized M2 only. Read the repository instructions, current progress, M2 plan, and the relevant gateway/security requirements; inspected the actual source and Git state before coding.
+- M1 remains verified. M2 is now IN PROGRESS; M3 and later milestones will not be started.
+- Design: actual YARP with a validated route-source/config-provider boundary; fixed 127.0.0.1:5050; no arbitrary proxy destinations; trusted startup-only route configuration (runtime registry updates remain M6).
+- Verification will be a separately published managed Gateway program exercising real HTTP/WebSocket traffic against trusted loopback-only test fixtures. No native apphost, testhost, deployment package, or production service is involved.
+- Git tracks only the four progress documents; all source stays local and only those four documents will be committed/pushed after verification.
+- Added the first YARP implementation: strict startup-only route source, reserved-prefix/destination validation, immutable IProxyConfigProvider snapshot, fixed listener, request budgets, problem responses, forwarded headers, and structured request/error logging. Default routes remain empty.
+- First publish found a .NET 8 WriteAsJsonAsync overload mismatch; corrected the explicit serializer-options argument. Added per-route body limits as well as Kestrel/global Content-Length checks so streaming requests retain a budget. Publish and behavior verification are still pending.
+- Gateway DLL publishing now succeeds with YARP 2.3.0 targeting net8.0. Added a dedicated published Gateway verification project and integrated its publish/run task into local tooling.
+- First managed Gateway run: 74 checks passed, 2 failed. Changed the startup snapshot to an explicitly non-changing token. The closed-port test reached the 2-second timeout before Windows reported refusal; replaced that timing-dependent test with a controlled upstream disconnection for 502, retaining the independent stalled-upstream 504 test. No failed check was marked complete or skipped.
+- Existing successful checks already covered reserved routes, destination validation, prefix preservation, forwarded headers, cookie/redirect behavior, fixed/chunked body limits, header/line limits, WebSocket echo/close, loopback sockets, and credential/query omission from structured logs. Fresh corrected verification is pending.
+- Corrected Gateway verification passed: 77 checks, 0 failures. Added one final case for failure after response headers are committed: such a stream must terminate rather than masquerade as a complete response; a problem body cannot safely replace already-sent headers.
+- The additional partial-response probe initially aborted upstream before the gateway necessarily committed headers, so a safe complete 502 could race the intended truncation assertion. Added fixture/client synchronization: only abort after the client has received 200 response headers, then require an incomplete-body transport error. This verifies the actual post-header failure boundary without weakening proxy error checks.
+- Corrected final Gateway run passed: 78 checks, 0 failed. Added UTC timestamps to the production JSON console logger and an actual published-process log check to the platform smoke procedure. Full publish/check/regression/smoke verification remains the final gate.
+- Full npm.cmd run verify passed: 21 Node/API checks, 27 managed Foundation checks, 78 managed Gateway checks (126 total), four DLL publish artifact scans, static/format checks, and real platform smoke including timestamped JSON logs. All fixture and platform processes stopped cleanly; test storage was removed.
+- Final tooling review made the log probe parse only complete newline-delimited records (stdout chunks may split JSON) and aligned doctor with the fixed Gateway port. Gateway production behavior is unchanged; final targeted tooling/smoke checks are pending.
+- Final route validation review tightened regular-expression end anchors to reject trailing control characters in identifiers, prefixes, and destination input. Added a regression check covering all three fields. A fresh final verification is required for this validation change before M2 is marked complete.
+- The next full run passed builds/static checks, Node/Foundation checks, and 78 of 79 Gateway checks; the known-length oversize probe hit a client-side in-flight write/reset race before it could consume the expected rejection or reach its upstream-count assertion. Changed that probe to the HTTP Expect: 100-continue handshake while retaining strict 413/problem-body and untouched-upstream assertions. The chunked-body test still transmits actual oversized data and must receive 413.
+- Final npm.cmd run verify passed with the hardened validator and corrected upload probe: 79 Gateway checks, 27 Foundation checks, 21 Node/API checks (127 total), all four managed publishes with no .exe artifacts, static/format checks, production JSON log inspection, live loopback sockets, and clean four-process smoke shutdown. M2 acceptance criteria can now be marked COMPLETED; M3 and later remain NOT STARTED.
+
 ## Current milestone and last completed task
 
 - **Last completed milestone:** M1 — Project Foundation, **COMPLETED** after verification using published managed DLLs.
@@ -441,5 +642,8 @@ Record actual outputs, failures, and test results before updating milestone stat
 
 </details>
 `````
+
+</details>
+``````
 
 </details>

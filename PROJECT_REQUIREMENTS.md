@@ -16,6 +16,10 @@
 
 This update takes precedence over earlier command examples or historical verification notes that use native executables, `dotnet run`, or VSTest. All other requirements remain in force.
 
+## Authorized M2 scope — 2026-10-26
+
+For M2, the Gateway must listen exclusively on `127.0.0.1:5050`. Implement the health endpoint, reserved platform path protection, path-prefix forwarding foundation, a route provider boundary with no application routes hardcoded in Program.cs, request limits, consistent proxy errors, structured logs, and WebSocket support foundation. Verify through a dedicated published managed Gateway program. Do not start later milestones or enable corporate-network access. Only the four named project Markdown files may be committed and pushed to the progress repository.
+
 ---
 
 # 1. PROJECT OVERVIEW

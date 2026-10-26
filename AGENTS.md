@@ -93,3 +93,11 @@ Do not commit any source code or other project files into this progress reposito
 - Do not use `dotnet run`, VSTest, or `dotnet test` if they require an executable runner. A dedicated published managed assertion program may verify production Foundation code and must return nonzero on failure; it is not a rehosted VSTest runner.
 - The user authorizes starting M2 if M1 remains impossible to verify within policy; record the exact unverified criteria and this exception before proceeding.
 - Verify that staged and pushed paths contain only the four named Markdown files. Never stage source code, binaries, credentials, or other documents in this progress repository.
+
+## Gateway development rules
+
+- M2 is explicitly authorized after M1 completion. Finish only the requested milestone and provide a handoff; do not start an unrequested later milestone.
+- The current Gateway must bind exclusively to `127.0.0.1:5050`; reject alternate ports/hosts at startup. Do not enable corporate-network listening without separate explicit authorization.
+- Keep application route data out of `Program.cs`. Preserve the approved route-source/config-provider boundary, reserved platform paths, loopback destination validation, and explicit request budgets.
+- M2 loads an immutable operator-reviewed startup snapshot. Do not describe it as registry-backed live routing; those updates belong to M6.
+- Verify Gateway changes using `npm.cmd run test:gateway`, which publishes and runs the managed verification DLL. Trusted test fixtures must bind only to loopback and be stopped afterward. Do not create later-milestone sample deployments during M2.

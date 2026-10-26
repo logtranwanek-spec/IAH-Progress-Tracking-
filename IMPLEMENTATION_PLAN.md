@@ -32,7 +32,7 @@ tests/Foundation.Tests/      published managed Foundation verification program
 tests/foundation/            Node foundation tests
 samples/DemoNode/            planned M3
 samples/DemoDotnet/          planned M3
-tests/Gateway.Tests/         planned M2
+tests/Gateway.Tests/         managed YARP HTTP/WebSocket verification
 tests/DeploymentAgent.Tests/ planned M5
 tests/Platform.Integration.Tests/ planned integration suite
 ```
@@ -41,7 +41,7 @@ M1 commands below refer to existing artifacts. Commands for later milestones rem
 
 ## Cross-milestone constraints and gates
 
-- Begin with localhost. The gateway's initial URL is `http://127.0.0.1:5050`. Do not enable the corporate-network listener or deploy to the corporate network without local verification and explicit authorization.
+- The Gateway is fixed to `http://127.0.0.1:5050` for the current authorized scope; alternate ports/hosts are rejected at startup. Do not enable the corporate-network listener or deploy to the corporate network without local verification and explicit authorization.
 - Port 5050 is the only intended network-facing entry point. Application processes must bind to loopback, using an internal port in the planned `6100–6999` range. Do not expose runtime ports to the corporate network.
 - Do not use Docker or require Administrator privileges for normal operation. Do not alter firewall rules, execution policy, endpoint protection, registry settings, or other IT controls.
 - Do not run .exe artifacts. All .NET applications and verification programs must use framework-dependent dotnet publish with UseAppHost=false, followed by dotnet <published DLL>. Do not use VSTest/testhost, native apphosts, or dotnet run. Publish outputs must be checked for forbidden executable artifacts.
@@ -103,7 +103,7 @@ npm.cmd run verify
 
 **Full verification:** `npm.cmd run verify` passed: API/dashboard compilation, three DLL publishes, publish scans reporting no .exe artifacts, formatting/type checks, **19 Node/API checks + 27 managed Foundation checks**, and local smoke. A negative control on an absent listener returned the expected assertion failure and exit code 1. No legacy VSTest test is reported as executed. Historical error 1260 remains part of the record; no security settings were changed.
 
-**Scope:** This completes M1 only. M2–M12 remain NOT STARTED. The user's conditional permission to start M2 while M1 is unverified was not needed.
+**Historical scope at M1 completion:** Only M1 was complete at that point; the user's conditional fallback to M2 was not needed. Current milestone states are recorded below.
 
 ### M2 — YARP Gateway
 
@@ -111,33 +111,48 @@ npm.cmd run verify
 
 **Tasks:**
 
-- Implement an ASP.NET Core 8 gateway with YARP, listening on `127.0.0.1:5050` for initial development.
-- Add gateway health handling, request limits, consistent proxy errors, and structured logs.
-- Support WebSockets and path-prefix forwarding behavior needed by later applications.
-- Validate route paths and restrict proxy destinations to approved loopback runtime endpoints; reserve platform paths.
-- Keep application route data out of `Program.cs`; use a provider boundary that can later accept validated dynamic configuration.
+- Implement ASP.NET Core 8 with YARP 2.3.0 and a fixed 127.0.0.1:5050 listener.
+- Add GET/HEAD health handling, explicit body/header/line/time/connection budgets, controlled problem responses, and timestamped structured request/error logs.
+- Preserve application path prefixes and queries, set trusted forwarded headers, and support HTTP/1.1 WebSocket forwarding.
+- Validate route IDs, reserved/conflicting paths, strict startup JSON, and literal approved loopback destinations.
+- Keep application route data out of Program.cs using IApprovedGatewayRouteSource and a validated immutable IProxyConfigProvider snapshot; live updates remain M6.
+- Publish a dedicated managed Gateway verification program with UseAppHost=false and run only its DLL.
 
-**Dependencies:** M1.
+**Dependencies:** M1 — satisfied.
 
-**Acceptance criteria:**
+**Acceptance criteria and evidence:**
 
-- Gateway builds and starts on loopback port 5050 without Administrator privileges.
-- Health endpoint returns a successful response locally.
-- Gateway does not listen on a corporate-facing address during this milestone.
-- Tests cover reserved paths, invalid destinations, proxy failures, path prefixes, and WebSocket proxy support.
-- No application runtime port is bound to a non-loopback address.
+| Criterion                                                                           | Verified result                                                                                                                                                                                 |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gateway publishes and starts on loopback port 5050 without Administrator privileges | PASS: real GatewayHost and published-process smoke; alternate host/port rejected before binding; current token Administrator=False                                                              |
+| Local health endpoint succeeds                                                      | PASS: GET JSON, HEAD empty body, safe 405 for unsupported methods                                                                                                                               |
+| No corporate-facing listener                                                        | PASS: managed TCP inspection confirms only 127.0.0.1 on Gateway port 5050                                                                                                                       |
+| Reserved paths, invalid destinations, proxy failures, prefixes, WebSockets covered  | PASS: managed configuration/HTTP/WebSocket checks, including chunked limits, controlled 502/504, interrupted response, forwarded headers, and log omission of supplied credential/query markers |
+| Application fixture ports bind only to loopback                                     | PASS: owned runtime-range fixture sockets inspected and stopped; no sample deployments or existing applications were modified                                                                   |
 
-**Verification commands (planned):**
+**Verification commands (implemented):**
 
 ```powershell
-dotnet publish .\tests\Gateway.Tests\Gateway.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\Gateway.Tests\bin\Release\net8.0\publish\Gateway.Tests.dll
-dotnet publish .\src\Gateway\Gateway.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\src\Gateway\bin\Release\net8.0\publish\Gateway.dll
-Invoke-RestMethod http://127.0.0.1:5050/_platform/health
+npm.cmd run build
+npm.cmd run test:gateway
+npm.cmd run verify
+npm.cmd run doctor
 ```
 
-**Status:** NOT STARTED
+The dedicated command publishes tests/Gateway.Tests with UseAppHost=false and executes artifacts/publish/Gateway.Tests/Gateway.Tests.dll through dotnet. Manual equivalent:
+
+```powershell
+dotnet publish .\tests\Gateway.Tests\Gateway.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/Gateway.Tests/
+dotnet .\artifacts\publish\Gateway.Tests\Gateway.Tests.dll
+```
+
+**Status:** COMPLETED
+
+**Final results:** npm.cmd run verify exited 0: **79 Gateway + 27 Foundation + 21 Node/API checks = 127 passing checks**, plus full platform smoke. All four .NET publish roots were scanned for .exe artifacts. The smoke verified actual production JSON log output, real HTTP/React/API responses, loopback sockets, graceful exit code 0, port release, and temporary-storage cleanup. Final static/format and doctor checks passed.
+
+**Decisions and limitations:** config/gateway.routes.json defaults to an empty list of operator-reviewed startup routes. The immutable provider does not watch files or support registry/runtime updates yet. Request prefixes are preserved; no guessed redirect/cookie/body rewrites are applied. Kestrel parser errors may have native response bodies; committed/upgrade stream failures terminate the stream instead of replacing already-sent headers with JSON. Authentication, package deployments, sample applications, metrics/log retention, and live routing remain later milestones.
+
+**Evidence:** Detailed self-contained results and failed-attempt history are in PROGRESS.md. Additional local-only references are GATEWAY.md and docs/verification/M2-2026-10-26.md. No later milestone was started.
 
 ### M3 — Node.js and ASP.NET Core Sample Deployments
 
@@ -510,4 +525,4 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
-M1 is `COMPLETED` with published-DLL verification under the confirmed company policy. M2–M12 remain `NOT STARTED`. Future .NET verification projects must be managed DLL programs; the publish/run commands above remain planned until those projects exist. Change a status only with a matching progress entry and verified evidence.
+M1 and M2 are `COMPLETED` with published-DLL verification. M3–M12 remain `NOT STARTED`. Future .NET verification projects must be managed DLL programs; the publish/run commands above remain planned until those projects exist. Change a status only with a matching progress entry and verified evidence.
