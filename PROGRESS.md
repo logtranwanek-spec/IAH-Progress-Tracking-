@@ -1,5 +1,98 @@
 # Project Progress
 
+## Current task — Managed Application Database documentation only — 2026-10-27
+
+**Authoritative handoff:** This documentation-only record supersedes the earlier active M8 implementation/resume instructions preserved below. No application code, schema, migration, configuration, database or existing application was changed by this task. No application build, test or execution was initiated or resumed for this task. Earlier local M8 implementation changes and artifacts were left untouched. Managed Application Database provisioning, initialization, backup, restore, lifecycle APIs and Dashboard controls are **not implemented or verified** by this update.
+
+### Milestone status — unchanged
+
+| Milestone | Status |
+| --- | --- |
+| M1–M6 | COMPLETED |
+| M7 — ZIP Upload and Approved Source Builds | IN PROGRESS |
+| M8 — React Dashboard | IN PROGRESS |
+| M9 — Monitoring and Logging | NOT STARTED |
+| M10 — Version Management and Rollback | NOT STARTED |
+| M11 — Authentication and Authorization | COMPLETED |
+| M12 — Security Hardening and Final Testing | NOT STARTED |
+| M10-DB — Managed Application Database Service (new future sub-milestone) | NOT STARTED |
+
+M7's trusted-prebuilt subset remains verified; approved source-build isolation/templates/build evidence remain unavailable and source builds stay disabled. M8's secure browser workflow/actual-browser acceptance and other recorded scope gaps remain unresolved; the browser-authentication candidate stays default disabled. No completion status or acceptance waiver was changed.
+
+### Last completed task and requirements added
+
+Defined **1 Platform Database + N Independent Application Databases**, with application databases optional and NONE, MANAGED_SQLITE and EXISTING_SQLITE modes. The Platform Registry remains dedicated management storage. Each managed database belongs to exactly one application and is never the Registry; registered existing SQLite files require explicit location/association authorization.
+
+Only the four official Markdown records were edited for this task:
+
+| File | Sections added or updated |
+| --- | --- |
+| PROJECT_REQUIREMENTS.md | Current documentation-only directive; section 9 policy precedence and new 9.1 Managed Application Databases (modes, isolation, target storage, lifecycle, release persistence, minimum configuration, future Dashboard, SQLite-consistent backup/restore); cross-references in sections 10, 14, 16.2 and 17. |
+| IMPLEMENTATION_PLAN.md | Current task override; cross-milestone database boundary; future M10-DB objective/tasks/dependencies/acceptance/verification/status after M10; requirement coverage and final extension-status note; reconciliation of the prior M8 failure from existing logs. Existing milestone IDs/statuses retained. |
+| AGENTS.md | Current documentation-only scope and permanent database separation/storage/data-preservation/SQLite-only/authorization/backup/restore/migration/audit rules. Existing security instructions retained. |
+| PROGRESS.md | This documentation-only architecture/change/verification/handoff record; complete earlier progress preserved below as history. |
+
+The target logical IHP_STORAGE_ROOT layout is registry/platform.db plus Applications/<application-uuid>/releases/, data/application.db, logs/ and config/, with shared Uploads/, Temporary/ and Logs/. It is a future target, not a statement that existing paths were moved. Implemented storage/configuration is preserved until a future explicitly authorized, compatible migration.
+
+Added future lifecycle requirements for idempotent non-overwriting provisioning, association, separately authorized initialization, metadata/status/integrity, storage usage/limits, permissions, backup/restore/history, retention, explicit deletion, interrupted-operation recovery and safe audits. Application deletion must not automatically destroy data; deployment/update/restart/rollback/release cleanup must preserve the independent database. Uploaded SQL never runs automatically and application rollback does not reverse schema changes.
+
+Future Dashboard database management must enforce M11 roles/current ownership, read-only Viewer access, explicit backup/restore/deletion authorization and destructive-action confirmation. Raw SQLite files, contents, internal paths, Registry configuration and secrets must not be exposed through public routes or ordinary browser endpoints.
+
+### Architecture and policy decisions
+
+- **Real database support:** SQLite only. SQL Server/PostgreSQL/MySQL remain metadata-only references. No real connection, authentication, migration, provisioning or connectivity testing is permitted; their verification gap remains accepted company policy.
+- **Isolation:** Validate approved path containment/file identity, traversal, symlink/junction/reparse escapes, aliases and cross-application access at Platform operation boundaries. Same-Windows-identity filesystem separation is not a sandbox or OS isolation against malicious code; trusted-reviewed-code restrictions remain.
+- **Backups/restores:** Require an approved SQLite-consistent in-process mechanism, not uncoordinated copying of an active .db file. Restore requires authorization/confirmation, backup integrity/provenance/compatibility, intended target identity, writer coordination/downtime, recovery planning and post-restore checks. Backups remain outside releases/public trees. These are requirements, not working features.
+- **Future scope:** M10-DB is NOT STARTED, placed after M10 and before final M12 acceptance of this extension. It depends on existing M4 API/Registry and M11 authorization, M5/trusted M7 release contracts, verified secure M8 Dashboard capabilities and M10 data-preserving release coordination. It does not start M9/M10, resolve M7/M8 or change their status.
+- **Deferred choices:** Concrete API/schema/migration contracts, approved backup-provider capability, backup layout, retention/limit defaults and recovery coordination require future implementation review. No new executable, database server, OS permission/security setting or network listener is authorized.
+
+### Actual verification and remaining issues
+
+**Documentation verification: PASS, 44/44 consistency checks.** An inline read-only review used System.IO.File.ReadAllText through PowerShell/ConvertTo-Json and JavaScript assertions over the four Markdown texts. It verified that every pre-task line remains in order, all Markdown fences are balanced, all 12 existing milestone statuses are unchanged, exactly one NOT STARTED M10-DB was added, and the modes/storage/lifecycle/backup/restore/authorization/SQLite-only/future-scope requirements agree across the records. These are documentation checks, not new application tests or additions to the historical 451-check total. The initial checker expression had a syntax error before any checks executed; it was corrected and the complete 44-check run passed.
+
+`git diff --check` exited 0. Read-only git status/diff inspection lists only the four authorized tracked records; git ls-files confirms no source/data/artifacts are tracked. Application builds/tests are deliberately not run for this documentation-only task. Review also used existing repository/log evidence and SQLite's official Online Backup API/active-copy safety documentation linked in section 9.1.8. Staged-path/whitespace and final remote identity checks are part of the delivery commands below.
+
+**Prior M8 verification correction (existing evidence only):** The last fully successful historical full gate remains 451 checks. Read-only inspection of the already-ended earlier browser-authentication full-run log, artifacts/m8-auth-verify.log, found exit/failure evidence: its 28 browser checks failed after owned-stack setup could not reach API 127.0.0.1:5266 (ECONNREFUSED/readiness timeout). The earlier focused browser-protocol run is recorded as 28/28 in the pre-task plan; neither it nor DOM simulation proves actual-browser acceptance or a successful new full regression. No failing application code/test was repaired or rerun during this documentation assignment. The earlier execution session was already closed; it was not resumed. Retain this failure as an unresolved M8 issue for a future authorized implementation task.
+
+No Managed Application Database functionality is complete, tested or enabled. Exact quotas/retention/provider details are not invented, and the target layout does not imply relocation of implemented storage. Existing M7 source-build isolation and M8 browser verification/security gaps persist. A progress-only repository contains no runnable source; earlier local implementation remains outside this delivery.
+
+### Exact next recommended task and resume commands
+
+Review the new section 9.1 and M10-DB scope. Future development requires an explicit assignment; do not start implementing Managed Application Databases, resume M8 code work or start another milestone as a side effect of this documentation change. On an authorized future session, read these records, inspect actual local source/state and reconcile the retained M8 failure before claiming new verification.
+
+```powershell
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8 -TotalCount 130
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+Get-Content -LiteralPath PROJECT_REQUIREMENTS.md -Encoding UTF8
+git status --short
+git diff --check
+```
+
+Progress-only delivery remains origin/main at https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git. Pre-delivery branch/remote inspection and git fetch confirmed main and baseline bdb369bc30c25a7646e439350ddcba2e42fec4fa equal to origin/main. Verify staged/committed paths contain exactly the four official records; never stage source, other documents, data, credentials or artifacts. The final handoff reports the delivered commit and remote verification; Git metadata is the authoritative commit identity.
+
+```powershell
+git add PROJECT_REQUIREMENTS.md AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md
+git diff --cached --check
+git diff --cached --name-only
+git commit -m "Define managed application database architecture and future roadmap"
+git push origin main
+git ls-remote origin refs/heads/main
+git rev-parse HEAD
+```
+
+## Preserved pre-task progress
+
+The complete pre-task progress text follows unchanged. Earlier active assignments, pending-test statements and resume commands are historical; this documentation-only record is authoritative. The surrounding longer fence preserves all previously nested history.
+
+```````````````text
+
+## Active M8 browser-authentication follow-up — 2026-10-27
+
+Core candidate implemented: opt-in localhost management-host boundary, single-use challenge/P256 request proofs/nonces, bounded explicit operation map, memory-only client, default-off discovery, shorter native M11 issuer and same M11 server authorization. First real Gateway/API protocol run: 13/20; failures exposed cleared nonce headers on API denials plus two test-fixture issues (missing Origin in method-tamper case; expiry violating SQLite's created/expiry constraint). Fixed without relaxing authorization. Rerun passed 20/20, including real trusted Node upload/approval/preparation/start/proxy/stop and DOM simulation through signed requests. Added archive/large-upload/source/issuer tests and scoped-session capacity; these and full regression are pending. No real-browser success is claimed and production opt-in remains off.
+
+Latest user explicitly authorizes resolving browser authentication, superseding the previous no-bridge wait only for a reviewed restricted boundary. Read repository instructions/current progress/plan, authentication/dashboard/Gateway code and security requirements. Baseline bdb369b and 451 checks. Direct browser access is denied by unchanged M11 guard; shared /admin/application origin and cookie port/path scope require care. Design: optional localhost:5050 management origin on existing IPv4 listener; hosted apps only on 127.0.0.1 when enabled; no cookies/storage tokens, memory-only nonextractable signing key with single-use challenges/nonces; fixed allowlisted Gateway operations backed by existing M11 sessions/authorization. Loopback HTTP is not TLS/OS isolation. No approved real-browser tool is connected; never launch a browser exe or claim DOM acceptance. Implement/test first; feature defaults off, M8/M7 remain IN PROGRESS pending evidence. No M9/source builds/user-data or system-setting change.
+
 **Updated:** 2026-10-27 (Asia/Bangkok)
 
 ## Current milestone and handoff
@@ -2110,3 +2203,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 ````````````
 `````````````
 ``````````````
+```````````````

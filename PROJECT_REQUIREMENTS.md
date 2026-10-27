@@ -6,6 +6,10 @@
 **Development Approach:** Production-oriented, modular architecture  
 **Primary Objective:** Self-service deployment of Node.js and ASP.NET Core applications through a centralized hosting platform.
 
+## Current documentation-only directive — 2026-10-27
+
+Define the future Managed Application Database architecture in section 9.1: **1 Platform Database + N Independent Application Databases**, with application databases optional. This assignment authorizes changes only to PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md; it does not authorize implementation, schema changes, migrations, application execution, builds or application tests. It supersedes earlier active implementation assignments for this task only. Preserve all existing milestone statuses: M1–M6/M11 COMPLETED, M7/M8 IN PROGRESS, and M9/M10/M12 NOT STARTED. The new M10-DB sub-milestone is NOT STARTED and requires a future explicit implementation assignment.
+
 ## Authoritative company policy update — 2026-10-26
 
 - Company policy prohibits running `.exe` artifacts. Do not execute application apphosts, VSTest/testhost executables, or dependency executables, and do not change security policy to enable them.
@@ -62,6 +66,10 @@ The user attachment authorizes M7 after M1–M6/M11 and 381 passing checks: auth
 The latest user request authorizes M8 React Dashboard after M1–M6/M11 and the verified M7 prebuilt subset (418 checks). M7 remains IN PROGRESS until source-build/isolation acceptance is satisfied. Implement responsive sidebar/header/navigation/states; safe authentication UI; role-aware application/detail/creation/search/filter, package/release/upload/preparation/deployment/approval/history, route/health and available audit views through existing secured API contracts. Do not weaken M11 Origin/Fetch Metadata/session checks: if approved browser authentication is unavailable, document the exact limitation, disable affected features and keep M8 IN PROGRESS/BLOCKED. Do not invent M9 monitoring or unavailable API data. Preserve all prior functionality and SQLite-only, published-DLL/no-.exe, literal loopback, no Docker/Administrator/security/existing-app changes/unapproved builds/corporate listening constraints. Verify UI/auth/roles/data/workflows/errors/expiration/responsiveness and full regression. Preserve history and push only the four records to progress origin/main, verifying the push. Do not start M9 or another milestone. This supersedes earlier M8 wait instructions only.
 
 ## 1.1. Background
+
+### Authorized M8 browser-authentication follow-up — 2026-10-27
+
+Resolve remaining M8 browser authentication: assess M11 browser rejection and loopback HTTP transport; design same-origin sessions, CSRF/Origin/Host validation, expiry/revocation/fixation/replay protection and no authentication secrets to application routes. Implement login/logout/current user/private-state cleanup/RBAC and existing application/package/upload/approval/routing/audit operations only after security verification, preserving server ownership/approval enforcement and M7 restrictions. No unrestricted API proxy, cross-origin management, reserved-path bypass, token storage in localStorage/sessionStorage, unapproved certificates/listeners/OS changes, browser exe/driver, source builds or arbitrary execution is allowed. Verify actual browser behavior only with permitted tools; if unavailable, record it and never count DOM simulation as browser acceptance. Run full regression, mark M8 complete only on verified criteria, keep M7 IN PROGRESS/source isolation unresolved, preserve history and push only the four records to progress origin/main with verified delivery. No M9/other milestone is assigned.
 
 Our company currently develops multiple internal web applications using two primary backend technologies:
 
@@ -840,6 +848,8 @@ The platform should be designed to support hostname-based routing in the future,
 
 # 9. DATABASE MANAGEMENT
 
+**Current policy and scope:** Only SQLite is allowed for real database operations. SQL Server, PostgreSQL and MySQL are **metadata-only connection references**; no real connection, authentication, migration, provisioning or connectivity testing against those engines is permitted. This restriction supersedes the original existing-company-server/connectivity wording retained below. Their missing real connectivity verification remains the accepted company-policy gap, not a claim of operational support. Section 9.1 defines future application database requirements; it does not describe implemented provisioning, backup or restore features.
+
 The Platform Registry will use SQLite initially.
 
 Application databases may use existing company database servers.
@@ -870,9 +880,131 @@ Database schema migrations must be separate, controlled deployment steps.
 
 Never automatically execute arbitrary SQL files from uploaded packages.
 
+## 9.1. Managed Application Databases
+
+**Target architecture:** **1 Platform Database + N Independent Application Databases**. The dedicated SQLite Platform Registry contains platform management records. Each deployed application may optionally use its own independent SQLite database; applications without a database remain fully valid. N may be zero. This service is future work in M10-DB, NOT STARTED. Existing connection-reference APIs are not evidence that application database lifecycle operations have been implemented.
+
+### 9.1.1. Optional application database modes
+
+| Mode | Required behavior |
+| --- | --- |
+| `NONE` | The application does not require a database. Do not provision a file or require a database association/configuration. |
+| `MANAGED_SQLITE` | The Platform provisions and manages a dedicated SQLite database for exactly one application, with an explicit application-to-database association and the lifecycle controls below. |
+| `EXISTING_SQLITE` | The application uses an existing SQLite file explicitly registered, validated and authorized through the Platform. Registration must not create, replace, import, migrate or take deletion authority over the file implicitly. |
+
+Record the selected mode and authorized association in Platform metadata. Configuration and mode changes require M11 authorization and application ownership checks. Changing a mode or association must not silently move, delete, replace or migrate data. No application is required to select a database mode other than NONE. SQL Server/PostgreSQL/MySQL references are separate metadata records and cannot enable operational database modes under current policy.
+
+### 9.1.2. Database separation and storage boundaries
+
+- Every MANAGED_SQLITE application must have its own independent SQLite file; a managed database belongs to exactly one application. Prevent duplicate associations or aliases that would attach another application's file or the Platform Registry.
+- Application databases must never share the Platform Registry database. Deployed applications must never receive direct access to the Registry, its connection configuration, protected credential material or internal management capabilities. Do not attach the Registry as an application database.
+- Resolve database identities to Platform-controlled paths within approved storage locations. Validate both new managed paths and registered EXISTING_SQLITE paths; arbitrary browser-supplied filesystem paths are not authority to access a file. An existing database outside approved storage requires an explicitly approved registration/location decision before any operation.
+- Enforce canonical containment and file identity checks for database, journal/WAL sidecar, backup, staging and restore paths. Reject path traversal, absolute/UNC/device-path injection, alternate streams, symlink/junction/reparse-point escapes, file aliases and cross-application substitutions. Revalidate at the operation boundary and fail closed if containment or identity cannot be established; string-prefix checks alone are insufficient.
+- Prevent unauthorized database file access through Platform APIs, including cross-application registration, status, backup, restore and deletion. Apply M11 RBAC/ownership even to metadata reads. Never expose raw paths as a substitute for an authorized resource ID.
+- Document the actual execution identity and effective filesystem permissions. **Filesystem separation under the same Windows identity is not a security sandbox. Separate SQLite files do not provide OS-level isolation against malicious application code.** Path validation protects Platform operations; it cannot stop same-user malicious code from directly accessing files permitted to that identity. Preserve trusted-reviewed-code restrictions; do not change Windows security settings or claim new identity isolation.
+
+### 9.1.3. Target logical application storage
+
+Use the existing configurable `IHP_STORAGE_ROOT`. The required target logical structure is:
+
+```text
+<STORAGE_ROOT>/
+|
++-- registry/
+|   +-- platform.db
+|
++-- Applications/
+|   |
+|   +-- <application-uuid>/
+|       |
+|       +-- releases/
+|       |   +-- v1/
+|       |   +-- v2/
+|       |   +-- v3/
+|       |
+|       +-- data/
+|       |   +-- application.db
+|       |
+|       +-- logs/
+|       |
+|       +-- config/
+|
++-- Uploads/
+|
++-- Temporary/
+|
++-- Logs/
+```
+
+`data/application.db` applies to MANAGED_SQLITE; NONE does not require that file. EXISTING_SQLITE uses its explicitly approved registered location. Application UUIDs, rather than mutable slugs or release labels, identify target application storage. Database files, their SQLite sidecars and backups must remain outside every release directory. Backup locations must be separately approved, application-scoped and outside publicly served trees; their exact configurable layout is a future design decision.
+
+This is a **target logical structure**, not an assertion about current physical paths. Preserve implemented `IHP_STORAGE_ROOT`, Registry location, slug/UUID directories and all existing configurations. The older examples in sections 10 and 17 are retained as examples; they do not authorize relocating data. Any future physical layout migration requires an explicitly authorized implementation milestone, compatibility/recovery planning and verified data preservation. This documentation task does not create or move directories/databases.
+
+### 9.1.4. Managed SQLite lifecycle requirements
+
+| Capability | Required behavior before implementation can be accepted |
+| --- | --- |
+| Provisioning | Idempotent, concurrency-safe provisioning for one application. A retry must return the existing authorized association; never overwrite an existing database, adopt an unrelated file or truncate data. Detect collisions and incomplete provisioning, fail safely and record the outcome. |
+| Association | Persist mode, stable application/database identifiers and authorized file identity separately from releases. Enforce one-application ownership of each managed database, with authorization rechecked for association changes. |
+| Initialization | Initialize a newly provisioned database only under an explicitly reviewed, separately authorized initialization/schema operation. Do not execute uploaded SQL, package hooks or application-provided migration commands automatically. Preserve existing files and data on retries. |
+| Metadata and status | Record safe identifiers, mode, association, lifecycle/validation status, schema/version information when known, timestamps, storage usage, configured limits and backup/recovery outcomes. Unknown or failed states must not be presented as healthy or successfully provisioned. Do not return internal paths or secrets in ordinary metadata. |
+| Integrity validation | Validate the SQLite file type and integrity through approved SQLite APIs, using bounded, coordinated checks appropriate to the database state. Do not treat extension/header checks alone as proof of integrity. Fail closed on invalid files, preserve evidence/data and expose only safe diagnostic results. |
+| Backup and restore | Require explicit authorization and the SQLite-consistent procedures in section 9.1.8. Track application ownership, operation state and validated backup identity; never imply that release archives are database backups. |
+| Retention | Store explicit retention policy for application data and backups, including retained data after application removal. Do not choose an undocumented retention duration or perform implicit destructive cleanup. Policy-driven deletion must remain explicitly authorized and auditable. |
+| Deletion | Require explicit authorized retention/deletion decision, destructive-action confirmation and verified target identity. Removing an application, changing mode or deleting a release must not automatically destroy application data/backups. EXISTING_SQLITE registration does not grant authority to delete externally owned files. |
+| Recovery | Detect interrupted provisioning/backup/restore/deletion, retain recoverable state and report partial/failed outcomes accurately. Validate recovery targets and backup provenance; require authorization for data-changing recovery and never silently replace a corrupt database with an empty file. |
+| Storage limits | Define configurable per-application database/sidecar/backup limits and available-space checks. Report usage and enforce documented Platform-operation budgets; never truncate data to meet a limit. Direct same-user application writes are not a hard filesystem quota or sandbox. Exact defaults require future implementation review. |
+| Access permissions | Enforce M11 RBAC, current application ownership and approved storage identity for each operation. Supply only the application's required runtime access; no Registry access or implicit cross-application grant. State same-identity limits explicitly. |
+| Audit logging | Audit requests, authorization denials, association/mode/retention changes, lifecycle actions, actor, application/database/backup identifiers, timestamps and outcomes. Include failures and recovery decisions; omit database contents, secrets, sensitive configuration and raw filesystem paths. |
+
+Application deletion must not automatically destroy application data without an explicit authorized retention/deletion decision. Retained data must keep an authorized management identity and audit association even if the application record is later removed. Concrete metadata/schema/API changes belong to future reviewed implementation and versioned migrations, not this documentation update.
+
+### 9.1.5. Deployment and versioning behavior
+
+Application data persists independently of application releases:
+
+```text
+Application v1 -> application.db
+Application v2 -> same application.db
+Application v3 -> same application.db
+```
+
+Deploying, updating, restarting or rolling back an application must not automatically delete, replace, copy over or reset its database. Release cleanup must exclude application data and backups. Mode NONE must continue to work without database setup.
+
+Database schema migrations must be explicit, controlled and separately authorized operations, with reviewed compatibility, backup/recovery and application coordination requirements. Never automatically execute SQL scripts from uploaded packages. Application rollback does not automatically reverse database schema changes; verify the target release's compatibility with the retained schema and refuse unsafe rollback rather than silently downgrading or discarding data.
+
+### 9.1.6. Application database access configuration
+
+Provide only the minimum application-specific database configuration required at runtime, through approved configuration delivery outside immutable release artifacts. Never provide Platform Registry configuration/credentials or internal management capabilities. Where configuration contains secrets, exclude it from application source code, release artifacts, ordinary API responses and logs.
+
+Database files, backups, contents and filesystem paths must not be served through public Gateway routes or application static assets. Platform APIs must not expose database contents without authorization, and ordinary browser endpoints must not download raw SQLite files. Dashboard metadata should use safe resource IDs and status/usage summaries. These are future enforcement requirements, not a guarantee against malicious trusted-identity code directly reading permitted files.
+
+### 9.1.7. Future Dashboard database management
+
+Provide an **Application Database Management** section as part of M10-DB, after secure Dashboard access is verified:
+
+- View and select the optional database mode during application configuration; register an authorized EXISTING_SQLITE reference without arbitrary filesystem browsing.
+- Provision a managed SQLite database and view real provisioning/validation status and safe metadata.
+- View database storage usage and documented limits.
+- Initiate explicitly authorized backups and restores; review backup history and operation results.
+- Manage authorized retention settings and request authorized database deletion with explicit destructive-action confirmation.
+
+Every management operation must enforce M11 RBAC and application ownership on the server; UI action visibility is supplementary. Administrators act within platform policy, Developers only within authorized owned-application permissions, and Viewers have read-only access to authorized safe metadata/history. Restore, deletion and other destructive actions require explicit authorization and confirmation; read access must never confer those rights. Backup also requires explicit authorization. No raw database file is exposed through ordinary browser endpoints. Until implemented and verified, label these capabilities as planned/disabled rather than claiming they work; existing M8 status is unchanged.
+
+### 9.1.8. SQLite-consistent backup and controlled restore
+
+- Use an approved SQLite-consistent backup mechanism, such as the SQLite Online Backup API through a policy-compatible in-process provider. Do not assume copying an active `.db` file is a safe backup procedure; active transactions and journal/WAL state must be handled correctly. No prohibited executable, external database engine or unapproved utility is authorized. SQLite documents a consistent snapshot mechanism in its [Online Backup API](https://www.sqlite.org/backup.html) and explains the [risks of copying active databases](https://www.sqlite.org/howtocorrupt.html#_backup_or_restore_while_a_transaction_is_active).
+- Require explicit backup authorization, validate source ownership and destination containment, create a new non-overwriting backup identity and verify completion/integrity before declaring success. Persist application/database association, safe schema/version metadata where available, time, size, integrity/hash result and operation outcome. Do not expose contents or sensitive paths in history.
+- Keep backups outside application release directories and public trees. Apply approved access/retention limits; an incomplete backup must not replace a valid retained backup or appear restorable.
+- Restore requires explicit authorization, destructive-action confirmation, verified application/database/backup identity, integrity and compatibility checks, adequate space, and controlled application downtime or coordinated access that excludes conflicting writers/connections. Coordinate SQLite sidecar handling through the approved provider; do not overwrite a live file blindly.
+- Stage and validate the restore with a documented failure/recovery plan that preserves the current recoverable database. Prevent restore from overwriting the Registry, another application's database, an unrelated registered file or any path outside approved storage. Revalidate target containment/identity before the destructive step.
+- Record restore status, audit actor/outcome and post-restore integrity/application health evidence before reporting success. A database restore and an application release rollback are distinct authorized operations; neither implies automatic permission for the other.
+
 ---
 
 # 10. APPLICATION VERSION MANAGEMENT
+
+Section 9.1 governs future application database persistence independently of these releases. The original layout below is illustrative; it does not authorize moving existing paths or placing databases/backups inside releases.
 
 Every deployment must create a new release.
 
@@ -1072,6 +1204,8 @@ The Agent must document all limitations introduced by the absence of Docker and 
 ---
 
 # 14. PLATFORM DATABASE DESIGN
+
+This is the dedicated Platform Registry schema. Future managed application databases are separate SQLite files governed by section 9.1; store only their management metadata/associations here, never their application tables or contents. No schema/migration change is authorized by the documentation-only assignment.
 
 Design a normalized database schema.
 
@@ -1346,6 +1480,8 @@ DEPLOYMENT SUCCESSFUL
 
 ### Application Detail
 
+Future M10-DB adds the Application Database Management section defined in section 9.1.7. It is planned, not an implemented M8 capability or a new M8 completion claim.
+
 Display:
 
 ```text
@@ -1391,6 +1527,8 @@ Manage:
 ---
 
 # 17. FILE STORAGE STRUCTURE
+
+For Managed Application Databases, section 9.1.3 defines the target logical `IHP_STORAGE_ROOT` structure, dedicated `registry/platform.db` and per-application `data/application.db`. Preserve current paths/configurations; the historical example below does not override those database separation requirements or authorize an automatic storage migration.
 
 Use a configurable storage root under the authorized Windows user profile.
 

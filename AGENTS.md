@@ -1,5 +1,9 @@
 # Repository Instructions for Codex and Development Agents
 
+## Current documentation-only assignment — 2026-10-27
+
+The latest user request is documentation only and supersedes the earlier M8 implementation assignment for this task. Modify only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md. Do not implement/modify/build/test application code, change database schemas/migrations, execute applications or start another milestone. Review documentation consistency and run git diff --check; application tests/builds are not authorized for this task. Preserve every existing milestone status and historical progress. M7/M8 remain IN PROGRESS; M10-DB is future NOT STARTED work and requires a separate explicit implementation assignment. Earlier implementation/test/resume instructions below are historical or conditional and do not override this scope.
+
 ## Session continuity
 
 At the start of every development session:
@@ -121,6 +125,21 @@ Do not commit any source code or other project files into this progress reposito
 - Registry migrations are explicit db:migrate/db:status steps after building, never automatic API startup. Consult local API.md for the custom Node migration runner, paths, operator capability, DPAPI identity boundary, and limitations.
 - The 2026-10-27 SQLite-only clarification accepts missing SQL Server/PostgreSQL/MySQL connectivity verification as a company-policy gap. It supersedes the former M4 blocker and instructions to obtain/test instances. Complete M4 after SQLite/reference/policy checks pass; preserve historical results as history, never as current engine support. Do not start M5 in this session.
 
+## Permanent managed application database rules
+
+- Follow PROJECT_REQUIREMENTS.md section 9.1: one dedicated Platform Registry plus optional independent application databases. NONE, MANAGED_SQLITE and EXISTING_SQLITE are future service modes, not currently verified lifecycle capabilities.
+- Platform Registry and application databases must remain separate. Each managed application database belongs to exactly one application; never share its file with another application or alias the Registry as an application database.
+- Never expose the Platform Registry, its file/configuration/credentials or internal management capabilities to deployed applications. Give an app only the minimum configuration for its authorized database.
+- Store application database files, SQLite sidecars and backups outside every release directory and public/static tree. Use configurable IHP_STORAGE_ROOT and approved application-scoped storage. Treat the section 9.1.3 structure as a target; preserve existing physical paths/configurations unless a future authorized implementation explicitly migrates them safely.
+- Validate canonical paths, file identities and authorization at every database operation; reject traversal, symlink/junction/reparse escapes, aliases and cross-application/Registry access through Platform APIs. An EXISTING_SQLITE file requires explicit registration and approved-location/ownership validation; registration alone never authorizes creation, migration or deletion.
+- Do not claim that separate SQLite files or filesystem separation under the same Windows identity provide a security sandbox or OS-level isolation against malicious application code. Keep trusted-reviewed-code restrictions and document actual access limits; do not change Windows security settings to claim isolation.
+- Never delete, replace or reset application data as an automatic side effect of deployment, update, restart, rollback, release cleanup, mode changes or application deletion. Data retention/deletion requires an explicit authorized decision; application rollback never automatically reverses database schema changes.
+- Only SQLite may be used for real database operations under current policy. SQL Server/PostgreSQL/MySQL remain metadata-only; no real connection, authentication, migration, provisioning or connectivity test is permitted.
+- Database backup, restore and deletion each require explicit authorization. Restore/deletion and other destructive actions also require explicit confirmation and verified target identity. Use an approved SQLite-consistent backup mechanism, never assume an active-file copy is safe, and coordinate downtime/writers for restore with a recoverable failure plan. Never overwrite an unrelated database.
+- Enforce M11 RBAC and current application ownership server-side for database management; Viewer access is read-only. Do not expose raw database files through ordinary browser endpoints or database paths/contents/secrets through public Gateway routes or unauthorized APIs/logs.
+- Initialization and schema migrations must be explicit, controlled and separately authorized. Never automatically execute uploaded database migration scripts, SQL files, package hooks or arbitrary commands.
+- Audit database lifecycle actions, authorization denials, retention decisions and recovery outcomes without sensitive inputs. Do not claim provisioning/backup/restore works until implemented and verified; M10-DB remains NOT STARTED until separately assigned.
+
 ## M5 deployment engine rules
 
 - The user explicitly authorizes M5 after completed M1–M4; this supersedes previous session-specific instructions to wait before M5. Do not start M6 or later milestones.
@@ -161,7 +180,14 @@ Do not commit any source code or other project files into this progress reposito
 ## M8 dashboard assignment
 
 - The latest user request authorizes M8 despite unfinished M7; this supersedes older wait instructions. Preserve M7 IN PROGRESS and its source-build/isolation dependency. Do not start M9 or any other milestone.
-- Build the responsive React dashboard against existing API contracts. Preserve M11 Origin/Fetch Metadata/session/ownership controls; never strip browser security headers, proxy native credentials, paste tokens into the browser or enable CORS as a workaround.
+- Build against existing API contracts and preserve M11 guards. Never disguise arbitrary browser requests by stripping security headers, forward browser-supplied native credentials, paste native tokens or enable CORS as a workaround. The explicitly authorized follow-up may construct only independently verified, allowlisted Gateway operations with server-held M11 sessions.
 - If approved browser authentication is unavailable, disable affected login/management functionality explicitly and keep M8 IN PROGRESS/BLOCKED. Tests with owned fixtures or native clients are not evidence of approved browser authentication.
 - Do not invent runtime metrics/history endpoints or M9 monitoring. Show only available registry/package/route/audit evidence; label unavailable capabilities accurately.
 - Keep real listeners loopback-only, managed .NET verification/publish policy, SQLite-only operations and four-document-only progress delivery. Run the full regression and verify origin/main after pushing.
+
+## M8 browser authentication follow-up
+
+- The latest user explicitly authorizes designing/implementing a browser authentication boundary. Preserve original M11 native Origin/session/RBAC/ownership checks; no generic proxy or direct native token in the browser is allowed.
+- Isolate the management hostname from application routing on the existing 127.0.0.1:5050 listener. Do not use cookies/path separation as an origin boundary or expose session material to application routes.
+- Implement only explicit browser operations with independent Host/Origin/Fetch Metadata/CSRF/replay/session checks and server-side M11 authorization. Secrets/keys remain memory-only; no localStorage/sessionStorage/URL credentials.
+- Keep new browser flow opt-in/default disabled until verified. Do not launch browser executables/install drivers or claim actual-browser acceptance from Node/DOM tests. Record transport limitations and unfinished acceptance accurately; M7 remains IN PROGRESS and M9 is not assigned.

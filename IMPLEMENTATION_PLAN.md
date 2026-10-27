@@ -6,6 +6,8 @@ Internal Application Hosting & Deployment Platform (project code: Internal Hosti
 
 This roadmap translates those requirements into independently verifiable milestones. It does not claim that planned functionality already exists.
 
+**Current task override (2026-10-27): DOCUMENTATION ONLY.** Define Managed Application Databases in the four official records; do not implement, modify, build or test application code, change schemas/migrations or execute applications. The earlier M8 assignment below is retained as history and is not the active task. M1–M6/M11 remain COMPLETED; M7/M8 remain IN PROGRESS; M9/M10/M12 remain NOT STARTED. Add M10-DB as a future NOT STARTED sub-milestone after M10 without renumbering or changing any existing milestone's status. No implementation of M10-DB or another milestone is authorized by this update.
+
 **Current assignment (2026-10-27):** M8 only, explicitly assigned after the verified M7 prebuilt subset despite unfinished source builds. M7 remains IN PROGRESS; no acceptance waiver/build authorization is implied. Older waits are superseded. M8 is IN PROGRESS with browser authentication unavailable under unchanged M11 controls. Do not start M9 or another milestone.
 
 ## Status rules
@@ -56,6 +58,8 @@ M1 commands below refer to existing artifacts. Commands for later milestones rem
 - Keep secrets out of browser responses and logs. Validate routes and destinations; proxy only to approved loopback destinations.
 - Use bounded restart attempts and backoff. Do not assume unattended startup after logout or reboot without IT approval.
 - Authentication and deployment authorization must fail closed. Before their milestone is complete, any development-only management access must remain local and must not enable untrusted or network-accessible deployment.
+
+Managed Application Database requirements are defined in PROJECT_REQUIREMENTS.md section 9.1. The architecture is one dedicated Platform Registry plus optional independent application SQLite databases. M10-DB is future work; it neither changes current physical paths nor upgrades the implemented metadata-only connection manager into a database lifecycle service. Registry/application separation, release-independent data, explicit authorization, SQLite-only operations and the same-Windows-identity isolation limitation apply to every future milestone that touches database storage.
 
 ## Milestones
 
@@ -451,6 +455,10 @@ npm.cmd run verify
 
 **Current M8 assessment:** latest user authorizes M8 while M7 remains IN PROGRESS. M11 rejects Origin and Sec-Fetch-Site other than none; no approved browser authentication transport exists. Do not weaken these controls or build a credential/header-stripping bridge. Implement safe dashboard/UI/API-contract work and document browser-dependent acceptance as unverified/disabled. M7 source builds remain disabled. No M9 work is authorized.
 
+**Browser-authentication follow-up:** user now explicitly authorizes a restricted browser boundary. Implemented opt-in localhost:5050 management-origin separation on the existing listener, memory-only nonextractable P256 key/proof sessions, single-use login challenge/request nonces, CSRF/Host/Origin/metadata checks and fixed operation allowlist. M11 native guards/RBAC/ownership remain unchanged; a native-only issuer reuses M11 with a fixed shorter 30-minute expiry that the Agent already enforces. Source builds remain disabled. Candidate defaults off; actual browser/loopback transport/profile/CSP behavior has no permitted connected verification tool, so M8 remains IN PROGRESS. BROWSER_AUTHENTICATION.md records trust limits and evaluation instructions. Focused real-service protocol checks passed 28/28; full regression is pending at this edit.
+
+**Documentation-only evidence reconciliation:** Read-only inspection of the already-ended follow-up log found the later full run failed its 28 browser checks because the owned API on 127.0.0.1:5266 was unavailable during stack readiness (ECONNREFUSED/timeout). The pending statement above describes its earlier edit; the 451-check result below is the last successful historical full gate, not a pass for the newer candidate. No application test/build/repair was performed in the documentation task. Preserve this unresolved M8 failure/default-off boundary and IN PROGRESS status for a future explicit implementation assignment; see the current PROGRESS.md record.
+
 **Verified evidence (2026-10-27):** final npm.cmd run verify exited 0 with **451 passing checks**, zero failures/skips, plus real built /admin/ assets/CSP/public-health/Origin-rejection and owned shutdown/port/storage smoke. Includes 28 React DOM/model/owned-native-client checks and 113 Gateway checks; all twelve .NET publish roots passed no-.exe scans. Original M1–M7/M11 regression remains passing. Native adapter is test-only, not a browser bridge. Actual browser authentication/workflows/visual acceptance and original unfinished wizard/settings scope remain unfulfilled, so M8 stays IN PROGRESS; M7 also stays IN PROGRESS. See PROGRESS.md/DASHBOARD.md.
 
 ### M9 — Monitoring and Logging
@@ -519,6 +527,56 @@ dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.In
 ```
 
 **Status:** NOT STARTED
+
+### M10-DB — Managed Application Database Service (future sub-milestone)
+
+**Objective:** Implement the optional **1 Platform Database + N Independent Application Databases** architecture from requirements section 9.1, with safe per-application SQLite lifecycle management independent of application releases. This adds future scope only; no provisioning, backup, restore, database Dashboard UI or new schema is claimed implemented.
+
+**Roadmap placement:** After M10 version management/rollback and the required M8 secure Dashboard capabilities, before final M12 acceptance of this extension. Existing M1–M12 identifiers, statuses and historical completion evidence are unchanged. M11 was already prioritized/completed earlier and remains a dependency, not new work. Implementation requires a future explicit assignment; do not start this sub-milestone during the documentation task or resume it merely because other code exists.
+
+**Tasks (future, independently verifiable):**
+
+1. Define reviewed metadata, authorization contracts and any explicit versioned Registry migrations for NONE, MANAGED_SQLITE and EXISTING_SQLITE. Preserve current Registry data/configuration and metadata-only external-engine references; do not apply a storage/schema migration implicitly.
+2. Implement an application-scoped storage resolver under configurable IHP_STORAGE_ROOT and the target logical layout. Validate canonical containment, file identity, traversal/reparse/symlink/alias escapes and cross-application targets for registration, provisioning, SQLite sidecars, backups, restore and deletion. Preserve existing implemented paths unless a separately authorized compatibility migration changes them.
+3. Implement idempotent/concurrency-safe non-overwriting per-application provisioning and explicit association/initialization, safe metadata/status/integrity/usage/limits, retention, authorized deletion and interrupted-operation recovery. NONE must allocate no database; EXISTING_SQLITE requires explicit registration/location authorization without automatic creation, migration or deletion authority.
+4. Implement explicitly authorized SQLite-consistent backup and validated restore, with protected backup history/retention outside releases, writer coordination/downtime, source/target identity checks and recoverable failure handling. Never use an uncoordinated active-file copy as proof of backup correctness.
+5. Integrate minimum runtime configuration and data preservation with M5/M7/M10: the same application database survives deployment/update/restart/rollback/release cleanup; schema initialization/migration is separate and authorized. Never run SQL scripts from uploaded packages automatically or infer database rollback from application rollback.
+6. Integrate a future Application Database Management Dashboard section through secured Platform API contracts: mode selection, provisioning, safe status/metadata/usage, authorized backup/restore/history, retention and deletion requests. Apply server-side M11 RBAC/current ownership; Viewer read-only and destructive authorization/confirmation. No raw file download or public path/Registry/secret exposure.
+7. Add credential-safe lifecycle/security audit events and operational documentation for backup/restore/recovery/retention, permission boundaries, limits and same-user trust. Extend existing automated/managed verification with owned SQLite-only fixtures; preserve all prior behavior and policy controls.
+
+**Dependencies:** M4 NestJS/Prisma/SQLite Platform API and explicit migration boundary; M11 sessions/RBAC/application ownership/audits; M5 trusted runtime/configuration; M7 verified trusted-prebuilt release contracts (source builds remain disabled); completed and security-verified M8 browser access/Dashboard operations for UI acceptance; and M10 release lifecycle/rollback coordination for data-persistence acceptance. No dependency grants permission to start unfinished milestones. M7 remains IN PROGRESS until its separate source-build/isolation acceptance is resolved.
+
+**Acceptance criteria (future evidence required):**
+
+| Area | Required verification before completion |
+| --- | --- |
+| Optional modes | NONE deploys without a database file/association/configuration; MANAGED_SQLITE provisions a dedicated file; EXISTING_SQLITE registers only explicitly authorized, validated existing SQLite files without overwriting/initializing them. Mode changes preserve existing data and enforce ownership. |
+| Provisioning and association | Concurrent/repeated provisioning creates or returns exactly one authorized association/file for one application, never truncates an existing database and rejects unrelated files, duplicate ownership and Registry aliases. Failed/interrupted provisioning is recoverable and reported accurately. |
+| Storage boundaries | Reject traversal, absolute/UNC/device/stream injection, symlink/junction/reparse escapes, aliases and cross-application substitution through management APIs. Databases/sidecars/backups are outside releases/public trees; Registry access/configuration is never handed to apps. Existing paths remain compatible unless an explicitly authorized migration is verified. Document that same-identity files are not an OS sandbox. |
+| Lifecycle and limits | Verify explicit initialization, safe metadata/status/integrity/usage, documented configurable storage limits, retention, authorized deletion and interrupted-operation recovery. Application deletion, mode changes and release cleanup never implicitly destroy data; EXISTING_SQLITE registration alone grants no file-deletion right. No silent empty-file replacement on corruption. |
+| Backup | Explicitly authorized approved SQLite-consistent mechanism produces a validated snapshot under coordinated/concurrent writes, including relevant journal/WAL behavior. Fresh backups are application-scoped, non-overwriting, outside releases, safely recorded and recoverable on failure; no active-file-copy assumption. |
+| Restore | Enforce explicit authorization/confirmation, backup provenance/integrity/compatibility and controlled downtime/writer coordination. Restore only the intended application's database, preserve a recovery path, reject unrelated/Registry/out-of-root targets and validate post-restore integrity/health before success. |
+| Deployment persistence | Write owned fixture data on v1 and verify the same database/data remains through v2/v3 deployment, restart, compatible rollback and release cleanup. Incompatible schema/release combinations fail safely; app rollback never automatically reverses schema or restores data. Uploaded SQL remains inert. |
+| Authorization | Anonymous/expired/revoked sessions, unauthorized owners, Viewers attempting writes and privilege escalation all fail closed. Backup, restore and deletion each require explicit authorization; destructive actions also require confirmation. No credentials, internal capabilities, database contents or paths leak through Gateway/browser/logs. |
+| Dashboard integration | Verify real authorized mode configuration/provisioning/status/usage/backup/restore/history/retention/deletion workflows, role-aware controls and failure states under the approved M8 browser boundary. Viewer is read-only; UI never replaces server enforcement; no ordinary raw SQLite download endpoint. |
+| Audit and SQLite policy | Verify safe actors/resource IDs/actions/times/outcomes for mode/association/lifecycle/retention/recovery/denied operations, including failures. Only SQLite performs real operations; SQL Server/PostgreSQL/MySQL remain metadata-only with no connection/authentication/migration/provisioning/connectivity test. Full applicable regression passes with no forbidden executables, elevation or security/network changes. |
+
+**Verification commands (future extensions to existing suites; NOT RUN for this documentation task):**
+
+```powershell
+# Run only after separately authorized implementation adds the database cases.
+npm.cmd --prefix .\src\Api run test
+npm.cmd --prefix .\src\Dashboard run test
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/Platform.Integration.Tests/
+dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests.dll
+npm.cmd run verify
+```
+
+Before future execution, align actual scripts/fixtures with the implementation, review any explicit migrations separately and record commands/results. Real-browser acceptance requires permitted actual-browser evidence; DOM simulations alone do not satisfy it. No database file or backup should enter the progress repository.
+
+**Status:** NOT STARTED
+
+**Unresolved future design choices:** Exact safe API/schema contracts, approved backup provider capability, backup layout/default retention/limits and recovery coordination require future review and verification. Nothing in this record authorizes new utilities, runtime permissions, OS isolation, automatic migrations or untrusted/source execution. Existing M7/M8 gaps and no-.exe/loopback/SQLite-only restrictions remain unchanged.
 
 ### M11 — Authentication and Authorization
 
@@ -625,7 +683,10 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | React dashboard and deployment experience                   | M8                   |
 | Metrics, health, structured logs, retention                 | M9                   |
 | Releases, history, safe updates, rollback                   | M10                  |
+| Optional independent application SQLite databases, lifecycle, backup/restore and database Dashboard | M10-DB (future) |
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
 M1–M6 and M11 are `COMPLETED`; SQLite-only policy/accepted gap remain. M7 and M8 are `IN PROGRESS` with source builds and approved browser authentication unavailable respectively. M9–M10 and M12 remain `NOT STARTED`; do not begin them. All .NET checks use published managed DLLs; uncreated later-milestone commands remain planned. Change status only with matching evidence and policy.
+
+The added M10-DB sub-milestone is **NOT STARTED** and does not change any status above. Section 9.1 defines new future acceptance requirements; provisioning, application database backup/restore and their Dashboard controls are not implemented or verified by this documentation update. Final M12 review must account for this extension when separately authorized, rather than treating prior Registry/reference tests as evidence of its acceptance.
