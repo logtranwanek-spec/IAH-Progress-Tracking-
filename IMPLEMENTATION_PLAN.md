@@ -6,7 +6,7 @@ Internal Application Hosting & Deployment Platform (project code: Internal Hosti
 
 This roadmap translates those requirements into independently verifiable milestones. It does not claim that planned functionality already exists.
 
-**Current assignment (2026-10-27):** M7 only, authorized by the latest attachment after completed M1–M6/M11. Older milestone handoffs saying to wait for M7 are historical and superseded. M7 remains IN PROGRESS because approved isolated source builds are unavailable; do not start M8 or another milestone.
+**Current assignment (2026-10-27):** M8 only, explicitly assigned after the verified M7 prebuilt subset despite unfinished source builds. M7 remains IN PROGRESS; no acceptance waiver/build authorization is implied. Older waits are superseded. M8 is IN PROGRESS with browser authentication unavailable under unchanged M11 controls. Do not start M9 or another milestone.
 
 ## Status rules
 
@@ -414,7 +414,7 @@ dotnet .\artifacts\publish\Packages.Tests\Packages.Tests.dll
 
 **Status:** IN PROGRESS
 
-**Verified evidence (2026-10-27):** focused package gate passed 37/37; final npm.cmd run verify exited 0 with **418 passing checks**, zero failures/skips, plus real platform smoke. All twelve published roots passed no-.exe scans. Exact Node/.NET upload/review/preparation/start/proxy/stop, rejection/tampering/collision/failure cleanup, interrupted staging, default Agent gate and full M1–M6/M11 regression passed. General deployment states track package state. PROGRESS.md records commands, corrected failures, files, security decisions and remaining limits. Approved source builds/build logs remain unfulfilled, so M7 stays IN PROGRESS; never infer full completion from its verified prebuilt subset. Do not start M8.
+**Verified evidence (2026-10-27):** focused package gate passed 37/37; final npm.cmd run verify exited 0 with **418 passing checks**, zero failures/skips, plus real platform smoke. All twelve published roots passed no-.exe scans. Exact Node/.NET upload/review/preparation/start/proxy/stop, rejection/tampering/collision/failure cleanup, interrupted staging, default Agent gate and full M1–M6/M11 regression passed. General deployment states track package state. PROGRESS.md records commands, corrected failures, files, security decisions and remaining limits. Approved source builds/build logs remain unfulfilled, so M7 stays IN PROGRESS; never infer full completion from its verified prebuilt subset. The latest user separately authorizes M8 while preserving this M7 status.
 
 ### M8 — React Dashboard
 
@@ -422,13 +422,14 @@ dotnet .\artifacts\publish\Packages.Tests\Packages.Tests.dll
 
 **Tasks:**
 
-- Build the React + TypeScript + Vite frontend using Tailwind CSS, shadcn/ui, and Lucide Icons as specified.
-- Add dashboard statistics/recent activity; searchable, filterable, sortable application list; application detail; new application wizard; deployment progress; monitoring; and settings pages for users, roles, runtime configuration, deployment policies, application limits, and platform configuration.
-- Connect to documented API contracts and show asynchronous deployment status without claiming success before health/routing verification.
-- Support clear validation/error states, accessible keyboard flows, responsive layouts, and session-aware controls.
-- Ensure API URLs and application base paths work under the gateway path prefix.
+- Implemented: React/TypeScript/Vite/Tailwind, local shadcn-style Radix/CVA primitives, Lucide icons, responsive sidebar/header/navigation, loading/empty/error states, semantic labels/focus/keyboard/reduced-motion styles.
+- Implemented: real public health; application list/detail/registration/search/filter/pagination/current-page sort; package history/hash/events/ZIP/control views; exact approvals/rejections/history; stored routes/safe links/confirmed removal and existing Administrator audit views through typed existing contracts. No invented runtime/history/metric endpoint.
+- Implemented: session/current-user/logout/expiry/RBAC/ownership view logic, safe errors and stale-response cancellation. Production BrowserApi permits only public health and disables all login/private actions; no token input/header-stripping/CORS/credential bridge.
+- Implemented: opt-in bounded /admin/ static Gateway hosting and exact public API-health projection; no protected API proxy. Vite retains Origin/Fetch Metadata.
+- Unfinished: approved browser authentication/session/CSRF/transport/origin design and actual authenticated browser workflow acceptance. Native-client DOM tests do not establish browser authentication.
+- Unfinished: actual browser viewport/pixel/screen-reader verification; original full deployment wizard, user/grant/configuration/policy editors and unavailable legacy runtime/release read contracts. Monitoring is M9 and rollback M10; neither is started.
 
-**Dependencies:** M4 API contracts, M6 routing/static hosting, M7 for real upload/deploy flows, and M11 authentication/session behavior. Page shells may be built earlier against tested API contracts, but M8 is complete only when the full authorized flow is verified.
+**Dependencies:** M4/M6/M11 and verified M7 prebuilt contracts are available; user explicitly assigns M8 despite M7 source-build/isolation remainder. Approved browser authentication is unavailable. Full authorized browser flow must pass before M8 completion; preserve M7 IN PROGRESS.
 
 **Acceptance criteria:**
 
@@ -438,16 +439,19 @@ dotnet .\artifacts\publish\Packages.Tests\Packages.Tests.dll
 - Frontend assets, navigation, and API calls work under the configured path prefix.
 - Responsive and accessibility checks are recorded.
 
-**Verification commands (planned):**
+**Verification commands (implemented):**
 
 ```powershell
-npm.cmd --prefix .\src\Dashboard run test
-npm.cmd --prefix .\src\Dashboard run build
-dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
+npm.cmd run test:dashboard
+npm.cmd run test:gateway
+npm.cmd run verify
 ```
 
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
+
+**Current M8 assessment:** latest user authorizes M8 while M7 remains IN PROGRESS. M11 rejects Origin and Sec-Fetch-Site other than none; no approved browser authentication transport exists. Do not weaken these controls or build a credential/header-stripping bridge. Implement safe dashboard/UI/API-contract work and document browser-dependent acceptance as unverified/disabled. M7 source builds remain disabled. No M9 work is authorized.
+
+**Verified evidence (2026-10-27):** final npm.cmd run verify exited 0 with **451 passing checks**, zero failures/skips, plus real built /admin/ assets/CSP/public-health/Origin-rejection and owned shutdown/port/storage smoke. Includes 28 React DOM/model/owned-native-client checks and 113 Gateway checks; all twelve .NET publish roots passed no-.exe scans. Original M1–M7/M11 regression remains passing. Native adapter is test-only, not a browser bridge. Actual browser authentication/workflows/visual acceptance and original unfinished wizard/settings scope remain unfulfilled, so M8 stays IN PROGRESS; M7 also stays IN PROGRESS. See PROGRESS.md/DASHBOARD.md.
 
 ### M9 — Monitoring and Logging
 
@@ -563,7 +567,7 @@ The dedicated auth command builds through guarded Prisma WASM generation and run
 
 **Security scope/limits:** Native local API clients only, existing unencrypted loopback HTTP; no cookie/browser-login UI, TLS, MFA, SSO, device proof or same-user isolation claim. Theft of both secrets/client context and local DB/source tampering remain risks. M5 trusted local operator and hosted apps' own content auth remain separate. No recovery bypass; audit retention/tamper resistance and real backup/recovery remain future work. Legacy maintenance closes after any user exists; M6 reader remains read-only. Actual upload/deployment/process/rollback/application-deletion execution stays absent/disabled even with a valid approval.
 
-**M11 historical handoff:** M11 is complete. The latest attachment subsequently authorized M7, which now integrates these ownership/approval gates under its restricted trusted-prebuilt policy. M8–M10 and M12 remain NOT STARTED; no later milestone is assigned.
+**M11 historical handoff:** M11 is complete. M7 subsequently integrated these ownership/approval gates under its trusted-prebuilt policy. The latest request now assigns M8 while preserving M7 IN PROGRESS. M9–M10 and M12 remain NOT STARTED; no further milestone is assigned.
 
 ### M12 — Security Hardening and Final Testing
 
@@ -624,4 +628,4 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
-M1–M6 and the explicitly prioritized M11 are `COMPLETED`; M4's SQLite-only policy/accepted gap remain in force. M7 is `IN PROGRESS` with approved source builds unavailable; M8–M10 and M12 remain `NOT STARTED`. Do not begin another milestone in this session. All .NET checks use published managed DLL programs; uncreated later-milestone commands remain planned. Change status only with matching evidence and current policy.
+M1–M6 and M11 are `COMPLETED`; SQLite-only policy/accepted gap remain. M7 and M8 are `IN PROGRESS` with source builds and approved browser authentication unavailable respectively. M9–M10 and M12 remain `NOT STARTED`; do not begin them. All .NET checks use published managed DLLs; uncreated later-milestone commands remain planned. Change status only with matching evidence and policy.

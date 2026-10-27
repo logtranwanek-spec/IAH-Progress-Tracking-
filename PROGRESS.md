@@ -4,6 +4,172 @@
 
 ## Current milestone and handoff
 
+- **Current milestone:** M8 — React Dashboard, **IN PROGRESS**, explicitly assigned despite unfinished M7. No M9/other milestone started.
+- **Previous milestones:** M1–M6 and M11 remain COMPLETED. **M7 remains IN PROGRESS**: its trusted-prebuilt subset is verified; source templates/build logs still require approved execution isolation and remain disabled.
+- **Last completed work:** Responsive React dashboard/views, guarded typed API contract, real public health, optional built /admin/ Gateway hosting and security/DOM/native-client regression. Production browser authentication/private actions remain disabled.
+- **Final verification:** `npm.cmd run verify` exited 0: **451 passing checks**, zero failures/skips, plus real local stack smoke. This is the previous 418 plus 28 dashboard checks and five Gateway checks. All twelve .NET publish roots passed no-.exe scans.
+- **M8 completion blocker:** Unchanged M11 rejects browser Origin and Sec-Fetch-Site other than none. No approved browser authentication/session/transport/origin design exists. Native-client DOM test success is not browser login or authenticated browser deployment evidence.
+- **Exact next task:** Resolve the reviewed M8 browser-session/CSRF/transport/management-origin design and safe actual-browser verification boundary before enabling private UI or declaring M8 complete. Keep existing guard, source-build prohibition and M7 status intact. Do not start M9.
+- **Git scope:** Only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md may be committed/pushed to `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git`, main. Source/tests/additional docs/SQLite/credentials/artifacts remain local/untracked. A progress-only clone cannot reconstruct/run the code.
+
+## Policy and authorized scope
+
+SQLite is the only allowed real database. SQL Server/PostgreSQL/MySQL remain metadata-only references with an accepted policy verification gap; no installation/connection/protocol test occurred. Every real listener remains 127.0.0.1, Gateway 5050 only. Published framework-dependent .NET DLLs use UseAppHost=false and run through dotnet; no apphost/.exe/testhost/VSTest, browser executable/driver, native Prisma engine, Docker, Administrator/security/ACL/firewall change, production access, corporate deployment/listening or existing application modification occurred. Installed node/dotnet/npm.cmd/git hosts follow the established project convention.
+
+The user explicitly authorized M8 while preserving M7 IN PROGRESS. The earlier M7 wait is superseded only for M8. No source-build authorization/acceptance waiver is inferred. Public health/static hosting does not grant browser management or modify API authorization. Verification used fresh owned SQLite registries/users/packages/sample copies and cleaned owned processes/storage; actual configured data was not migrated or bootstrapped.
+
+## Implemented features and actual evidence
+
+| Area                          | Evidence and practical boundary                                                                                                                                                                                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Layout/navigation             | PASS in React DOM: sidebar/header/breadcrumb/hash pages, navigation and mobile toggle/Escape/focus; dark React/TypeScript/Tailwind/local shadcn-style Radix/CVA primitives/Lucide; responsive/reduced-motion CSS contracts. Real browser pixel/screen-reader acceptance remains unverified |
+| Browser authentication policy | PASS: production login form disabled, no credential collection/token-paste/storage/cookies/override; all privileged BrowserApi methods reject before any fetch. Only two credential-free public health paths are used                                                                      |
+| Authentication integration    | PASS using owned test-only native client against real M11: failed/successful login, current role/user, logout/revocation/401 expiration and clearing private records; late responses cannot repopulate private state. **Not approved browser authentication**                              |
+| Application management        | PASS native-client DOM/API: scoped list/detail, ownership/read-only labels, server search/runtime filtering, empty states, current-page sorting/model contracts, two-step real owned registration; Viewer writes denied server-side and UI controls hidden                                 |
+| Packages/deployments          | PASS native-client DOM/API: real trusted ZIP inspection/pending state, metadata/hash/history, source-build warning and preparation queued without claiming READY/RUNNING; existing M7 suite verifies actual approved Node/.NET execution/routing                                           |
+| Approval management           | PASS native-client DOM/API: exact metadata/file hashes, distinct Administrator/trusted-code attestation gating, real approval/rejection/history and no auto-execution                                                                                                                      |
+| Routing/audit                 | PASS native-client DOM/API: actual stored disabled intent/safe loopback link, confirmed removal, controlled rejection when no approved runtime; real Administrator audit events and Viewer denial. Stored intent is not reachability                                                       |
+| Loading/errors/revocation     | PASS: safe health failure/malformed/oversized identity response, safe exceptions/no raw secret values, 401 expiration, revoked grants clearing detail, request-identity/stale-response handling                                                                                            |
+| Gateway hosting               | PASS managed tests: opt-in /admin/ and allowlisted JS/CSS, GET/HEAD, redirect, CSP/no-store, forbidden publish files/source maps/methods and all other protected paths denied. No generic privileged API proxy                                                                             |
+| Existing behavior             | PASS: final full gate retained all M1–M7/M11 checks, twelve published roots and real built /admin/ health/security/shutdown smoke. M7 remains IN PROGRESS; no acceptance waiver                                                                                                            |
+
+Production has no demo application rows, fake runtime status or fabricated CPU/RAM/monitoring data. Unknown application totals display an em dash. Capability pages distinguish implemented, blocked, disabled and planned features. No M9 collector/log aggregation or M10 online upgrade/rollback is introduced.
+
+## Architecture and security decisions
+
+- **Blocked production client:** main.tsx constructs only BrowserApi. It permits same-origin GET /_platform/health and /_platform/api/system/health with credentials omitted, timeout/identity/size checks. Login and every private operation fail before network access. There is no browser feature flag, secret storage or native-token bridge.
+- **Typed view contract:** DashboardApi describes safe users, applications, package metadata/events/hashes, approvals, route intent, audit pages and existing actions. It does not expose tokens/binding to React. A Node native harness in test/ privately owns temporary M11 credentials and calls the real secured API; it is not imported into the bundle or provided as a server/production adapter.
+- **Permissions:** Administrators manage all apps/review others' packages; Developers manage owned apps; Viewers/read grants are read-only. UI permission checks never replace server enforcement. No ownership/user/policy escalation fields are submitted by ordinary registration.
+- **State correctness:** 202 queue admission never becomes successful/healthy deployment. Actual package state/events drive views; API authorization is required for execution controls. Same-user/request-identity refresh retains current records while loading, preserving feedback; identity changes mask old data immediately and pending results cancel/ignore after navigation/logout. API 401 expires the session view; safe 403/404 deny without raw input/error rendering. Logout is reported only after revocation succeeds; failures do not pretend revocation.
+- **Review:** Exact M7 archive/config/file/owner fingerprint is computed for explicit trusted-code review. Self-review/non-Administrator/historical decisions are unavailable; server checks remain authoritative. Archive review still requires the approved native download workflow. No code executes by opening/inspecting UI or the dashboard's ZIP tests.
+- **Limited data:** Existing package history, registry status, stored routes and safe security audit events are displayed. Registry status is labeled separately from runtime health; missing general legacy-release/runtime endpoints remain unavailable. Sorting is explicitly of the loaded page. No arbitrary API host/path/port/start/build/env/manifest command is accepted.
+- **Static hosting only:** IHP_DASHBOARD_ENABLED=1 opts Gateway into a fixed repository src/Dashboard/dist snapshot. LocalStack supplies it only to Gateway; direct Gateway startup without opt-in retains former /admin reservation. Only index.html and assets/<name>.js/.css are loaded; links/unexpected files/source maps rejected; maximum 32 files/4 MiB each/16 MiB total. Client requests use dictionary keys, never filesystem traversal.
+- **Response policy:** GET/HEAD /admin/ with self-only CSP, no framing/base/form action, no-store, nosniff, no-referrer and same-origin resources; /admin redirects, unknown assets 404/writes 405. Application route validators/reserved prefixes remain unchanged.
+- **Public health projection:** Exact GET/HEAD /_platform/api/system/health sends only a fixed loopback API health request without incoming credentials/cookies/headers/query, proxy or redirects; two-second/2-KiB budgets; only safe component/status output. All other API paths remain reserved at Gateway. Existing Vite proxy preserves Origin/Fetch Metadata; real smoke confirms browser-origin login still returns controlled 403.
+- **Scope:** No API source, Prisma schema/migration, Agent runtime policy or original sample application change is required. SQLite total remains 20 models/four reviewed migrations. M8 does not enable source builds, corporate access, alternate execution identities or OS isolation.
+
+## Files created or modified
+
+**Created locally:**
+
+- src/Dashboard/src/app.tsx, api.ts and model.ts.
+- src/Dashboard/src/components/ui/button.tsx and card.tsx; src/Dashboard/components.json and tsconfig.test.json.
+- src/Dashboard/test/dashboard.test.mjs and native-harness.mjs.
+- src/Gateway/DashboardAssets.cs and tests/Gateway.Tests/DashboardChecks.cs.
+- DASHBOARD.md and docs/verification/M8-2026-10-27.md; local artifacts/m8-dashboard-first-failure.log, m8-dashboard.log, m8-gateway.log, m8-verify-450.log and m8-verify.log plus continuity drafts.
+
+**Modified locally:**
+
+- src/Dashboard/src/main.tsx/style.css, vite.config.ts and package.json.
+- src/Gateway/GatewayHost.cs/Program.cs and tests/Gateway.Tests/Program.cs.
+- tools/local.mjs, tasks.mjs and smoke.mjs; root package.json/package-lock.json, .gitignore and .prettierignore (test output exclusions).
+- README.md, ARCHITECTURE.md, SECURITY.md, AUTHENTICATION.md, GATEWAY.md and INSTALLATION.md.
+- The four tracked records PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md.
+
+Pinned dependencies installed with npm.cmd --ignore-scripts: lucide-react 1.62.0, @radix-ui/react-slot 1.5.0, class-variance-authority 0.7.1, clsx 2.1.1, tailwind-merge 3.7.0 and dev-only jsdom 30.1.3. No remote generator/browser installer/native tool ran. API/Agent/sample source and existing SQL migrations were not modified. Only the four project records are delivered to Git; implementation/additional docs remain local as required.
+
+## Commands, failures and corrections
+
+| Actual command/iteration                                                                                              | Result                                                                                                                                                                                      |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| npm.cmd view pinned dependency versions; npm.cmd install --workspace @ihp/dashboard --save-exact --ignore-scripts ... | Installed exact runtime packages above; dev jsdom installed separately with --save-dev/--save-exact/--ignore-scripts; zero audit vulnerabilities                                            |
+| Initial npm.cmd run build --workspace @ihp/dashboard                                                                  | Failed unused Package type and unknown-valued JSX truthiness; removed unused import/explicit boolean conditions; then build passed                                                          |
+| npm.cmd run test:dashboard initial                                                                                    | Built API/dashboard/published PackageInspector; 20/23 tests passed, failures were asynchronous nav assertion and approval/rejection feedback lost when parent refreshed                     |
+| Corrections                                                                                                           | Wait for rendered navigation; retain only same-user/request-identity data during refresh, preserve component feedback, cancel stale results; guard identity render. No API security relaxed |
+| Focused dashboard reruns                                                                                              | 23/23 then 27/27 passed. Real async assertions wrapped in act; final focused 27/27 had no act warnings                                                                                      |
+| npm.cmd run test:gateway                                                                                              | Exit 0, 113/113 including five new dashboard checks/setup; all existing Gateway tests retained                                                                                              |
+| npm.cmd run format; dotnet format InternalHostingPlatform.sln --no-restore                                            | Exit 0; full format/type/.NET checks passed in first complete gate                                                                                                                          |
+| First npm.cmd run verify                                                                                              | Exit 0: 450 checks, zero failures/skips, plus real built /admin/ assets/CSP/public-health/browser-origin rejection smoke, owned shutdown/port/storage cleanup                               |
+| Final accessibility correction                                                                                        | Skip link focuses current main content without changing the SPA route; dedicated check passed in final 28/28 dashboard suite                                                                |
+| Final npm.cmd run verify                                                                                              | **Exit 0: 451 checks, zero failures/skips, plus real local smoke; no act warnings in final dashboard results**                                                                              |
+| npm.cmd run doctor                                                                                                    | Exit 0: Windows 22631 x64, Node 26.12.1, npm 11.20.0, .NET SDK 8.0.425, .NET/ASP.NET 8.0.31                                                                                                 |
+| npm.cmd audit --json                                                                                                  | Exit 0, zero vulnerabilities                                                                                                                                                                |
+| Current principal                                                                                                     | Administrator=False                                                                                                                                                                         |
+| Published output scan                                                                                                 | Twelve project publish roots, zero .exe artifacts                                                                                                                                           |
+| git fetch origin main/base comparison                                                                                 | Local HEAD/origin/main both c553e0102f64146481f58459e508bdc77eeb9948 before delivery; exact progress remote/main confirmed                                                                  |
+
+Some patch contexts were rejected before execution and corrected; no partial external action occurred. Actual verification uses Tee-Object logs and propagated LASTEXITCODE. All .NET runtime/verifier launches come from UseAppHost=false Release framework-dependent publish, no VSTest/testhost/dotnet run/test or apphost.
+
+### Full gate results
+
+Final documentation checks: npm.cmd run check exited 0 after the handoff update; git diff --check passed. Complete prior progress text and every original requirements line were verified preserved. Published output scan again found twelve roots and zero .exe artifacts. Only the four authorized records are tracked for delivery.
+
+| Suite                                          |  Passed | Failed/skipped |
+| ---------------------------------------------- | ------: | -------------: |
+| Node foundation/lifecycle/sample configuration |      25 |              0 |
+| API HTTP/reference/policy/DPAPI/routing/auth   |      81 |              0 |
+| Guarded Prisma/SQLite/migration                |      13 |              0 |
+| React DOM/model/owned-native-client dashboard  |      28 |              0 |
+| Managed Foundation                             |      27 |              0 |
+| Managed Gateway                                |     113 |              0 |
+| Managed Samples                                |      82 |              0 |
+| Managed Deployment Agent                       |      27 |              0 |
+| Managed routing/auth integration               |      18 |              0 |
+| Managed packages                               |      37 |              0 |
+| **Total**                                      | **451** |          **0** |
+
+The first 450-check full gate was the previous 418 plus 27 dashboard and five Gateway checks. The final skip-link regression passed, producing 451. Smoke is separate from the assertion total. It verified literal loopback Gateway/API/Vite listeners, real React module/assets, CSP/public health, preserved Origin rejection, structured logs, successful four-owned-child shutdown/released ports and owned temporary storage cleanup. No actual configured registry was modified.
+
+## Remaining issues and acceptance gaps
+
+1. **M8 browser authentication blocked:** unchanged M11 rejects browser Origin/Fetch Metadata. Need an explicitly reviewed browser-session/CSRF/transport/management-origin design; no native credential bridge/CORS/header stripping is authorized. Private production UI remains disabled; full authenticated browser upload/review/deploy is not verified.
+2. **M8 actual visual/accessibility verification incomplete:** Node/jsdom semantic/focus/navigation and responsive CSS contracts were tested. No browser .exe/driver launched. Actual browser viewport/pixel/contrast/screen-reader measurements remain unverified, not inferred from CSS presence. This independently prevents full acceptance claims.
+3. **Incomplete original M8 page scope:** available registry/package/approval/route/audit views exist, but the full original deployment wizard, user/grant/config/policy editors, legacy M5 release/runtime-health read contracts and real authenticated browser workflows remain unfinished/disabled. No new backend endpoints were invented to mask this.
+4. **M7 remains IN PROGRESS:** approved isolated source build templates/build logs are unavailable; no uploaded build scripts/dependency installation commands run. Prebuilt success is not full M7 completion. M9 monitoring/M10 rollback remain NOT STARTED.
+5. **Operational/trust limits unchanged:** local HTTP and same-user code/storage are not TLS/OS isolation; hashes do not prove code safety; M5 ownership/job window and recovery, M6 polling/LKG/offline revocation, M7 orphan/retention/upgrade gaps and M11 native-client assumptions persist. No arbitrary-code, instant revocation or unattended reboot/logout guarantee is claimed.
+6. **Data/UX scope:** registry status and stored route intent are not live process/reachability probes; per-page sorting is explicit; polling applies only to selected available package views. Unknown totals/health remain unavailable rather than fabricated. Build/restart refreshes static Gateway assets; Vite remains development-only.
+
+## Exact next task and safe resume commands
+
+Read AGENTS/current PROGRESS/M8 plan/relevant requirements; inspect actual source/tests/storage/config before relying on records. Preserve M7 IN PROGRESS/source builds disabled. Resolve M8's approved browser authentication/session/CSRF/transport/management-origin design and permitted real-browser verification method before enabling private features or claiming completion. Do not start M9 or weaken any security policy. With policy unchanged, retain disabled browser management and accurate IN PROGRESS status.
+
+```powershell
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8 -TotalCount 220
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+Get-Content -LiteralPath DASHBOARD.md -Encoding UTF8
+git status --short
+npm.cmd run doctor
+npm.cmd run test:dashboard
+npm.cmd run test:gateway
+npm.cmd run verify
+```
+
+Tests create owned fresh SQLite registries. Do not migrate actual user data merely to resume checks; M8 adds no migration. After existing authorized development registry setup, npm.cmd run build / npm.cmd run start:local serves http://127.0.0.1:5050/admin/ and Vite 5173/admin/, public health only. Stop with Ctrl+C. Do not seed actual credentials or enable execution automatically.
+
+For the explicitly authorized progress-only delivery:
+
+```powershell
+git diff --check
+git add PROJECT_REQUIREMENTS.md AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md
+git diff --cached --name-only
+git commit -m "Record M8 dashboard and browser authentication limitation"
+git push origin main
+git ls-remote origin refs/heads/main
+git rev-parse HEAD
+```
+
+Require staged/committed paths to be exactly the four named records and compare remote main with HEAD. Final handoff confirms push identity/result; no source/data/credentials/artifact is included. Complete earlier progress/intermediate failures are preserved below as history; obsolete statuses/waits do not override this snapshot.
+
+## Preserved progress history
+
+The complete prior record, including intermediate M8 work and all earlier sessions, follows as history. Its obsolete milestones/waits/results do not override the current snapshot.
+
+``````````````text
+# Project Progress
+
+## Active M8 session — 2026-10-27
+
+Expanded dashboard tests passed 27/27 without act warnings, Gateway 113/113, and the first complete verify gate passed 450 checks plus real /admin/ bundle/CSP/public-health/browser-origin-rejection smoke and cleanup. Final accessibility review found skip-link hash navigation resetting the page; corrected to focus current main content and added a dedicated check. Final rerun is pending; do not infer browser authentication or visual acceptance from those results. M7/M8 remain IN PROGRESS.
+
+The latest user instruction assigns M8 only, superseding the M7 wait. Read AGENTS/progress/M8 plan and dashboard/security requirements, inspected existing React/Vite/Tailwind shell and API contracts. M7 remains IN PROGRESS with source builds disabled. Confirmed the existing M11 native-client guard rejects browser Origin/Fetch Metadata; there is no approved browser session transport. Do not strip headers, expose/paste native tokens, enable CORS or invent a credential bridge. Proceed with real responsive components, safe public health and contract/owned-native-client verification, keeping browser management disabled and M8 unfinished. Starting baseline c553e01, 418 passing checks; implementation and tests remain local and only four records may be pushed.
+
+Implemented responsive React/Tailwind dashboard, local shadcn-style primitives/Lucide, guarded application/package/approval/routing/audit views and explicit blocked browser authentication. Added optional fixed /admin/ static hosting and fixed public health projection to Gateway; no protected API relay or API guard change. First TS build found unused type/unknown JSX conditions, corrected. First DOM/native-client test run 20/23 passed: one async navigation assertion and two feedback losses during parent refresh. Fixed test timing and retained only same-user/request-identity data during refresh, with stale-response cancellation. Focused rerun 23/23 and Gateway 113/113 passed. Added further login/revocation/stale-response/route tests and production-host smoke assertions; not yet claiming those or full regression. No browser binary launched; DOM/CSS checks do not prove pixel layout. M8 and M7 remain IN PROGRESS.
+
+**Updated:** 2026-10-27 (Asia/Bangkok)
+
+## Current milestone and handoff
+
 - **Current milestone:** M7 — ZIP Upload and Approved Source Builds, **IN PROGRESS**. The latest attached request authorized M7 after M11; earlier instructions to wait are historical.
 - **Completed milestones:** M1–M6 and M11 remain COMPLETED. Their full regression passed alongside M7.
 - **Last completed task:** Implemented and verified the secure trusted-prebuilt upload/review/preparation/runtime/routing workflow; completed full build/check/test/smoke and operating documentation.
@@ -1943,3 +2109,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 ```````````
 ````````````
 `````````````
+``````````````

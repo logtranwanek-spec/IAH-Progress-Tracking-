@@ -157,3 +157,11 @@ Do not commit any source code or other project files into this progress reposito
 - Source builds remain disabled unless an explicitly reviewed safe build boundary is established; no uploaded scripts/npm installs/shell/build commands are authorized. Same-user processes are not a sandbox.
 - Only exact-fingerprint, distinct-Administrator-reviewed trusted prebuilt releases may enter the controlled Agent workflow. Recheck approval, current user authority and hashes before promotion/start; preserve M5 ownership/loopback and M6 validation.
 - If safe source builds/execution cannot be implemented, record the exact limitation and leave M7 IN PROGRESS or BLOCKED as appropriate; do not weaken acceptance or invent verification. Update/push only the four records and verify origin/main.
+
+## M8 dashboard assignment
+
+- The latest user request authorizes M8 despite unfinished M7; this supersedes older wait instructions. Preserve M7 IN PROGRESS and its source-build/isolation dependency. Do not start M9 or any other milestone.
+- Build the responsive React dashboard against existing API contracts. Preserve M11 Origin/Fetch Metadata/session/ownership controls; never strip browser security headers, proxy native credentials, paste tokens into the browser or enable CORS as a workaround.
+- If approved browser authentication is unavailable, disable affected login/management functionality explicitly and keep M8 IN PROGRESS/BLOCKED. Tests with owned fixtures or native clients are not evidence of approved browser authentication.
+- Do not invent runtime metrics/history endpoints or M9 monitoring. Show only available registry/package/route/audit evidence; label unavailable capabilities accurately.
+- Keep real listeners loopback-only, managed .NET verification/publish policy, SQLite-only operations and four-document-only progress delivery. Run the full regression and verify origin/main after pushing.
