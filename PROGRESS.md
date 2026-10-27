@@ -2,6 +2,164 @@
 
 **Updated:** 2026-10-27 (Asia/Bangkok)
 
+## Current milestone and handoff
+
+- **Last completed milestone:** M4 — Platform API and Database, **COMPLETED under the authoritative SQLite-only policy**.
+- **Previously completed:** M1–M3 remain COMPLETED; regression checks passed.
+- **First unfinished milestone:** M5 — Deployment Engine, NOT STARTED. **Do not start M5 in this session.**
+- **Last completed task:** Removed prohibited external-engine execution paths/dependencies/fixtures, verified SQLite/reference/policy behavior, and passed the full regression.
+- **Final gate:** `npm.cmd run verify` exited 0: **259 passing automated checks**, zero failures/skips, plus real platform smoke.
+- **Blockers:** None for the revised M4 scope. External-engine connectivity is an accepted policy gap, not a pending dependency or task.
+- **Git scope:** Only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md, PROGRESS.md may be committed/pushed to `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git` on main. Implementation/additional docs/binaries remain local and untracked; a fresh progress-repository clone cannot run the implementation.
+
+## Authoritative policy and accepted verification gap
+
+**Only SQLite is supported and allowed for real database operations on this machine.** The latest user clarification supersedes the previous M4 blocker and instructions to obtain/test SQL Server, PostgreSQL, or MySQL instances.
+
+SQL Server/PostgreSQL/MySQL remain supported **only as connection-reference metadata type labels** with protected registration, read, update and application assignment APIs. Their real operational drivers, connectivity, authentication, TLS/certificate checks and protocol fixtures are not supported or implemented in the current execution path. Do not install or connect to these engines, even on loopback. Do not claim real authentication or query evidence. No environment flag enables those operations.
+
+The missing real connectivity verification is explicitly **accepted by the user as a company-policy gap** and excluded from M4 completion criteria. M4 completion records the adjusted scope, not a claim that prohibited tests passed. Earlier failed-connection/protocol evidence remains historical below and must never be replayed under current policy.
+
+For an existing valid reference, POST /_platform/api/database-connections/:id/test returns controlled **403 database_connectivity_disabled_by_policy** after SQLite metadata validation only. It does not load credentials, import a database driver, open a database socket, emit connection-success/failure audit claims, or return a reachable value. Invalid/missing reference IDs still return 400/404.
+
+## Features verified and acceptance evidence
+
+| Revised M4 criterion                 | Actual evidence                                                                                                                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Native-free Prisma + real SQLite     | PASS: pinned Prisma 7.10.1 WASM validation/generation and real JS/WASM client on node:sqlite; 11 normalized models                                                             |
+| Fresh/versioned registry migrations  | PASS: reviewed SQL, checksum history, FK/type/model parity, indexes/constraints, idempotent reapply, rollback and changed-history rejection                                    |
+| Registry CRUD foundations            | PASS: real NestJS create/read/update, safe duplicate/reserved/path/input validation, pagination/filter/search and concurrent write/audit atomicity                             |
+| Reference metadata retained          | PASS: all three external-engine labels register/read/update/assign using SQLite and protected DPAPI references; assignment idempotent; schema/migration unchanged              |
+| SQLite-only enforcement              | PASS: three HTTP policy-denial checks return 403 with zero credential loads and no reachability payload; reference ID checks use only SQLite                                   |
+| Credentials protected/omitted        | PASS: real published-DLL DPAPI round trips, tampering/reference-swap rejection, rotation/concurrent cleanup, post-restart decryption, raw DB/HTTP/log redaction                |
+| Errors/logs/OpenAPI/guards           | PASS: safe problem responses with trace IDs, structured logs, strict body/query validation, docs describe policy denial with no success response; management defaults disabled |
+| Destructive/deployment boundary      | PASS: local operator capability required; DELETE disabled; deployment/start/stop/restart/rollback endpoints absent                                                             |
+| Windows/loopback/no-.exe constraints | PASS: Administrator=False; only loopback platform/sample/API listeners; all seven publish roots scanned with no .exe; .NET launched only as published DLLs                     |
+| External-engine real connectivity    | ACCEPTED POLICY GAP: no real connect/protocol/authentication test was executed in this completion session; this capability is prohibited and not claimed                       |
+
+SQLite registry health performs a real local query. Real migrations, persistence, dates/booleans/bytes/relations, FKs, unique slugs, runtime/route data constraints and concurrent transactions remain verified. There was no new data migration because the schema already uses SQLite; metadata type labels/fields and existing constraints remain intact.
+
+## Changes made in the SQLite-only completion session
+
+- Removed `src/Api/src/connectivity.ts` and its obsolete compiled `dist/connectivity.js` / map.
+- Removed pg/mysql2/tedious/@types/pg as **direct API dependencies** and the now-unused Azure MSAL override; npm updated the lockfile. Prisma tooling may retain unused transitive libraries; none grants operational support or is imported as an external-engine execution path.
+- Replaced Registry.testConnection with a metadata-only lookup and an unconditional policy rejection for an existing reference; no secret load or socket code.
+- Updated controller/OpenAPI descriptions to SQLite-only operation and explicit 403; removed its successful-connectivity response.
+- Removed all external database rejection/stall TCP fixtures from the executable test suite **before running tests**. Replaced them with policy-denial/no-vault-load and ID-validation tests. SQLite/reference/DPAPI tests remain real operations.
+- Verified source search has no pg/mysql2/tedious/testConnectivity/protocol-fixture imports/usages in API source/test/package declarations; obsolete connectivity source and compiled JS are absent.
+- Updated permanent AGENTS policy, authoritative requirements, roadmap acceptance/status, current progress, API/architecture/security docs and historical-evidence banner.
+- No M5 implementation, database server installation, external-engine connection attempt, corporate-network deployment, production access, existing-application modification or Windows security-setting change.
+
+## Actual commands and results
+
+| Command/check                                                                                        | Result                                                                                                      |
+| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `npm.cmd uninstall --ignore-scripts --workspace @ihp/api pg mysql2 tedious @types/pg`                | Exit 0; 78 packages removed; zero reported vulnerabilities                                                  |
+| Exact project-owned obsolete connectivity JS/map removal                                             | Completed; subsequent Test-Path checks returned False for source and compiled JS                            |
+| `npm.cmd run build --workspace @ihp/api`                                                             | Exit 0: guarded WASM validation of 11 models, native-free TypeScript client generation, strict compilation  |
+| `npm.cmd run test --workspace @ihp/api`                                                              | Exit 0: **33 HTTP/reference/policy + 13 guarded SQLite** checks passed                                      |
+| `npm.cmd run format`                                                                                 | Exit 0                                                                                                      |
+| `npm.cmd run verify`                                                                                 | **Exit 0; 259 checks plus platform smoke**                                                                  |
+| `npm.cmd audit --json`                                                                               | Exit 0; zero vulnerabilities                                                                                |
+| `npm.cmd config get ignore-scripts`                                                                  | true                                                                                                        |
+| Current Windows principal role check                                                                 | Administrator=False                                                                                         |
+| Source/test/dependency search and artifact existence checks                                          | No external-driver/protocol-fixture usages in the API paths; deleted connectivity source/compiled JS absent |
+| `node src/Api/tools/database.mjs migrate` with isolated temporary IHP_STORAGE_ROOT/IHP_DATABASE_PATH | Exit 0; fresh owned SQLite registry applied/verified                                                        |
+| `node src/Api/tools/database.mjs status` against that registry                                       | Exit 0; migration history current                                                                           |
+
+The extra CLI checks used a new user-profile directory, not the actual platform registry. An initial command including recursive fixture cleanup was rejected by automatic approval review **before execution**, with stated reason only “blocked by policy.” A safer command omitted recursive cleanup and successfully ran migrate/status. The resulting schema-only verification artifact is intentionally retained at:
+
+```text
+C:\Users\logtran\IhpM4SqliteCli-80e764c42d904a95b3d9a1873e7b5617\registry\platform.db
+```
+
+No credentials, actual application records, or persistent environment/config changes were introduced by that retained CLI fixture. Its environment overrides existed only in that command's shell. No system security control or approval mechanism was bypassed.
+
+## Final automated evidence
+
+| Suite                                          | Passed  | Failed/skipped |
+| ---------------------------------------------- | ------- | -------------- |
+| Node foundation/lifecycle/sample configuration | 25      | 0              |
+| API HTTP/reference/policy/DPAPI                | 33      | 0              |
+| Guarded Prisma/SQLite/migration                | 13      | 0              |
+| Managed Foundation                             | 27      | 0              |
+| Managed Gateway                                | 79      | 0              |
+| Managed Samples                                | 82      | 0              |
+| Total registered checks                        | **259** | **0**          |
+
+**The total remains 259 because forbidden protocol cases were replaced with policy-denial/ID checks. This is new SQLite-only verification, not a replay of the former driver tests.** Prohibited external-engine authentication/TLS/query checks are outside the accepted scope and were not executed or represented as passing.
+
+The 33 HTTP checks cover real registry operations, capabilities/default deny, reserved/duplicate/malformed input, pagination/search/filtering, atomic concurrent creates, safe errors/body limits, OpenAPI/Swagger, all three reference labels, DPAPI tamper/swap/rotation/concurrent cleanup, policy denial before vault loads, redaction, missing IDs and actual API restart persistence.
+
+The 13 guarded SQLite checks cover native-process rejection, 11-model/table scalar/type/FK parity, fresh/idempotent migrations, real Prisma scalar/relationship mapping, P2002/P2003, reserved-route/runtime constraints, rollback, active-port uniqueness, concurrent transaction isolation, changed migration checksums, failed-DDL rollback and unsafe/uninitialized storage.
+
+Additional successful smoke: controlled fresh SQLite migration in smoke-owned temporary storage; published Gateway JSON logs; real registry/API/React responses; only 127.0.0.1 on ports 5050/5065/5173; four owned platform processes exited 0; sockets released; smoke temporary storage removed. Managed sample checks also verified concurrent Node/.NET loopback processes on 6411/6421, prefix routing, exit 0 and port release.
+
+All seven .NET publish roots passed no-.exe scans: Gateway, DeploymentAgent, Foundation.Tests, Gateway.Tests, DemoDotnet, CredentialProtection, Samples.Tests. The build uses UseAppHost=false and launches published DLLs through dotnet. No VSTest, apphost, testhost, dotnet run/test, Docker, elevation or policy workaround was used. Prettier, TypeScript and solution dotnet format checks passed. Testing uses the installed Windows x64 / Node 26.12.1 / npm 11.20.0 / SDK 8.0.425 / ASP.NET/.NET 8.0.31 environment.
+
+## Files changed
+
+**Only files authorized for commit/push:** PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md, PROGRESS.md.
+
+**Modified local implementation/support:** src/Api/src/registry.ts, src/Api/src/controllers.ts, src/Api/src/app.ts, src/Api/test/api.test.mjs, src/Api/package.json, package.json, package-lock.json.
+
+**Removed local implementation/build files:** src/Api/src/connectivity.ts and obsolete src/Api/dist/connectivity.js / connectivity.js.map.
+
+**Modified local documentation:** API.md, ARCHITECTURE.md, SECURITY.md, README.md, docs/verification/M4-2026-10-27.md (historical banner).
+
+**New local evidence:** docs/verification/M4-SQLite-only-2026-10-27.md.
+
+Existing schema/migration, sample applications, Gateway/Agent/dashboard source, published-DLL policy and operating-system settings were not changed. Generated build output remains local/ignored. Implementation is deliberately not committed to the four-document progress repository.
+
+## Decisions, failures and limitations
+
+- M4 completion follows the user's explicit revised SQLite-only acceptance scope. The accepted external-engine gap is caused by company policy, not an unresolved software defect or need for IT/server approval. Do not seek servers or replay old protocol tests.
+- No implementation build/test failed in this completion session. The separately rejected CLI cleanup command was handled through the safer retained-fixture approach above; no rejected action was counted as executed.
+- Metadata support for SQL Server/PostgreSQL/MySQL is **not operational database support**. The current test endpoint never reports reachability.
+- Prisma remains pinned and native-free using internal WASM/generator APIs and the published CommonJS generator entry. The reviewed Node migration runner is not native Prisma Migrate; automatic diff/shadow/history/drift-repair features remain unsupported. No different ORM was substituted.
+- DPAPI CurrentUser is at-rest identity protection, not isolation from same-user code. Crash-time orphan reconciliation, identity/profile backup/recovery, full authentication/RBAC and production hardening remain later scope.
+- Exact Node 24 and interactive manual Ctrl+C remain prior documented unverified limits. Real supervised clean shutdown and current installed-runtime checks pass.
+- No current M4 blocker remains. M5–M12 are NOT STARTED.
+
+## Exact next recommended task
+
+Provide this M4 completion handoff and **wait for separate authorization before M5**. Do not implement the Deployment Engine now. At the next authorized session, read AGENTS/current progress/the applicable milestone, consult current SQLite-only requirements, inspect repository state, and resume only authorized unfinished work. Never infer permission to add external database operations from the retained metadata models.
+
+Safe verification/resume commands (not authorization to start M5):
+
+```powershell
+git status --short --branch
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+npm.cmd run build
+npm.cmd run test --workspace @ihp/api
+npm.cmd run verify
+```
+
+Use npm.cmd ci --ignore-scripts if restore is necessary. For explicitly initializing only the platform-owned SQLite registry after build, db:migrate/db:status remain separate controlled steps documented in local API.md. Do not run bare Prisma CLI/Migrate or any SQL Server/PostgreSQL/MySQL install/connection/authentication/protocol command.
+
+## Progress repository synchronization
+
+Stage/commit/push only the four named Markdown paths; inspect exact staged and commit/tree paths, then compare remote main with local HEAD. The final handoff supplies the commit receipt. Source/extra docs remain local. Current M4 completion and the accepted policy gap supersede previous BLOCKED/obtain-server instructions.
+
+## Preserved previous records
+
+All previous progress, intermediate SQLite-only work, earlier M4 evidence/blocker decisions and M1–M3 history are retained below as historical text. Earlier external-driver tests preceded the current policy clarification and are no longer authorized. Their commands/statuses must not override the current policy or be replayed.
+
+`````````text
+# Project Progress
+
+## Active SQLite-only M4 completion — 2026-10-27
+
+The latest explicit user policy supersedes the prior M4 blocker: **only SQLite is allowed for real operations**. External-engine references remain metadata-only; SQL Server/PostgreSQL/MySQL installation, connectivity, and protocol-fixture checks are prohibited. Their live verification is an accepted policy gap. Read the four records and inspected actual sources; found operational drivers and earlier fixture tests that must be removed/disabled before any verification is rerun. No network or external-engine test has run in this completion session. Next: remove the execution path/dependencies, verify explicit policy rejection and unchanged SQLite/reference behavior, then mark M4 COMPLETED. M5 remains unauthorized/not started.
+
+Implementation adjustment: removed connectivity.ts and obsolete compiled connectivity.js/map, removed pg/mysql2/tedious/@types/pg as direct API dependencies plus the unused Azure override using npm.cmd uninstall --ignore-scripts (exit 0; 78 packages removed; audit zero). The compatibility test endpoint now validates only stored SQLite metadata and throws 403 database_connectivity_disabled_by_policy without loading credentials or importing drivers. Removed all protocol rejection/stall fixtures before tests run; replaced them with policy-denial/no-credential-load and reference-ID checks. Swagger now describes SQLite-only operation and no successful-connectivity response. Reference schema/migration and registration/read/update/assignment/vault capabilities are retained. These revisions await build/tests; no new completion claim yet.
+
+Targeted gate: npm.cmd run build --workspace @ihp/api exited 0; npm.cmd run test --workspace @ihp/api exited 0 with 33 HTTP/policy checks and 13 guarded SQLite checks. All three external-engine labels were tested only as metadata references and controlled 403 policy denials; vault load counts stayed zero for these requests, no reachability payload was returned, and no protocol fixture ran. SQLite migrations/constraints/transactions and DPAPI rotation/restart/redaction checks still pass. Updated the operational docs to remove instructions for forbidden tests. Next: format and full regression, then record M4 completion under the revised criteria.
+
+**Updated:** 2026-10-27 (Asia/Bangkok)
+
 ## Current milestone and session handoff
 
 - **Current/first unfinished milestone:** M4 — Platform API and Database, **BLOCKED** on one external verification dependency: successful authenticated SQL Server/PostgreSQL/MySQL connectivity.
@@ -1042,3 +1200,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 </details>
 ```````
 ````````
+`````````

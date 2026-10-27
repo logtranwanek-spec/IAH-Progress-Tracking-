@@ -30,6 +30,10 @@ After completed M1–M3, implement M4 only: NestJS Platform API, normalized SQLi
 
 The user confirmed on 2026-10-27 that no approved local SQL Server/PostgreSQL/MySQL test instances are available. Document successful authenticated connectivity as unverified; do not install servers or contact corporate databases to fill that gap.
 
+## Authoritative SQLite-only policy clarification — 2026-10-27
+
+Only SQLite is allowed and available for real database operations on this machine. Do not install, connect to, or perform real connectivity tests against SQL Server, PostgreSQL, or MySQL, including local test fixtures that exercise their protocols. Keep their connection-reference data models and registration/read/update/assignment APIs as metadata-only capabilities; do not implement or claim real authenticated connectivity for those engines. Their connectivity verification is an **accepted gap caused by company policy**, not a blocker or an outstanding M4 acceptance requirement. Finish the remaining SQLite-only M4 work, verify the revised behavior, and mark M4 COMPLETED. Do not start M5. This clarification supersedes earlier requirements/instructions to enable or verify SQL Server/PostgreSQL/MySQL connections. All no-.exe, published-DLL, loopback, no-Administrator/Docker, credential protection, and four-document-only commit/push restrictions remain in force.
+
 ---
 
 # 1. PROJECT OVERVIEW
