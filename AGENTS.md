@@ -129,3 +129,12 @@ Do not commit any source code or other project files into this progress reposito
 - Use SQLite for persistent leases, intent, instances, exits and recovery budgets. Keep schema changes in reviewed explicit migrations. Never contact other database engines.
 - Serialize Agent ownership and per-application operations, verify PID/start identity and listeners, and never terminate an unrelated port occupant or process discovered only by PID. Recovery must be bounded and persisted across Agent restarts.
 - Preserve the API deployment prohibition until M11; M5 control is restricted to the trusted local operator/verification boundary. Do not expose Agent HTTP/network control.
+
+## M6 dynamic routing rules
+
+- The user now authorizes M6 only, superseding the previous session's wait for M6. Do not start M7 or later milestones.
+- Preserve the M2 validator, static startup source, fixed 127.0.0.1:5050 listener, request limits and reserved paths. Runtime changes must be complete immutable validated snapshots with last-known-good retention on rejection.
+- Load dynamic routes through a fixed loopback API endpoint and a separate read-only routing capability. Never accept arbitrary destination URLs/ports from route-management clients; derive destinations from approved running M5 registry state.
+- Route-intent changes require the existing local operator capability. This is not M11 user authorization; application deletion and deployment/process execution APIs remain disabled.
+- Verify real add/update/remove, both trusted samples, WebSockets, invalid snapshots, unchanged Gateway process and restart reconciliation using published managed DLLs. Stop only owned fixtures and preserve progress history.
+- Use npm.cmd run test:routing for the dedicated managed Gateway/integration gate and npm.cmd run verify for the full regression. Consult local DYNAMIC_ROUTING.md for protocol/capability configuration and stale-source/isolation limits.

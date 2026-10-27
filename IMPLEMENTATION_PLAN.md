@@ -317,43 +317,62 @@ dotnet .\artifacts\publish\DeploymentAgent.Tests\DeploymentAgent.Tests.dll
 
 **Limits and decisions:** Trusted reviewed single-process loopback-v1 releases only; no shell/npm build/upload execution, injected platform credentials, Agent HTTP API, dynamic routing or later-milestone implementation. Jobs/environment checks are not same-user or network isolation. A small Process.Start-to-job-assignment window remains; no atomic suspended launch or orphan-proof guarantee. Hard-kill testing observes cleanup under the job/EOF contract; it does not distinguish which wins that race. Unknown prior exits remain null. Redaction is best-effort; unlabelled secrets can leak if trusted apps log them. No unattended reboot/logout startup, identity isolation, comprehensive crash recovery, exact Node 24 or manual Ctrl+C verification is claimed. Full detail/history is in PROGRESS.md and local DEPLOYMENT_ENGINE.md/docs/verification/M5-2026-10-27.md.
 
-**Next milestone:** M6 — Dynamic Routing, NOT STARTED. Wait for separate authorization; do not begin it in this M5 session.
+**Historical M5 handoff:** M6 was deferred for separate authorization. The subsequent user instruction and verified M6 completion below supersede that session-specific wait.
 
 ### M6 — Dynamic Routing
 
-**Objective:** Connect approved application routes to YARP at runtime without restarting the gateway.
+**Objective:** Connect approved application routes in SQLite to YARP at runtime without restarting the Gateway, preserving M2's static/security boundary.
 
-**Tasks:**
+**Tasks — implemented and verified:**
 
-- Implement a YARP dynamic configuration provider fed by a controlled internal API/configuration-change mechanism.
-- Load and validate route changes from the application registry; reject reserved/conflicting paths and non-loopback or unapproved destinations.
-- Support route add, update, removal, and deployment replacement while retaining the last known good configuration on invalid updates.
-- Verify prefix behavior, redirects/static assets where supported, WebSockets, gateway restart, and route reconciliation.
-- Keep the route-provider boundary extensible for future hostname-based routing without making it part of the initial release.
-- Provide a route smoke test for both sample applications.
+- Immutable validated static-plus-registry snapshots, atomic replacement and one-shot change tokens; unchanged snapshots do not reload and rejected candidates preserve the exact last known good configuration.
+- Fixed loopback API polling with a separate read-only routing capability, strict versioned/nonduplicate JSON, streaming size/depth/header/timeout budgets, no redirect/proxy/cookie use and safe structured state logs.
+- Operator-protected route-intent read/publish/update/remove with atomic audits; no caller-supplied destination. Projection follows selected reviewed M5 RUNNING release/instance/app/session/lease state and matching basePath.
+- M2 validation/reserved paths and static source retained; configured/narrowed ports plus absolute 6100–6999 boundary; duplicate/static collisions and arbitrary destinations rejected.
+- Runtime/release replacement and stopped-state reconciliation; Gateway/API restart recovery; static-only compatibility and source-failure retention.
+- Prefix/assets/redirects/cookies and existing/new WebSockets verified. Path-only route boundary remains separate from future hostname support.
+- Managed Gateway and Platform.Integration.Tests verification, safe owned fixtures and operator/trust documentation in local DYNAMIC_ROUTING.md.
 
-**Dependencies:** M2, M3, M4, and the route/port contract from M5.
+**Dependencies:** M2–M5, all satisfied. M11 remains required before ordinary-user/unreviewed deployment or process execution APIs.
 
-**Acceptance criteria:**
+**Acceptance evidence (2026-10-27):**
 
-- A route can be added, updated, and removed without restarting the gateway.
-- Node.js and ASP.NET Core samples are reachable simultaneously through distinct paths on port 5050.
-- Invalid paths, reserved paths, conflicts, and arbitrary proxy destinations are rejected.
-- A failed update does not replace the last known good route configuration.
-- Route state can be reconciled after gateway restart.
+| Criterion                                            | Actual result                                                                                                                                                                    |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Live add/update/remove                               | PASS: real API intent and live provider changes; published Gateway PID/start ticks unchanged during operations                                                                   |
+| Both samples on port 5050                            | PASS: reviewed Node/ASP.NET Core sample copies simultaneously healthy through distinct /demo-node and /demo-dotnet prefixes                                                      |
+| Release/destination update                           | PASS: reviewed v2 Node replacement skips an occupied old port; new release/build/port is served through the same Gateway                                                         |
+| Invalid/reserved/conflicting/arbitrary routes reject | PASS: M2 regression, operator-input and combined/static validation; malformed/unauthorized/redirect/oversized/timeout source tests                                               |
+| Failed update retains last good                      | PASS: exact snapshot/token identity retained, live proxy stays usable, redirect trap receives zero calls; valid source recovery applies                                          |
+| Restart reconciliation                               | PASS: deliberate published Gateway restart reloads persisted SQLite routes; API restart/removal reaches unchanged Gateway; stopped runtime withdraws/resumes                     |
+| Static and WebSocket compatibility                   | PASS: static-only mode/source retained; existing socket survives changes/removal; new post-update socket negotiates/echoes/closes; preserved-prefix asset/redirect/cookie checks |
 
-**Verification commands (planned):**
+**Verification commands (implemented):**
 
 ```powershell
-dotnet publish .\tests\Gateway.Tests\Gateway.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\Gateway.Tests\bin\Release\net8.0\publish\Gateway.Tests.dll
-dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
-Invoke-WebRequest http://127.0.0.1:5050/demo-node/
-Invoke-WebRequest http://127.0.0.1:5050/demo-dotnet/
+npm.cmd run test:routing
+npm.cmd run test --workspace @ihp/api
+npm.cmd run verify
+npm.cmd run doctor
+npm.cmd audit --json
 ```
 
-**Status:** NOT STARTED
+test:routing builds the guarded API, publishes/runs Gateway.Tests, then publishes Gateway/Agent/DemoDotnet/trusted fixture/Platform.Integration.Tests and runs the managed integration DLL. All .NET publishes use UseAppHost=false. For manual integration execution after its prerequisites:
+
+```powershell
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/Platform.Integration.Tests/
+dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests.dll
+```
+
+**Status:** COMPLETED
+
+**Final results:** npm.cmd run verify exited 0: **340 passing checks**, zero failures/skips — 25 Node foundation/sample, 44 API/reference/policy/routing, 13 guarded SQLite, 27 Foundation, **108 Gateway**, 82 Samples, 27 Agent and **14 managed routing integration**. Real platform smoke, all ten no-.exe publish scans, build/type/format/solution checks, doctor and npm audit passed. Audit reports zero vulnerabilities; Administrator=False. Evidence is in PROGRESS.md, local docs/verification/M6-2026-10-27.md and artifacts/m6-verify.log.
+
+**Storage and authorization:** Uses the existing 15 models/two reviewed migrations; no schema/migration/dependency/server was added. Only SQLite performs real operations; the external-engine accepted gap is unchanged. API deployment/process/application-deletion remains disabled. M6 permits only local capability-protected route-intent removal, not application destruction or ordinary-user execution.
+
+**Operational limits:** Opt-in polling/eventual activation; a successful PUT stores intent rather than acknowledging Gateway activation. Static collisions reject at the Gateway and require operator correction. Failed/offline feeds retain last accepted in-memory destinations, which can become stale; no offline revocation or independent API OS ownership authority is claimed. Fresh Gateway startup loads static routes only until the API responds. Registry projection trusts M5 state and same-user operator discipline. Existing WebSockets keep their old selected connection. No arbitrary upload/build, zero-downtime/rollback orchestration, hostname routing, login/RBAC, sandbox, unattended startup or corporate-network access is implemented.
+
+**Next milestone:** M7 — ZIP Upload and Approved Source Builds, NOT STARTED. Wait for a new user instruction and review its M11/approval/isolation dependencies before proceeding.
 
 ### M7 — ZIP Upload and Approved Source Builds
 
@@ -582,4 +601,4 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
-M1–M5 are `COMPLETED`; M4's SQLite-only policy/accepted gap remain in force. M6–M12 remain `NOT STARTED`. Do not begin M6 in this session. Future .NET checks must be published managed DLL programs; later milestone commands remain planned until those projects exist. Change a status only with matching verified evidence and current policy.
+M1–M6 are `COMPLETED`; M4's SQLite-only policy/accepted gap remain in force. M7–M12 remain `NOT STARTED`. Do not begin M7 or later milestones in this session. Future .NET checks must be published managed DLL programs; later milestone commands remain planned until those projects exist. Change a status only with matching verified evidence and current policy.

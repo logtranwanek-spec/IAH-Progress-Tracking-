@@ -4,6 +4,186 @@
 
 ## Current milestone and handoff
 
+- **Current/last completed milestone:** M6 — Dynamic Routing, **COMPLETED**. Its acceptance criteria passed the final implementation gate below.
+- **Previously completed:** M1–M5 remain COMPLETED; full regression passed.
+- **First unfinished milestone:** M7 — ZIP Upload and Approved Source Builds, **NOT STARTED**. Do not start M7 or any later milestone without a new user instruction. Its existing M11/security dependencies remain relevant.
+- **Last completed task:** Implemented validated live Gateway snapshots, local API/SQLite route intent/feed, managed end-to-end verification and operator/security documentation; passed final build/check/test/smoke.
+- **Final verification:** `npm.cmd run verify` exited 0: **340 passing checks**, zero failures/skips, plus real platform smoke.
+- **Blockers:** None for approved M6. Read-only feed availability/staleness and existing trusted-process isolation limits remain documented.
+- **Progress Git scope:** ONLY PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md may be committed/pushed to `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git` on main. Source, tests, extra docs, lockfiles and artifacts remain local/untracked. A progress-only clone cannot run the implementation.
+- **History:** All prior work, including intermediate M6 gates, is preserved in the fenced historical section below. Superseded statuses/wait instructions and old prohibited external-engine experiments are historical, never current instructions.
+
+## Mandatory policy retained
+
+**Only SQLite is supported and allowed for real database operations.** SQL Server/PostgreSQL/MySQL remain protected connection-reference metadata labels/APIs only. Their installation, operational connections and real protocol/authentication tests are prohibited. Missing real connectivity evidence remains the user-accepted company-policy gap. No such operation or test ran in M6.
+
+.NET components/verifiers are published framework-dependent with `UseAppHost=false` and executed only as `dotnet <published>.dll`. No application apphost/.exe artifact, VSTest/testhost, native Prisma engine or database server was run. The established installed node/dotnet/git/npm.cmd CLI-host convention remains. Dependency lifecycle scripts stay disabled; Prisma validation/generation uses the guarded JS/WASM path, and migrations stay explicit reviewed Node/SQLite steps.
+
+All real platform/sample/verification listeners bind only 127.0.0.1. Gateway remains exclusively **127.0.0.1:5050**. No Docker, elevation, Windows security change, production access, corporate-network listening/deployment or existing-application modification occurred. Original DemoNode/DemoDotnet sources remain unchanged; tests stage owned trusted copies.
+
+## Features implemented
+
+- **Atomic dynamic provider:** ValidatedProxyConfigProvider retains the M2 static source and optionally accepts complete registry snapshots. It validates the complete combined candidate before swapping immutable route/cluster objects and signalling the previous one-shot change token. Invalid candidates leave the exact last accepted snapshot and token intact; identical configurations avoid reloads.
+- **Strict validation preserved:** Canonical path-prefix routes only; reserved segments, malformed/encoded/nested/root paths, duplicate IDs/prefixes, static collisions, unsafe hosts/schemes/URL components and component ports reject. Destinations are reconstructed as `http://127.0.0.1:<port>/` and constrained both to 6100–6999 and the configured narrower range. Widened settings cannot bypass that absolute boundary.
+- **SQLite/API intent:** Operator-protected GET/PUT/DELETE `applications/:id/route` read, create/update and remove one application's route intent. PUT accepts only publicPath, requires the selected reviewed RUNNING M5 release/instance/lease/session, and enforces matching basePath. Writes/removals and audit entries commit atomically. Application/deployment deletion and process/deployment execution APIs remain disabled.
+- **Separate read-only feed:** GET `routing/snapshot` projects approved eligible routes in one consistent Prisma/SQLite transaction. Its capability is separate from the local operator capability; neither grants the other's operations. Missing reader configuration fails closed, equal/malformed capabilities reject startup, literal-loopback peers are required and Origin headers are rejected.
+- **Controlled polling:** The production Gateway reads IHP_ROUTING_TOKEN at its entrypoint and polls only the fixed literal-loopback API snapshot path at the validated API port. Host factory calls remain static-only unless explicit routing options are supplied. No public Gateway update endpoint or arbitrary source URL exists. The launcher supplies the reader only to API/Gateway and the operator capability only to API.
+- **Runtime/release reconciliation:** Effective destinations follow the current approved M5 instance/lease instead of client input or historical routes.targetPort. Stopped/unhealthy/unowned registry state withdraws effective routes while intent persists. New approved eligible state restores them; Gateway/API restarts reconcile SQLite state without editing a route file.
+- **Proxy compatibility:** Existing prefix/header/request limits/errors/logging and platform-path protection remain. New requests use accepted updates, including WebSocket upgrades. Existing WebSockets finish on their selected connection through target/prefix/removal changes. Preserved-prefix assets, redirects and cookies were verified with a trusted fixture; the two minimal samples are not claimed to implement those extra features.
+- **Managed integration:** Platform.Integration.Tests is a published assertion DLL, not VSTest. It runs the production Node API and published Gateway against real production RuntimeEngine-controlled, reviewed sample copies and SQLite. It checks actual PID/start identity, owned sockets, v2 release/build identity, shutdown and port release.
+
+## M6 acceptance evidence
+
+| Criterion                                                 | Actual evidence                                                                                                                                                                                                    |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Add/update/remove without Gateway restart                 | PASS: managed live provider tests plus real operator API changes; published Gateway PID and start ticks remain unchanged during live operations                                                                    |
+| Node and ASP.NET samples simultaneously reachable on 5050 | PASS: real approved copies healthy through /demo-node and /demo-dotnet on distinct M5 ports; both retain release/port identity                                                                                     |
+| Dynamic destination/release update                        | PASS: stop owned Node fixture, stage/review v2, occupy its old loopback port, start v2 on a new approved lease; same Gateway serves release=v2/build=m6-v2; competing occupant remains alive                       |
+| Unsafe/duplicate/reserved routes rejected                 | PASS: M2 validator regression, API input rejection, static ID/prefix collision rejection, absolute/narrowed port boundary and actual invalid-source scenarios                                                      |
+| Last-known-good on failed update                          | PASS: rejected candidates preserve exact snapshot/token; malformed/unauthorized/redirect/oversized/timeout feeds leave the live proxy working; redirect trap receives zero requests                                |
+| Restart/reconciliation                                    | PASS: deliberate published Gateway restart reloads both SQLite routes; API interruption retains last good routes; restarted API removal reaches unchanged Gateway; stopped runtime withdraws and resumes correctly |
+| Static backward compatibility                             | PASS: static-only provider remains immutable, static-only sample regression passes, static route coexists with dynamic routes and survives valid registry removal                                                  |
+| WebSockets/prefix compatibility                           | PASS: existing socket survives target/prefix/removal updates; new socket after update negotiates subprotocol, echoes and closes; real preserved-prefix asset/redirect/cookie checks pass                           |
+| Security/execution policy                                 | PASS: Administrator=False; only literal-loopback real listeners; ten published roots scanned without .exe; managed DLL execution; no external database operation                                                   |
+
+## Actual commands and results
+
+| Command/check                                                                                                                                                                 | Result                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `npm.cmd run build --workspace @ihp/api`                                                                                                                                      | Exit 0; guarded WASM validation/generation of 15 models and strict compilation              |
+| `dotnet publish .\src\Gateway\Gateway.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/Gateway/` | Exit 0                                                                                      |
+| `npm.cmd run test --workspace @ihp/api`, first routing gate                                                                                                                   | Exit 0; 43 API/reference/routing + 13 SQLite checks at that revision                        |
+| `npm.cmd run test:gateway`, first live gate                                                                                                                                   | Exit 0; 92 checks                                                                           |
+| `npm.cmd run test:routing`, first whole-chain gate                                                                                                                            | Exit 0; 92 Gateway + 14 managed integration checks at that revision                         |
+| `npm.cmd run test:gateway`, added source-failure cases                                                                                                                        | Exit 0; 107 checks                                                                          |
+| `npm.cmd run format` and `dotnet format InternalHostingPlatform.sln --no-restore`                                                                                             | Exit 0                                                                                      |
+| `npm.cmd run verify`, final gate including later boundary/default-disabled/v2 checks                                                                                          | **Exit 0; 340 passing checks**, zero failures/skips, plus full smoke                        |
+| `npm.cmd run doctor`                                                                                                                                                          | Exit 0: Windows 22631 x64, Node 26.12.1, npm 11.20.0, SDK 8.0.425, .NET/ASP.NET Core 8.0.31 |
+| `npm.cmd audit --json`                                                                                                                                                        | Exit 0; zero vulnerabilities                                                                |
+| Current Windows principal Administrator role check                                                                                                                            | **False**                                                                                   |
+| `git diff --check`                                                                                                                                                            | Passed; documentation formatting/index checks repeated before commit                        |
+
+The final verify command was captured with PowerShell `Tee-Object -FilePath artifacts/m6-verify.log` and propagated `$LASTEXITCODE`. This local artifact is not committed. The direct dedicated-gate counts above are earlier revisions; final counts below come from the final full regression, not an invented rerun of an earlier command.
+
+No M6 application-code/build/test failure occurred. An orchestration snippet had a JavaScript syntax error before tool execution and was resubmitted correctly; an exploratory nonexistent config path was corrected to the actual package path. Neither changed application state or became a claimed test failure.
+
+### Final regression
+
+| Suite                                          |  Passed | Failed/skipped |
+| ---------------------------------------------- | ------: | -------------: |
+| Node foundation/lifecycle/sample configuration |      25 |              0 |
+| API HTTP/reference/policy/DPAPI/routing        |      44 |              0 |
+| Guarded Prisma/SQLite/migration                |      13 |              0 |
+| Managed Foundation                             |      27 |              0 |
+| Managed Gateway                                |     108 |              0 |
+| Managed Samples                                |      82 |              0 |
+| Managed Deployment Agent                       |      27 |              0 |
+| Managed routing integration                    |      14 |              0 |
+| **Total**                                      | **340** |          **0** |
+
+API routing adds 11 checks to the prior 33. Gateway adds 29 checks to the prior 79, including setup wrappers counted consistently with earlier evidence. Integration adds 14; thus the previous 286 becomes 340.
+
+All ten .NET publish roots passed no-.exe scans. Static/type/solution formatting checks passed. Separate full smoke verified reviewed SQLite migration/Agent compatibility, real API/React/Gateway responses, structured Gateway logs, 127.0.0.1 listeners on 5050/5065/5173, four owned child exit codes 0, released ports and removal of owned temporary storage. M6 integration separately verifies real v2 replacement, dynamic routes, API/Gateway restart and safe failure retention. No migration was applied to the actual platform registry during verification.
+
+## Files created or modified in M6
+
+Source and extra docs remain local/untracked by explicit progress-repository policy.
+
+**Created:**
+
+- `src/Gateway/Routing/RegistryRoutePoller.cs`.
+- `src/Api/src/routing.ts` and `src/Api/test/routing.test.mjs`.
+- `tests/Gateway.Tests/DynamicChecks.cs` and `RegistrySourceChecks.cs`.
+- `tests/Platform.Integration.Tests/Platform.Integration.Tests.csproj`, `Program.cs`, `Child.cs`, `Checks.cs` and `packages.lock.json`. The verifier links the existing owned M5 Workspace helper.
+- `DYNAMIC_ROUTING.md` and `docs/verification/M6-2026-10-27.md`.
+- Local `artifacts/m6-verify.log` from the final gate.
+
+**Modified:**
+
+- `src/Gateway/Program.cs`, `GatewayHost.cs`, `Routing/GatewayRoutes.cs` and `Routing/ValidatedProxyConfigProvider.cs`.
+- `src/Api/src/registry.ts`, `app.ts`, `controllers.ts`, `http.ts` and `src/Api/package.json`.
+- `tests/Gateway.Tests/Program.cs` and `Fixtures.cs`.
+- `tools/local.mjs`, `tools/tasks.mjs`, `tools/publish.mjs`, root `package.json` and `InternalHostingPlatform.sln`.
+- `README.md`, `GATEWAY.md`, `API.md`, `INSTALLATION.md`, `ARCHITECTURE.md` and `SECURITY.md`.
+- The four tracked records: `PROJECT_REQUIREMENTS.md`, `AGENTS.md`, `IMPLEMENTATION_PLAN.md` and `PROGRESS.md`.
+
+Build/client/publish artifacts were regenerated. Original sample sources, the Prisma schema and both reviewed migrations were unchanged. M6 uses the existing 15 models/two migrations; no database server/dependency was added.
+
+## Decisions, known issues and limits
+
+- **Opt-in trusted local control:** M6 is a local operator capability, not login/RBAC, end-user approval or authority for unreviewed code. API application deletion/deployment/runtime execution remains disabled. Agent HTTP control is absent.
+- **Polling budgets:** Defaults are implementation choices: 1-second interval, 2-second request timeout, 64-KiB streamed response, 16-KiB headers, depth 8, at most 100 combined routes. Managed source tests use shorter bounded intervals/timeouts. No arbitrary polling URL is allowed.
+- **Eventual activation:** PUT acknowledges persisted route intent, not synchronous Gateway activation. Static collisions or bad combined candidates are rejected by the Gateway and retain the whole last good configuration; the operator must correct intent/configuration and verify public health. GET intent targetPort is historical metadata; effective destinations follow M5 leases.
+- **Staleness during source failure:** Failed/offline/unauthorized refreshes retain the previous in-memory snapshot as required. Stops/removals cannot arrive while the API is unavailable; previous destinations may be stale and proxy errors may occur. No offline revocation guarantee is claimed. A fresh Gateway startup has only static routes until a valid API response; no stale dynamic disk cache is loaded.
+- **Registry trust:** Runtime eligibility is a projection of M5-maintained SQLite state, not a new OS PID/listener/health authority inside the API. Abrupt Agent death, port reuse or same-user DB/file tampering can outdate it. M5 job/EOF/PID/socket controls and trusted operator/release discipline remain mandatory.
+- **Existing connections:** Established WebSockets keep their old selected connection after updates/removal; new requests observe the new snapshot. Forced connection revocation, authenticated sessions and zero-downtime deployment/rollback orchestration are not implemented.
+- **Static routes:** Operator-reviewed static JSON is still read only at startup. Dynamic snapshots cannot overwrite/remove it. Static destinations are not M5 runtime projections; preserve review discipline. Restart is required only to change that file.
+- **Prefix support:** Matching reviewed basePath is enforced; no guessed prefix stripping or Location/cookie/body rewriting. Minimal samples expose identity/health; extra asset/redirect/cookie checks use a trusted test fixture, not invented sample features.
+- **Existing isolation gaps remain:** Same ordinary Windows identity is not a sandbox/firewall; M5 launch-to-job assignment gap, best-effort log redaction, OS SQLite servicing and no unattended logout/reboot guarantee remain. Exact Node 24/manual Ctrl+C compatibility is still unverified; current installed runtime and supervised shutdown passed.
+- **No M7+ work:** ZIP/source builds, ordinary-user execution approval/auth, dashboard management, rollback and broader hardening remain unfinished. Only SQLite real operations are allowed; the external-engine gap is accepted and must not become an instruction to install/contact those engines.
+- No known blocking defect or unresolved failing test remains in the approved M6 scope.
+
+## Exact next task and commands to resume
+
+**End this session after the M6 handoff.** On a future explicit authorization, first read M7 and its M11/approved-build/isolation dependencies before implementing ZIP/prebuilt preparation. Do not enable unreviewed upload/build/execution merely because M6 routing is complete.
+
+Every session: read AGENTS → current PROGRESS → relevant IMPLEMENTATION_PLAN/PROJECT_REQUIREMENTS, inspect actual local source and compare it to evidence. Implementation is not present in the progress-only remote; preserve this workspace or an explicitly approved source backup.
+
+```powershell
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8 -TotalCount 220
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+Get-Content -LiteralPath PROJECT_REQUIREMENTS.md -Encoding UTF8
+git status --short
+npm.cmd run doctor
+npm.cmd run build
+npm.cmd --workspace @ihp/api run db:status
+npm.cmd run test:routing
+npm.cmd run verify
+```
+
+Run `npm.cmd ci --ignore-scripts` only if restoration is needed. Use explicit `npm.cmd --workspace @ihp/api run db:migrate` if the configured local registry is absent/behind; never run automatic/uploaded migrations or native Prisma commands. Manual integration execution, after publishing its prerequisites:
+
+```powershell
+dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/Platform.Integration.Tests/
+dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests.dll
+```
+
+Consult local DYNAMIC_ROUTING.md for capability generation, route-intent commands, configuration parity, polling/recovery and limits; DEPLOYMENT_ENGINE.md for trusted M5 preparation. Never put capabilities/credentials in Git, chat, URLs or logs.
+
+Progress synchronization uses exactly the four named documents:
+
+```powershell
+git add -- PROJECT_REQUIREMENTS.md AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md
+git diff --cached --name-only
+git commit -m "Complete M6 validated dynamic routing"
+git push origin main
+git ls-remote origin refs/heads/main
+```
+
+Check staged/committed paths and verify remote main equals local HEAD. The final session handoff reports the resulting commit; source is intentionally excluded.
+
+## Preserved progress history
+
+All entries below are historical evidence, not active instructions. Earlier milestone counts/statuses and wait messages are superseded by this current snapshot and authoritative company policy.
+
+```````````text
+# Project Progress
+
+## Active M6 session — 2026-10-27
+
+M6 is IN PROGRESS under the new user authorization, superseding the M5 wait message below. Read repository instructions, current M5 evidence, M6 acceptance criteria and routing/security requirements; inspected actual Gateway provider/validator, API/SQLite schema, M5 runtime state and existing published verification. The four-document repository is clean at d38425e; implementation remains present locally. First task: preserve static routes while implementing atomic validated runtime snapshots, fixed loopback API polling with a separate read-only capability, operator-protected registry route intent derived from approved M5 runtime state, then managed real-process verification. No M7+ work, external database operation or corporate-network listening is authorized. No M6 behavior is yet marked verified.
+
+Core step: implemented opt-in immutable Gateway snapshots/change tokens and fixed loopback API polling with a separate read-only capability, strict bounded JSON/timeout/redirect policy, combined static/dynamic validation and last-known-good retention. Added operator-protected route-intent read/publish/remove and a reader-only snapshot derived from M5 reviewed running state/leases; client-supplied destinations are refused and stopped/unowned instances are excluded. API builds with 15-model guarded WASM generation; Gateway publish is being checked. No migration/schema change was needed. Next: managed real-process checks and existing regression; route behavior is not yet claimed as passing.
+
+First behavioral gates: API build and Gateway publish passed; API/reference/routing checks passed 43 plus 13 SQLite checks. Gateway managed verification passed 92 checks, including live add/target/prefix/remove, static compatibility, real assets/redirects/cookies, existing and new WebSockets, and immutable rejection. npm.cmd run test:routing then passed those 92 checks plus 14 new managed integration checks against real published Gateway, production Node API and production M5 engine/sample copies. Verified unchanged Gateway PID/start identity during live operations, real occupied-old-port runtime replacement, both samples on 5050, route removal, Gateway/API restart reconciliation, source interruption retention, stopped-runtime withdrawal, literal PID-owned loopback listeners, safe logs, exit 0 and port release. Added bounded malformed/unauthorized/redirect/oversized/timeout source tests and default-disabled reader coverage; those additions are pending the final regression. M6 remains IN PROGRESS until that gate passes. Next: operator documentation, formatting and full regression; no M7+ work.
+
+Source verification step: npm.cmd run test:gateway passed 107 checks, including 12 malformed/unsafe/unavailable source cases, actual chunked size/timeout/redirect rejection, no redirect-trap request, exact last-known-good identity and valid empty recovery preserving static routes. Added the final absolute 6100–6999 validation test (even if settings attempt to widen it), exact HTTP 200 reader requirement and consistent single-load API configuration; final full regression will include these plus the new default-disabled reader test. Created DYNAMIC_ROUTING.md and updated setup/architecture/security/API/Gateway docs. The launcher now sends routing credentials only to API/Gateway and operator credentials only to API. No code/test failure has occurred in the M6 gates so far. Next: final format/build/test/smoke gate and accurate completion evidence.
+
+**Updated:** 2026-10-27 (Asia/Bangkok)
+
+## Current milestone and handoff
+
 - **Current/last completed milestone:** M5 — Deployment Engine, **COMPLETED**. All M5 acceptance criteria have verified evidence below.
 - **Previously completed:** M1–M4 remain COMPLETED; the full regression passed with the new engine migration/schema.
 - **First unfinished milestone:** M6 — Dynamic Routing, **NOT STARTED**. Do not begin M6 or any later milestone without a new user instruction.
@@ -1397,3 +1577,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 ````````
 `````````
 ``````````
+```````````

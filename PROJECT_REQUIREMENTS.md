@@ -40,6 +40,10 @@ After completed M1–M4, implement only M5: a controlled .NET 8 process/runtime 
 
 This new M5 authorization supersedes the preceding M4 session's instruction to wait before M5. The SQLite-only policy and all security constraints remain unchanged.
 
+## Authorized M6 scope — 2026-10-27
+
+After completed M1–M5, implement M6 only: validated dynamic YARP path-prefix snapshots; live add/update/remove without Gateway restart; SQLite registry/API integration; backward-compatible static startup routes; published managed verification of changes, rejections, real proxying, WebSockets and restart reconciliation. Preserve exact loopback destinations on approved runtime ports, reserved paths, last-known-good configuration and all existing limits. Only SQLite operations, published DLL execution, ordinary-user operation and 127.0.0.1 listeners are authorized. No existing application/security changes, Docker, corporate listening or later milestone. Commit/push only the four project records. This supersedes the M5 session's wait for M6.
+
 ---
 
 # 1. PROJECT OVERVIEW
