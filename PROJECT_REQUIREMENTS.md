@@ -24,6 +24,12 @@ For M2, the Gateway must listen exclusively on `127.0.0.1:5050`. Implement the h
 
 After completed M1/M2, implement trusted minimal `samples/DemoNode` (Node.js) and `samples/DemoDotnet` (ASP.NET Core 8). Both must expose a healthy success endpoint, identify the sample and release/build in responses, bind only to `127.0.0.1` on configurable ports in `6100–6999`, run concurrently on distinct ports, and stop cleanly. Provide clear run instructions. Do not require Docker or Administrator privileges, modify existing applications/security settings, or deploy to the company network. For .NET always publish with `UseAppHost=false` and run the published DLL; prefer managed verification over VSTest/testhost. Finish and verify M3 only. Commit/push only the four named progress documents to the progress repository.
 
+## Authorized M4 scope — 2026-10-27
+
+After completed M1–M3, implement M4 only: NestJS Platform API, normalized SQLite registry with Prisma, versioned migrations/constraints, validated registry read/create/update foundations, pagination/filtering/errors/logging/OpenAPI, and protected database connection reference registration/assignment/update/connectivity checks for SQL Server/PostgreSQL/MySQL. Assess Prisma against the no-.exe policy first and document limitations; prefer Node JS/WASM or published managed DLLs. Never execute forbidden native engines or install database servers. Keep all listeners and any connectivity verification on loopback, credentials protected, destructive/deployment operations protected or disabled, and existing applications/security settings unchanged. No later milestone or corporate-network deployment is authorized. Commit/push only the four project records to the progress repository.
+
+The user confirmed on 2026-10-27 that no approved local SQL Server/PostgreSQL/MySQL test instances are available. Document successful authenticated connectivity as unverified; do not install servers or contact corporate databases to fill that gap.
+
 ---
 
 # 1. PROJECT OVERVIEW

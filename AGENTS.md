@@ -108,3 +108,15 @@ Do not commit any source code or other project files into this progress reposito
 - Samples must bind exclusively to `127.0.0.1` using validated configurable ports in `6100–6999`. Reject unsafe settings before binding. Do not modify existing applications.
 - Publish DemoDotnet and the managed Samples.Tests verifier with `UseAppHost=false`, then run their published DLLs through `dotnet`. Use Node directly for the dependency-free DemoNode sample.
 - Verify real concurrent processes, health/release identity, loopback sockets, prefix compatibility, graceful shutdown, and port release. Stop only processes owned by the verification session.
+
+## M4 database and API rules
+
+- M4 is explicitly authorized after M1–M3 completion; do not start M5 or later milestones in this session.
+- Audit Prisma dependency installation, validation, generation, migrations, and runtime separately. Disable dependency lifecycle scripts; never launch a native Prisma engine or silently substitute a different ORM.
+- Use only reviewed repository migrations as a separate controlled step, never uploaded SQL or an HTTP-triggered migration. Record any custom migration-runner limitation accurately.
+- Management operations must fail closed until explicitly configured local operator access; destructive and deployment operations stay disabled until the authorization milestone.
+- Protect database credentials using Windows-supported current-user protection; never return or log plaintext credentials, connection strings, bearer tokens, or raw driver exceptions.
+- Database connectivity verification must stay on loopback. Do not contact corporate database servers without separate explicit authorization, and do not install database servers.
+- Supported Prisma commands are the API package's prisma:validate/build scripts, which use guarded pinned WASM/internal generation. Use npm.cmd ci --ignore-scripts; preserve project .npmrc ignore-scripts=true. Do not replace them with bare Prisma CLI/Migrate or enable dependency hooks.
+- Registry migrations are explicit db:migrate/db:status steps after building, never automatic API startup. Consult local API.md for the custom Node migration runner, paths, operator capability, DPAPI identity boundary, and limitations.
+- The user confirmed no approved local SQL Server/PostgreSQL/MySQL instances are available. M4 stays open/blocked until successful authenticated SELECT 1 checks are evidenced; real rejection/timeout tests must not be reported as successful database authentication. Do not start M5 to bypass this gap.

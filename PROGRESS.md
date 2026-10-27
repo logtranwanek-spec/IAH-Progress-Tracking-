@@ -1,5 +1,217 @@
 # Project Progress
 
+**Updated:** 2026-10-27 (Asia/Bangkok)
+
+## Current milestone and session handoff
+
+- **Current/first unfinished milestone:** M4 — Platform API and Database, **BLOCKED** on one external verification dependency: successful authenticated SQL Server/PostgreSQL/MySQL connectivity.
+- **Completed milestones:** M1, M2, M3 remain COMPLETED; their regressions passed.
+- **Last completed implementation task:** Native-free Prisma/SQLite registry, guarded real NestJS APIs, DPAPI credential references, concurrent-rotation correction, restart persistence, and final complete regression.
+- **Final gate:** `npm.cmd run verify` exited 0 with **259 passing automated checks**, zero failed/skipped registered tests, plus full real platform smoke. The three positive live database integrations are **not executed**, not implied by that automated total.
+- **User clarification:** No approved local database test instances exist; the user requested documenting the verification gap. No server was installed or company database contacted.
+- **Next task:** Obtain approved pre-existing loopback test instances and locally configured credentials, verify actual authenticated SELECT 1 for all three database families, then reassess M4 completion. Do not start M5.
+- **Git scope:** Only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md, and PROGRESS.md may be committed/pushed to `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git` on main. All source/binaries/additional docs remain local/untracked. A fresh clone of that progress repository contains no runnable implementation; retain this workspace.
+
+## M4 acceptance evidence and blocker
+
+| Criterion                                           | Actual result                                                                                                                                                                                                                                                     |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prisma validates schema and fresh SQLite migrations | PASS: pinned Prisma WASM validates 11 normalized models; controlled reviewed SQL creates fresh tables; real Prisma client persists/queries SQLite                                                                                                                 |
+| Versioned constraints/indexes/FKs                   | PASS: model/table column names and types, FK parity, unique slugs, reserved paths, route/runtime range checks, active-port uniqueness, checksums, rollback, and idempotent reapplication                                                                          |
+| Application registry CRUD foundations               | PASS: real HTTP create/read/update, duplicate/reserved/input validation, filter/search/pagination, atomic audit entries, concurrent duplicate-create conflict                                                                                                     |
+| Connection registration/assignment/update           | PASS: SQL Server/PostgreSQL/MySQL metadata and reference operations, idempotent assignment, DPAPI storage/rotation, concurrent cleanup, safe list/get/assigned responses                                                                                          |
+| Full connectivity behavior                          | **PARTIAL/BLOCKED:** all three actual JS drivers reached owned loopback rejection/stall fixtures and returned safe failure/timeout; overlap limit verified. Real authenticated success and server-certificate acceptance remain unverified for all three families |
+| Credential protection and omission                  | PASS: real published-DLL Windows DPAPI round trip, tampering/reference swap rejection, post-restart unprotection; response/log/raw registry byte scans omit credentials/token                                                                                     |
+| API validation/errors/OpenAPI                       | PASS: real NestJS HTTP checks, 400/401/403/404/409/413/429/503 behavior, trace IDs, schemas and Swagger, safe request log fields                                                                                                                                  |
+| Destructive/deployment authorization boundary       | PASS: default management disabled, configured local bearer capability required, Origin denied, DELETE disabled; deployment/runtime/rollback routes absent                                                                                                         |
+| Windows/no-elevation/no-native policy               | PASS for implemented workflow: Administrator=False; all listeners IPv4 loopback; all seven .NET publish roots have no .exe; helper runs only as published DLL                                                                                                     |
+
+**M4 is not COMPLETED.** The unavailable approved database instances prevent full successful connectivity verification. The user confirmed the absence; no criterion was waived. Do not convert TCP failure/timeout evidence into a successful authentication claim. No M5–M12 work was started.
+
+## Features implemented and architectural decisions
+
+- Real NestJS API at `http://127.0.0.1:5065/_platform/api` (configured component port); health now reports milestone=registry and performs a real SQLite query.
+- Pinned Prisma 7.10.1 schema/client/query compiler. Eleven normalized models: User, Application, Deployment, RuntimeInstance, Route, DatabaseConnection, DeploymentLog, AuditLog, ApplicationSecret, DeploymentApproval, plus ApplicationDatabaseConnection join.
+- Real SQLite via a reviewed built-in `node:sqlite` driver adapter. Serialized leases prevent unrelated root requests joining interactive transactions. Date/boolean/bytes/relations and Prisma P2002/P2003 constraint mappings verified.
+- Initial reviewed migration `202610270001_registry`, explicit Node application step, SHA-256 history in _ihp_migrations, immediate transactions, FK checks, rollback, changed-history rejection, and startup refusal for uninitialized/outdated registry.
+- Registry defaults to `<storageRoot>/registry/platform.db` outside source under the current profile. IHP_DATABASE_PATH must stay strictly inside storageRoot without storage links; IHP_STORAGE_ROOT keeps existing validated configuration behavior.
+- Health/docs are public on loopback. Management defaults to 503 management_disabled. An explicitly configured strong IHP_LOCAL_OPERATOR_TOKEN enables local capability-protected management; missing/invalid bearer yields 401, browser Origin is denied. This is a local operator boundary, not M11 login/session/RBAC.
+- Application metadata create/read/update with canonical unique slugs; framework derived from node/dotnet runtime; slug/runtime immutable after creation; owner remains nullable until user/authorization work.
+- Paginated/filterable/searchable read APIs; strict object/query validation and 64 KiB JSON limit; safe application/problem+json and matching X-Request-Id/traceId.
+- Structured UTC request logs use route patterns, status, method, duration and trace only. No parameter values, query/body/header values, SQL, raw driver errors, credentials, or bearer tokens.
+- OpenAPI JSON and Swagger UI; input credentials write-only, safe response models, bearer and error contracts. Swagger submissions and persisted authorization disabled.
+- Database connection register/list/read/update/assign/test for sqlserver/postgresql/mysql with fixed literal loopback hosts. Opaque credential references are never returned; connection strings, DNS/remote hosts, SQL input, native/CLI auth, and TLS overrides are unsupported.
+- Windows DPAPI CurrentUser through published CredentialProtection.dll. UUID-bound entropy prevents ciphertext swapping. Secrets use bounded private stdin/stdout, not process arguments. SQLite stores only references; ciphertext lives under storageRoot/vault. Rotation commits metadata/audit then removes the previous ciphertext; failed registration cleans new ciphertext.
+- Capturing the previous credential reference inside the SQLite transaction fixes cleanup during concurrent rotations; regression confirms only referenced ciphertext remains.
+- Actual pg/mysql2/tedious drivers use verified TLS and fixed SELECT 1, basic credentials, 3-second connect/query stage budgets, four active checks maximum, and no overlapping check for one reference. Rejection/stall fixtures are actual owned loopback TCP sockets, not simulated successful database servers.
+- API code rejects native addon loading and every child-process path except the exact published credential-helper DLL through dotnet. The launcher passes the operator capability only to API, not Agent/Gateway/dashboard/helper.
+- Destructive operations disabled and deployment/runtime/rollback endpoints absent. No database server installation, corporate-network listener/access, production access, existing application modification, or IT/security/ACL/certificate setting change.
+
+## Prisma policy assessment and limitations
+
+1. Registry discovery found latest Prisma `8.0.0-rc.27`; this prerelease was not adopted. Stable `7.10.1` was pinned for CLI/client/internal generator/driver contracts.
+2. Normal Prisma CLI depends on @prisma/engines, whose package postinstall can fetch engines. Default SQLite adapter depends on better-sqlite3/native addon installation. No such install hook or native Prisma engine was executed.
+3. Dependencies were installed using --ignore-scripts. Project .npmrc now sets ignore-scripts=true; `npm.cmd config get ignore-scripts` returned true. Future restores must preserve this.
+4. A standard CLI validate probe was run with the guard preloaded. It attempted a network operation, which was rejected before any download/process. This is assessment evidence, not a successful CLI validation. Native Prisma Migrate was not run.
+5. Direct pinned @prisma/internals config/schema/DMMF WASM validation succeeds under the same guard. The in-process TypeScript generator succeeds with engineType=client and binaryPaths={}; its manifest declares no required native engines. Output target containment/links and native artifacts are checked.
+6. The generator package's ESM entry has unresolved extensionless imports on this Node. Its published CommonJS entry works; no node_modules package was patched. Internal Prisma APIs are version-sensitive and must remain pinned/re-audited on upgrade.
+7. Runtime Prisma uses the real JS/WASM query compiler and custom node:sqlite adapter; guarded database tests demonstrate persistence and transactions while subprocess/addon/network paths are rejected.
+8. The migration runner is **custom Node code applying reviewed repository SQL** in Prisma's migration directory, with its own _ihp_migrations history. It does not implement native Prisma Migrate, _prisma_migrations history, automatic SQL diff/shadow databases, arbitrary uploaded SQL, full drift repair, or interchangeability with standard migration commands. This is not a substituted ORM.
+
+Primary references reviewed: [Prisma driver architecture](https://www.prisma.io/docs/orm/v7/core-concepts/supported-databases/database-drivers), [Prisma engine internals](https://www.prisma.io/docs/orm/v6/more/internals/engines), [Node SQLite](https://nodejs.org/api/sqlite.html), [Microsoft CurrentUser protection](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.dataprotectionscope), [Nest OpenAPI](https://docs.nestjs.com/openapi/introduction), [node-postgres TLS](https://node-postgres.com/features/ssl), [Tedious connection API](https://tediousjs.github.io/tedious/api-connection.html). Local package manifests/types/source were inspected before selecting/executing the supported paths.
+
+## Actual commands and results
+
+| Command/check                                                                                                                                                                                                      | Actual result                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| npm.cmd view prisma version / pinned manifests and adapter dependency queries                                                                                                                                      | Discovery: latest 8.0.0-rc.27; pinned 7.10.1 dependency/source audit. @prisma/adapter-node-sqlite lookup returned E404; no official package was assumed available |
+| node built-in SQLite :memory: probe                                                                                                                                                                                | PASS; SQLite 3.54.0                                                                                                                                               |
+| npm.cmd install --ignore-scripts --save-exact --workspace @ihp/api @prisma/client@7.10.1 @prisma/driver-adapter-utils@7.10.1 @nestjs/swagger@12.0.4 pg mysql2 tedious                                              | Exit 0; resolved exact saved versions pg 8.23.1, mysql2 3.24.6, tedious 20.3.8                                                                                    |
+| npm.cmd install --ignore-scripts --save-dev --save-exact --workspace @ihp/api prisma@7.10.1 @prisma/internals@7.10.1 @types/pg                                                                                     | Exit 0                                                                                                                                                            |
+| npm.cmd install --ignore-scripts --save-dev --save-exact --workspace @ihp/api @prisma/client-generator-ts@7.10.1                                                                                                   | Initial ECONNRESET; retry with --fetch-retries=1 --fetch-timeout=60000 exited 0                                                                                   |
+| npm.cmd install --ignore-scripts --save-dev --save-exact --workspace @ihp/api @types/express --fetch-retries=1 --fetch-timeout=60000                                                                               | Exit 0 after missing declaration build failure                                                                                                                    |
+| npm.cmd update @azure/msal-node --ignore-scripts --fetch-retries=1 --fetch-timeout=60000                                                                                                                           | Exit 0; pinned override 7.1.0 resolves advisory; basic SQL authentication only, Azure/CLI auth not enabled                                                        |
+| npm.cmd audit --json                                                                                                                                                                                               | Exit 0; zero vulnerabilities after override/update (initial report had two high transitive findings)                                                              |
+| node --import ./tools/no-native.mjs ./node_modules/prisma/build/index.js validate --schema ./src/Api/prisma/schema.prisma                                                                                          | Denied before network operation; no engine ran; not counted as a pass                                                                                             |
+| node src/Api/tools/prisma.mjs generate                                                                                                                                                                             | PASS: 11 models validated in WASM and real native-free TypeScript client generated                                                                                |
+| dotnet sln InternalHostingPlatform.sln add src/CredentialProtection/CredentialProtection.csproj                                                                                                                    | Exit 0                                                                                                                                                            |
+| dotnet publish .\src\CredentialProtection\CredentialProtection.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/CredentialProtection/ | Exit 0; helper invoked afterward only as dotnet <published DLL>                                                                                                   |
+| npm.cmd run build --workspace @ihp/api                                                                                                                                                                             | Final exit 0; guarded generation and strict TypeScript compilation                                                                                                |
+| npm.cmd run migration:test --workspace @ihp/api                                                                                                                                                                    | Initial 9/12; mapping fixes then 12/12. Final expanded database suite in full verify: 13/13                                                                       |
+| npm.cmd run test --workspace @ihp/api                                                                                                                                                                              | Initial HTTP 25/28; parser/slug fixes then 29/29 and later 32/32. Final expanded HTTP suite in verify: 33/33                                                      |
+| npm.cmd run format; dotnet format InternalHostingPlatform.sln --no-restore                                                                                                                                         | Exit 0                                                                                                                                                            |
+| npm.cmd run verify (first full)                                                                                                                                                                                    | Exit 0; 258 checks plus smoke                                                                                                                                     |
+| npm.cmd run verify (final after concurrent rotation correction)                                                                                                                                                    | **Exit 0; 259 checks plus smoke**                                                                                                                                 |
+| npm.cmd run doctor                                                                                                                                                                                                 | Exit 0: Windows x64 build 22631, Node 26.12.1, npm 11.20.0, SDK 8.0.425, ASP.NET/.NET 8.0.31                                                                      |
+| Current Windows principal role check                                                                                                                                                                               | Administrator=False                                                                                                                                               |
+| npm.cmd config get ignore-scripts                                                                                                                                                                                  | true                                                                                                                                                              |
+
+## Final automated check breakdown
+
+| Suite                                          | Passed  | Failed/skipped |
+| ---------------------------------------------- | ------- | -------------- |
+| Node foundation/lifecycle/sample configuration | 25      | 0              |
+| Real API HTTP/DPAPI/connectivity               | 33      | 0              |
+| Guarded Prisma/SQLite/migration                | 13      | 0              |
+| Managed Foundation                             | 27      | 0              |
+| Managed Gateway                                | 79      | 0              |
+| Managed Samples                                | 82      | 0              |
+| Total registered automated checks              | **259** | **0**          |
+
+Additional successful smoke: separate migration into an owned temporary database; actual published Gateway JSON logs; live registry/API/React responses; only 127.0.0.1 on 5050/5065/5173; all four platform children exited 0; sockets released; temporary storage removed. M3 samples also ran concurrently at 6411/6421 and exited 0 in their managed checks. DPAPI helper is invoked via its published DLL during the HTTP checks.
+
+All seven publish roots were scanned without .exe artifacts: Gateway, DeploymentAgent, Foundation.Tests, Gateway.Tests, DemoDotnet, CredentialProtection, Samples.Tests. Prettier, TypeScript, and dotnet format passed. The final stalled-driver check completed in about 3.33 seconds for all three concurrent checks.
+
+**Outside this automated pass count:** real successful authentication/SELECT 1/certificate acceptance against SQL Server, PostgreSQL, and MySQL was not run. No available approved server exists. Zero automated skips must not be read as verification of those unavailable integrations.
+
+## Files created or modified during M4
+
+**Tracked commit/push scope:** PROJECT_REQUIREMENTS.md (authorized M4/user clarification), AGENTS.md (permanent safe commands/boundaries), IMPLEMENTATION_PLAN.md (actual implementation/evidence/BLOCKED status), PROGRESS.md (this handoff and preserved complete history).
+
+**New local implementation/config/docs:**
+
+- .npmrc
+- API.md
+- src/Api/prisma/schema.prisma
+- src/Api/prisma/migrations/202610270001_registry/migration.sql
+- src/Api/src/database.ts
+- src/Api/src/sqlite-adapter.ts
+- src/Api/src/registry.ts
+- src/Api/src/validation.ts
+- src/Api/src/http.ts
+- src/Api/src/native-policy.ts
+- src/Api/src/controllers.ts
+- src/Api/src/vault.ts
+- src/Api/src/connectivity.ts
+- src/Api/tools/prisma.mjs
+- src/Api/tools/database.mjs
+- src/Api/test/database.test.mjs
+- src/CredentialProtection/CredentialProtection.csproj
+- src/CredentialProtection/Program.cs
+- src/CredentialProtection/packages.lock.json
+- tools/no-native.mjs
+- docs/verification/M4-2026-10-27.md
+
+**Modified local files:** src/Api/src/app.ts, src/Api/src/main.ts, src/Api/test/api.test.mjs, src/Api/package.json; package.json, package-lock.json; packages/contracts/index.d.ts; tools/publish.mjs, tools/local.mjs, tools/smoke.mjs; InternalHostingPlatform.sln; .gitignore, .prettierignore; README.md, ARCHITECTURE.md, INSTALLATION.md, SECURITY.md.
+
+Generated TypeScript/compiled client, all publish/build output, registry/vault files, node_modules, and extra documentation remain local and outside the four-document commit. No actual registry is migrated automatically when a developer starts the API.
+
+## Failures, corrections, and remaining limits
+
+- Guarded CLI network denial and missing official adapter E404 were discovery outcomes, not successful capabilities.
+- One generator install failed with ECONNRESET; retry succeeded without proxy/security changes.
+- Initial attempted legacy generator-build import did not exist in this Prisma version. The pinned TS generator export was inspected and used. Its ESM extensionless-import failure was corrected by using its published CommonJS entry, not altering dependency code.
+- Initial TypeScript errors: adapter column/isolation types, then missing Express declarations. Corrected; final builds pass.
+- Initial database checks failed on base64 byte parameters and generic SQLite constraint error mapping. Implemented proper bytes and P2002/P2003 conversion; independent relation/bytes/FK checks now pass.
+- Initial HTTP checks exposed error-code inconsistencies and a body-parser 413 incorrectly reported as 500. Corrected safe filter mapping and canonical validation; final cases pass.
+- Two high transitive Azure MSAL findings were removed with an explicit pinned override/update; audit now zero. No Azure/CLI authentication is supported.
+- Review found concurrent credential rotations could orphan the intervening reference; the prior reference is now captured inside the transaction, and real concurrent HTTP rotation verifies cleanup.
+- Some documentation patches failed context validation and made no changes before corrected reapplication. No failed build/test has been marked passing without a successful rerun.
+- No confirmed unresolved regression remains in the implemented automated scope. **Live successful external-database verification remains BLOCKED**.
+- CurrentUser DPAPI protects ciphertext at rest for the designated Windows identity; same-user application code can access secrets. No separate execution identity/process isolation, identity/profile backup/recovery, or crash-time orphan-vault reconciliation is provided.
+- Registry metadata itself is not encrypted; credentials are in DPAPI ciphertext. ApplicationSecret models exist, but no secrets CRUD, login/RBAC, approval execution, or deployment feature exists.
+- Capability tokens are explicit local development/operator credentials, not production authorization. No secrets are seeded.
+- Exact Node 24 from the specification remains unverified; installed Node 26.12.1 and SQLite 3.54.0 were used. Broader arbitrary SQLite types/adapters, native Prisma Migrate/drift workflows, and production backup/recovery were not validated.
+- Interactive Ctrl+C remains the prior documented manual gap; graceful supervised shutdown and port release are verified by real smoke.
+
+## Exact next task and safe resume commands
+
+Read the four records and inspect actual source/artifacts first. Keep M4 BLOCKED until approved **existing** loopback SQL Server/PostgreSQL/MySQL instances are supplied. Do not install a server or contact corporate/production endpoints. Configure credentials locally through the protected API, obtain a real reachable=true result after authenticated SELECT 1 for each family, verify redaction and TLS, and only then assess M4 completion. Never bypass TLS/IT restrictions or start M5 to avoid the missing evidence.
+
+```powershell
+git status --short --branch
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+npm.cmd run doctor
+npm.cmd run build
+npm.cmd --workspace @ihp/api run prisma:validate
+npm.cmd --workspace @ihp/api run migration:test
+npm.cmd --workspace @ihp/api run test
+npm.cmd run verify
+```
+
+For explicitly initializing the platform-owned registry, after build:
+
+```powershell
+npm.cmd --workspace @ihp/api run db:migrate
+npm.cmd --workspace @ihp/api run db:status
+npm.cmd run start:local
+```
+
+Use `npm.cmd ci --ignore-scripts` if dependencies must be restored. Consult API.md before enabling the operator capability, creating connection references, or changing storage. Do not run bare Prisma CLI/Migrate, native engines, apphosts/testhost, dotnet run/test, or unreviewed SQL. To manually publish the helper:
+
+```powershell
+dotnet publish .\src\CredentialProtection\CredentialProtection.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/CredentialProtection/
+```
+
+The API supplies the helper's bounded stdin protocol and launches `dotnet .\artifacts\publish\CredentialProtection\CredentialProtection.dll`; do not pass credentials on a command line. No credentials or tokens belong in Git/chat.
+
+## Progress repository synchronization
+
+Only the four authorized project records are staged/committed/pushed. Inspect exact staged/commit/tree paths, then compare remote main to local HEAD. The final handoff supplies the commit receipt. Source and extra docs remain local. M4's blocked status and missing positive connectivity evidence must persist across future sessions.
+
+## Preserved previous records
+
+The complete previous M3 snapshot, M4 work timeline, intermediate failures, M2/M1 evidence, and older history are preserved below as historical text. Earlier statuses and next-task statements are superseded by this current snapshot.
+
+````````text
+# Project Progress
+
+## Active M4 session — 2026-10-27
+
+M4 is IN PROGRESS under the user's explicit M4-only authorization. Read AGENTS.md, current progress, M4 plan, database/API/security requirements, and actual API/config/source. M1–M3 source and completed verification records are present; API is still a real health-only foundation. No Prisma packages/schema/database existed. The prior M3 snapshot below is historical.
+
+Assessment in progress: registry shows latest Prisma 8.0.0-rc.27 (prerelease) and stable 7.10.1 adapter packages. Prisma 7.10.1 CLI depends on @prisma/engines; default SQLite adapter depends on native better-sqlite3. Do not run install hooks or native engines. Installed Node's built-in node:sqlite successfully opened :memory: and reported SQLite 3.54.0. Investigate a pinned JS/WASM Prisma client with a reviewed built-in SQLite adapter and controlled versioned SQL runner if native Prisma Migrate cannot be used. No schema/client/migration functionality has been verified yet.
+
+Prisma/source step: installed pinned packages with --ignore-scripts. A guarded standard CLI validation attempt was denied before any engine download/process; direct @prisma/internals WASM validation passed (11 normalized models). In-process pinned TypeScript generation passed after selecting the package's published CommonJS entry (its ESM entry has unresolved extensionless imports). No dependency was patched. Added a guard blocking tool subprocesses, native addons, and downloads; a custom built-in node:sqlite adapter and separate checksummed/transactional migration runner; all model scalar columns match the actual fresh SQLite tables. CredentialProtection published as a .NET 8 DLL (UseAppHost=false). Initial npm generator installation had ECONNRESET; retry succeeded. Initial TypeScript build had two adapter type errors; corrected and build passed. First database run: 9/12 passed; found bytes parameter conversion and SQLite constraint-to-Prisma error mapping failures. Correcting both, then rerunning. No failed criterion is marked completed. A transitive Azure MSAL advisory was resolved by a pinned override and npm update --ignore-scripts; audit now reports zero vulnerabilities. Next task: finish database verification, implement guarded API/credential/connectivity paths, and test real HTTP behavior.
+
+Database verification rerun: build exited 0; all 12 guarded database/migration/Prisma checks passed, including bytes/date/bool/relations, P2002/P2003, atomic rollback and concurrent transactions. Added local capability guard (default management disabled), registry create/read/update/filter/page APIs, structured safe errors/request logs/OpenAPI, DPAPI vault calls via published DLL, connection metadata/reference assignment/update and actual JS-driver SELECT 1 paths constrained to verified-TLS loopback. Added only the missing Express declaration package after a type-check failure; the API now compiles. HTTP/DPAPI/driver verification has not yet run, so these features are not yet recorded as passing. No database server is installed or corporate database contacted; positive authenticated connectivity for the three external database families remains unavailable for live verification.
+
+HTTP/credential verification: first HTTP run passed 25/28; corrected invalid-slug/parser error codes and raw body-parser 413 mapping. Rerun passed 29 HTTP + 12 database checks. Added application duplicate-create concurrency, schema type/FK parity, active-port data constraints, all-three-driver stalled-handshake budgets/overlap rejection, raw registry/log redaction, and API restart persistence. Final targeted run passed **32 HTTP + 13 guarded database checks**, zero failures/skips. Real DPAPI round trips, tampering/reference-swap rejection, rotation/cleanup and post-restart unprotection passed. Real SQL Server/PostgreSQL/MySQL drivers reached owned loopback rejection/stall fixtures and returned safe failures within the budget (~3.3 seconds for the combined stalled check). No successful authenticated database query is claimed. Asked whether approved pre-existing local test databases are available; continued independent work while awaiting information. Next: operational docs, final formatting/full regression, accurate acceptance status, and four-document-only synchronization.
+
+First full regression passed: npm.cmd run verify exited 0 with 258 checks plus smoke (including separate migration into smoke-owned storage, live registry health, loopback sockets, graceful shutdown and cleanup). The user confirmed no approved local test instances are available and requested documenting the gap. Do not call successful external-database authentication verified. Final review corrected concurrent credential-rotation cleanup by capturing the previous vault reference inside the SQLite transaction; added an actual concurrent-rotation regression. Added project .npmrc ignore-scripts=true, safe operational docs, status-command no-create guard, and cleanup containment checks. In-process generation now reads its engine version from the pinned generator manifest. These final adjustments require the final full regression. M4 is still IN PROGRESS until that gate, then must remain open/blocked on the explicitly unverified real successful SQL Server/PostgreSQL/MySQL SELECT 1 checks. No later milestone was started.
+
 **Updated:** 2026-10-26 (Asia/Bangkok)
 
 ## Current milestone and session handoff
@@ -829,3 +1041,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 
 </details>
 ```````
+````````

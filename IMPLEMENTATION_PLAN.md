@@ -25,6 +25,7 @@ src/Api/                     NestJS + Prisma + SQLite
 src/DeploymentAgent/         .NET 8 Worker
 src/Dashboard/               React + TypeScript + Vite
 src/Foundation/              shared .NET host configuration
+src/CredentialProtection/    published current-user DPAPI helper (M4)
 packages/config/             shared Node configuration
 packages/contracts/          TypeScript contracts
 tools/                       local development lifecycle and checks
@@ -235,16 +236,50 @@ Run the samples in separate terminals. Defaults are 6101/6102; IHP_SAMPLE_PORT a
 - API validation, error format, and OpenAPI documentation are covered by tests.
 - No deployment operation is anonymously accessible.
 
-**Verification commands (planned):**
+**Verification commands (implemented):**
 
 ```powershell
-npm.cmd --prefix .\src\Api run test
-npm.cmd --prefix .\src\Api run prisma:validate
-npm.cmd --prefix .\src\Api run migration:test
-npm.cmd --prefix .\src\Api run build
+npm.cmd run build
+npm.cmd --workspace @ihp/api run prisma:validate
+npm.cmd --workspace @ihp/api run migration:test
+npm.cmd --workspace @ihp/api run test
+npm.cmd run verify
+npm.cmd audit
 ```
 
-**Status:** NOT STARTED
+After building, initialize the real local registry only through the separate controlled step, then start locally:
+
+```powershell
+npm.cmd --workspace @ihp/api run db:migrate
+npm.cmd --workspace @ihp/api run db:status
+npm.cmd run start:local
+```
+
+**Status:** BLOCKED
+
+**Implemented and verified (2026-10-27):**
+
+- Pinned Prisma 7.10.1 WASM schema validation and real TypeScript client generation/query runtime without native Prisma engines, addons, downloads, or generator subprocesses. Dependency hooks disabled by project .npmrc and install flags.
+- Eleven normalized models (ten required entities plus the application/connection join); reviewed initial SQLite SQL migration, indexes, unique slugs, foreign keys, runtime/route constraints, checksummed transactional history, and rollback/idempotency.
+- Actual NestJS/Prisma application registry create/read/update, pagination/filter/search, duplicate/reserved-path validation, safe errors, request logging, and OpenAPI/Swagger. Management defaults disabled; explicit strong local capability required when enabled. Login/RBAC stays M11.
+- Real current-user Windows DPAPI through published CredentialProtection.dll; credentials absent from responses/logs/registry; ciphertext rotation/cleanup, tampering/reference swapping, concurrent rotation, and post-restart recovery verified.
+- Connection reference registration/list/read/update/assignment and real SQL Server/PostgreSQL/MySQL JS-driver rejection/timeout checks against owned loopback fixtures. No server installation, company-network access, or TLS bypass.
+- Destructive operations disabled, deployment/runtime endpoints absent, and real process smoke confirms loopback-only ports and clean shutdown.
+
+| Acceptance criterion                                     | Evidence/status                                                                                                                                                                                       |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prisma validates schema; migrations create fresh SQLite  | PASS through guarded Prisma WASM + reviewed Node SQL runner, not native Prisma Migrate                                                                                                                |
+| CRUD rejects duplicate slugs/reserved paths              | PASS: real HTTP and database constraints, including concurrent duplicate creates                                                                                                                      |
+| Connection references register/assign/update/test safely | PARTIAL: registry/DPAPI/real driver failure and stalled-handshake paths pass; successful authenticated SELECT 1 and certificate acceptance against all three real database families remain unverified |
+| No plaintext secrets in responses/logs                   | PASS: credential marker scans, raw database bytes, structured request logs, OpenAPI write-only inputs                                                                                                 |
+| Validation/error/OpenAPI tests                           | PASS: 33 real HTTP checks and 13 guarded database checks                                                                                                                                              |
+| No anonymous deployment                                  | PASS: deployment/runtime/rollback endpoints absent; destructive operations disabled                                                                                                                   |
+
+**Final regression:** npm.cmd run verify exited 0 with **259 passing checks**, zero failures/skips: 25 Node foundation/sample, 33 API HTTP, 13 database/migration, 27 managed Foundation, 79 Gateway, 82 managed Samples; plus full platform smoke. All seven .NET publish roots passed no-.exe scans. Doctor/format/type checks passed; npm audit reported zero vulnerabilities. Administrator=False.
+
+**Blocker and next task:** The user explicitly confirmed no approved local database test instances exist and requested documenting the verification gap. Full successful authenticated connectivity cannot be evidenced without those instances; do not install servers, contact corporate databases, disable certificate checks, waive the criterion, or start M5. When approved existing loopback test instances and locally configured credentials are available, verify real POST /database-connections/:id/test returns reachable=true after SELECT 1 for SQL Server, PostgreSQL, and MySQL; then update evidence/status. This session does not claim M4 COMPLETED.
+
+**Prisma limits:** Standard CLI validation was rejected by a preload guard before a network operation; no native engine was downloaded/launched. Supported validation/generation use pinned internal Prisma WASM/generator APIs in-process, with the published CommonJS generator entry due to an ESM import-resolution issue. The custom Node migration runner uses _ihp_migrations and reviewed repository SQL; it does not implement native Prisma Migrate, automatic diff/shadow DB workflows, its history format, or full schema drift repair. These are documented compatibility limits, not hidden ORM substitution. See PROGRESS.md and local API.md/docs/verification/M4-2026-10-27.md.
 
 ### M5 — Deployment Engine
 
@@ -543,4 +578,4 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
-M1, M2, and M3 are `COMPLETED` with published-DLL verification. M4–M12 remain `NOT STARTED`. Future .NET verification projects must be managed DLL programs; later milestone publish/run commands remain planned until those projects exist. Change a status only with a matching progress entry and verified evidence.
+M1, M2, and M3 remain `COMPLETED`. M4 is `BLOCKED` on successful authenticated live database connectivity verification; its implementation and 259-check regression are recorded above. M5–M12 remain `NOT STARTED`. Future .NET verification projects must be managed DLL programs; later milestone commands remain planned until those projects exist. Change a status only with matching verified evidence.
