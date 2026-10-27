@@ -511,36 +511,52 @@ dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.In
 
 ### M11 — Authentication and Authorization
 
-**Objective:** Enforce authenticated sessions, roles, application ownership, and deployment approvals across management operations.
+**Objective:** Enforce authenticated local API sessions, roles, application ownership/read grants and metadata-bound deployment approvals before M7 self-service work.
 
-**Tasks:**
+**Priority/dependencies:** Explicitly pulled forward after M1–M6 by the user. M4 identity/schema and M5/M6 contracts are present. Browser session UI remains M8; upload/build/deployment and rollback execution remain disabled. This completion does not authorize M7 or another milestone.
 
-- Implement secure local authentication without plaintext passwords and establish session protection/expiry/logout behavior.
-- Add Administrator, Developer, and Viewer role enforcement, application ownership checks, and endpoint authorization guards.
-- Enforce deployment and rollback authorization and approval states; audit security-sensitive actions.
-- Protect management APIs and ensure the platform does not allow anonymous deployment.
-- Keep the design extensible for future Microsoft Entra ID integration without assuming SSO is available.
+**Tasks — implemented and verified:**
 
-**Dependencies:** M4 identity schema/API and the approval/security design. M11 may be pulled forward and must be complete before enabling deployments in M7 or rollback in M10; frontend session integration is verified in M8.
+- Node built-in full-cost salted scrypt, safe one-time capability-protected Administrator bootstrap and persistent account/global login budgets. No native executable/addon/authentication service dependency.
+- Hashed opaque server-side sessions with independent client binding, User-Agent matching, idle/absolute expiry, max-session eviction, login rotation, logout and self/admin/permission-change revocation across API restarts.
+- Administrator/Developer/Viewer enforcement, SQL-scoped application lists/reads, creator ownership, read-only grants, Administrator ownership transfer and privileged reference management. Prevent caller identity/role/owner escalation and protect the last active Administrator.
+- Request-local serialized authorization transactions: current session/role/ownership and protected SQL/audits commit together; nested Registry/Routing joins preserve prior behavior and audit failure rolls back mutation.
+- Reviewed-release approval request/review/rejection/revocation/history with requester/reviewer/time, metadata/owner fingerprint, distinct reviewer and current permission checks. Valid approval never activates an execution endpoint.
+- Persistent credential-safe security audits, safe user/session views and OpenAPI descriptions. Gateway service reader and trusted M5 operator boundary remain separate.
+- Real auth HTTP/SQLite tests, managed production API/Gateway/Agent integration, full M1–M6 regression and local AUTHENTICATION.md covering matrix, operation and explicit transport/recovery limits.
 
-**Acceptance criteria:**
+**Acceptance evidence (2026-10-27):**
 
-- Anonymous management/deployment requests are rejected; session expiry and logout are verified.
-- Role and application ownership tests cover allowed and denied actions for all roles.
-- Passwords are hashed with a suitable password hashing mechanism; secrets and session tokens are not logged or returned improperly.
-- Deployment approval and audit records show requester, approver, status, and review time.
-- Entra ID remains an extension point, not a dependency for local operation.
+| Criterion                                          | Actual result                                                                                                                                                                                                 |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Anonymous/invalid sessions rejected; expiry/logout | PASS: missing/forged/cookie/query/fixation/invalid-bound/expired/revoked/replayed sessions, Origin/Host/cross-site checks, idle/absolute limits and persistent restart state                                  |
+| Roles and ownership for all roles                  | PASS: Administrator management, owned Developer writes, Viewer/read-only grants, scoped search/count/read and cross-app restrictions; role/owner input escalation and last-admin denial                       |
+| Password/session secrecy                           | PASS: actual full-cost salted scrypt and verification, raw credentials absent from logs/audits/SQLite, safe views and once-only no-store token response                                                       |
+| Approval and audit identity/status/time            | PASS: real request/review/rejection/revocation, self-review/double decision/stale metadata/role-owner invalidation; audit rollback and safe actor/resource records                                            |
+| Existing architecture and no new execution         | PASS: initialized user sessions manage live owned routes through unchanged published Gateway, Viewer cannot write, real reviewed-release approval returns executionEnabled=false                              |
+| Future identity provider boundary                  | Local verification/session issuance is separate from role/ownership/audit policy; no unverified external JWT/header is trusted. Entra ID is a future mapping/verifier, not an installed/configured dependency |
 
-**Verification commands (planned):**
+**Verification commands (implemented):**
 
 ```powershell
-npm.cmd --prefix .\src\Api run test
-npm.cmd --prefix .\src\Dashboard run test
-dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
+npm.cmd run test:auth
+npm.cmd run test:routing
+npm.cmd run verify
+npm.cmd run doctor
+npm.cmd audit --json
 ```
 
-**Status:** NOT STARTED
+The dedicated auth command builds through guarded Prisma WASM generation and runs real HTTP/SQLite Node tests. Managed integration is published with UseAppHost=false and run through dotnet DLLs; no VSTest/testhost. Frontend auth tests are not claimed; M8 is unimplemented.
+
+**Status:** COMPLETED
+
+**Final gate:** npm.cmd run verify exited 0 with **381 passing checks**, zero failures/skips: 25 Node foundation/sample, **81 API/reference/routing/auth (including 37 auth)**, 13 guarded SQLite, 27 Foundation, 108 Gateway, 82 Samples, 27 Agent and **18 managed integration**. All ten no-.exe publish scans, build/type/format/solution checks and real platform smoke passed. Doctor passed; npm audit found zero vulnerabilities; Administrator=False. Detailed current/intermediate evidence is in PROGRESS.md, local docs/verification/M11-2026-10-27.md and artifacts/m11-verify.log.
+
+**Schema:** Appended reviewed 202610270003_auth migration; 18 models/three migrations. Session/throttle/grant tables plus safe audit/approval fields and constraints. Earlier migrations and actual existing applications/registry/users were not changed by tests. Explicit local backup/review/migration is an operational prerequisite; contradictory legacy approval data fails closed rather than being deleted.
+
+**Security scope/limits:** Native local API clients only, existing unencrypted loopback HTTP; no cookie/browser-login UI, TLS, MFA, SSO, device proof or same-user isolation claim. Theft of both secrets/client context and local DB/source tampering remain risks. M5 trusted local operator and hosted apps' own content auth remain separate. No recovery bypass; audit retention/tamper resistance and real backup/recovery remain future work. Legacy maintenance closes after any user exists; M6 reader remains read-only. Actual upload/deployment/process/rollback/application-deletion execution stays absent/disabled even with a valid approval.
+
+**Handoff:** M11 is complete; M7–M10 and M12 are NOT STARTED. Await a new assignment. M7 must explicitly integrate ownership/approval/isolation gates before any future execution path.
 
 ### M12 — Security Hardening and Final Testing
 
@@ -601,4 +617,4 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
-M1–M6 are `COMPLETED`; M4's SQLite-only policy/accepted gap remain in force. M7–M12 remain `NOT STARTED`. Do not begin M7 or later milestones in this session. Future .NET checks must be published managed DLL programs; later milestone commands remain planned until those projects exist. Change a status only with matching verified evidence and current policy.
+M1–M6 and the explicitly prioritized M11 are `COMPLETED`; M4's SQLite-only policy/accepted gap remain in force. M7–M10 and M12 remain `NOT STARTED`. Do not begin another milestone in this session. Future .NET checks must be published managed DLL programs; later milestone commands remain planned until those projects exist. Change a status only with matching verified evidence and current policy.

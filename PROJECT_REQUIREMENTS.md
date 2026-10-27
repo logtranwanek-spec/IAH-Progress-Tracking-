@@ -46,6 +46,10 @@ After completed M1–M5, implement M6 only: validated dynamic YARP path-prefix s
 
 ---
 
+## Authorized M11 priority — 2026-10-27
+
+After completed M1–M6 (340 passing checks), implement M11 before M7: secure local authentication, login/logout/expiry/revocation and session misuse protection; Administrator/Developer/Viewer RBAC; application ownership/access; deployment approval request/review/status controls; credential-safe security audits; NestJS/SQLite integration; fail-closed protected operations and automated security/full regression tests. Preserve M1–M6 architecture/functionality and all SQLite-only, published-DLL/no-.exe, 127.0.0.1, no-Administrator/Docker/security-change restrictions. Never expose credentials in logs or enable untrusted code. Actual uploads/deployment execution stay disabled until their milestone. Document architecture, permissions, limitations and operation; mark complete only after verified criteria. M7 and all other milestones are not authorized. Commit/push only the four named records to progress origin/main. This supersedes the preceding M6 session's milestone order.
+
 # 1. PROJECT OVERVIEW
 
 ## 1.1. Background

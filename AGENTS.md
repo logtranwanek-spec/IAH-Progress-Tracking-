@@ -138,3 +138,13 @@ Do not commit any source code or other project files into this progress reposito
 - Route-intent changes require the existing local operator capability. This is not M11 user authorization; application deletion and deployment/process execution APIs remain disabled.
 - Verify real add/update/remove, both trusted samples, WebSockets, invalid snapshots, unchanged Gateway process and restart reconciliation using published managed DLLs. Stop only owned fixtures and preserve progress history.
 - Use npm.cmd run test:routing for the dedicated managed Gateway/integration gate and npm.cmd run verify for the full regression. Consult local DYNAMIC_ROUTING.md for protocol/capability configuration and stale-source/isolation limits.
+
+## M11 authentication and authorization priority
+
+- The user explicitly prioritizes M11 before M7; this supersedes the M6 handoff's next-milestone order. Implement M11 only; do not start M7 or other milestones.
+- Preserve M1–M6, loopback/no-.exe/SQLite-only policy and progress history. Actual upload/deployment/rollback execution remains disabled even when approval exists.
+- Use local password hashing and revocable server-side sessions with no native executable dependency. Never log passwords, tokens, client binding, credential material or raw authentication inputs.
+- Bootstrap the first Administrator only through the configured local operator capability. Once users exist, that legacy capability must not bypass session/RBAC/ownership/approval enforcement.
+- Enforce authorization and sensitive state changes atomically, protect all endpoints by default, scope application reads/writes, prevent self-approval/escalation and audit security actions without sensitive inputs.
+- Document loopback HTTP/client trust and same-user limitations accurately; no corporate/SSO/TLS/OS security configuration is authorized by this milestone. Verify real HTTP security behavior and full M1–M6 regression before marking M11 completed.
+- Use npm.cmd run test:auth for focused security checks and npm.cmd run verify for the full gate. Read local AUTHENTICATION.md for bootstrap transition, native-client protocol, permission matrix, transaction boundary, approval/execution separation and operational limits.

@@ -4,6 +4,180 @@
 
 ## Current milestone and handoff
 
+- **Current/last completed milestone:** M11 — Authentication and Authorization, **COMPLETED**, prioritized before M7 by explicit user instruction.
+- **Previously completed:** M1–M6 remain COMPLETED; their full regression and real Gateway/Agent integration passed.
+- **First unfinished milestone by roadmap order:** M7 — ZIP Upload and Approved Source Builds, NOT STARTED. **Do not start M7 or any other milestone without a new instruction.**
+- **Last completed task:** Finished local authentication/session/RBAC/ownership/approval/audit implementation, documented the operating boundary and passed full build/check/test/smoke.
+- **Final gate:** `npm.cmd run verify` exited 0: **381 passing checks**, zero failures/skips, plus real platform smoke.
+- **Current blockers:** None for approved M11 backend scope. Browser login/TLS/SSO, same-user isolation, actual upload/deployment execution and recovery procedures are not completed capabilities.
+- **Git scope:** Commit/push ONLY PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md to `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git`, branch main. Implementation, tests, extra docs, database/credentials and artifacts remain local/untracked. A progress-only clone cannot run the implementation.
+- **Continuity:** The user interrupted/resumed while formatting; the existing command completed with exit 0. Work resumed from verification, preserving all earlier work. The complete earlier log/intermediate failures is fenced below, with obsolete statuses/instructions treated as history.
+
+## Mandatory policy and execution boundary
+
+Only **SQLite** performs real database operations. SQL Server/PostgreSQL/MySQL labels/reference APIs remain metadata-only; installation/connections/protocol/authentication tests are prohibited. Their missing connectivity evidence remains the accepted company-policy gap. No such operation/test ran in M11.
+
+All real listeners use literal 127.0.0.1; Gateway remains 127.0.0.1:5050. .NET artifacts are framework-dependent publishes with UseAppHost=false and run as `dotnet <published>.dll`. No apphost/.exe artifact, VSTest/testhost, native Prisma engine, database server, Docker, elevation, Windows security change, production access or corporate listening/deployment was used. Installed node/dotnet/git/npm.cmd hosts follow the existing project convention. No new package/native executable dependency was added.
+
+No actual platform registry/user was migrated or bootstrapped by verification. Tests use owned temporary profile storage and new reviewed copies of the samples; original/existing applications are unchanged. Source/build outputs remain local by instruction.
+
+## Features implemented and acceptance evidence
+
+| M11 requirement             | Actual verified evidence                                                                                                                                                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Secure local authentication | PASS: Node built-in scrypt with random salts/fixed full-cost parameters; safe one-time bootstrap; correct/wrong/unknown/inactive-user login and malformed-input checks                                                               |
+| Session management          | PASS: random opaque token, independent client binding, matching User-Agent, server-side digest storage, eight-hour absolute/30-minute idle limits, max five unrevoked sessions, logout/self/admin revocation and restart persistence |
+| Hijacking/reuse controls    | PASS: missing/wrong binding, changed client header, forged/cookie/query sessions, fixation input, expired/revoked/replayed tokens and cross-site/Host/Origin attempts reject; transport limits below remain explicit                 |
+| RBAC                        | PASS: Administrator/Developer/Viewer allowed/denied operations; self-escalation/unknown role/unsafe fields reject; last active Administrator protected; password/role/active changes revoke sessions                                 |
+| Application authorization   | PASS: authenticated ownership assignment; scoped list/count/search/read; owned Developer writes; Viewer/read grants cannot write; unauthorized cross-app reads/writes deny; transfer/grant/revocation tested                         |
+| Approval controls           | PASS: owner/admin request, distinct Administrator review/rejection, status/requester/reviewer/times, unique active decision and concurrent review, stale fingerprint/owner/role revocation; valid approval never enables execution   |
+| Audit/security data         | PASS: safe user/session views and one-time no-store login token response; credential values omitted from logs/audits/SQLite; safe actor/decision records persist and simulated audit failure rolls back mutation                     |
+| M1–M6 preservation          | PASS: all existing regression plus actual published Gateway/Agent with initialized user sessions, live owned route changes, Viewer restrictions, replay denial and real reviewed-release approval                                    |
+| Extension/scope             | Local user verification/session issuance remains separate from authorization policy; Entra ID is future integration, not a configured dependency. No browser UI or execution endpoint is claimed                                     |
+
+The focused suite has **37 real HTTP/SQLite auth checks**. The managed integration has **18 checks**, including four added M11 scenarios against the production API and published Gateway/production M5 engine. It verifies the same Gateway PID during session-authorized live routing, then exercises metadata approval of the real reviewed Node release while authorized=false/executionEnabled=false. Public sample health stays available.
+
+## Security architecture and decisions
+
+- **Local native-client interface:** Existing loopback HTTP is retained; no cookie or browser login is introduced. Privileged requests reject Origin, cross-site Fetch metadata and unexpected Host/peer. Public health/static API schemas remain as M4 compatibility features. Hosted application content does not inherit Platform API authentication.
+- **Passwords:** Fixed scrypt N=131072/r=8/p=1, random 16-byte salt, 64-byte key, versioned hash; no caller/stored cost settings. Two concurrent derivations maximum, 192-MiB allocation cap/job. New/reset passphrases require 15 Unicode code points and bounded bytes/code units; no plaintext password storage. Unknown/malformed stored hashes use the same-cost dummy verification path.
+- **Persistent throttling:** Five attempts/account and 120 globally per 15-minute window; success resets the account bucket. SQLite global accounting bounds fresh-username work/bucket growth. Throttled and rejected authentication is audited without input values.
+- **Sessions:** Login accepts username/password/clientBinding only and returns the random token once in a no-store response. Clients retain a random 32-byte base64url binding and send Authorization plus X-IHP-Session-Binding and the same User-Agent. SQLite stores only digests/IDs/server-side times/revocation. Tied issue timestamps use insertion order for oldest-session eviction.
+- **Bootstrap transition:** Configured private operator capability can create the first Administrator only when no user exists; an immediate transaction rechecks this. Before bootstrap it preserves trusted M4/M6 maintenance. Once any user exists, that token cannot manage ordinary endpoints. Missing user sessions fail closed; no reset/reopen/default-password endpoint exists.
+- **Atomic policy:** Request-local transactions revalidate the session/current active role, check ownership/permission, execute existing Registry/Routing operations and persist audits together. Nested operations join the transaction. Legacy maintenance also rechecks empty-user state inside it; revocation/ownership changes cannot race a stale precheck into a later unauthorized mutation.
+- **Roles/grants:** Administrators manage users/security/reference metadata and all applications. Developers create/modify owned applications; Viewers only read explicitly granted applications. Read grants never give write/ownership power. Owner/role claims in ordinary bodies cannot override the session. Database references/assignment are Administrator-only.
+- **Approval/execution separation:** Fingerprint binds reviewed deployment/release/manifest/base-path/build metadata plus owner context. Requester/reviewer current roles/active state, ownership and fingerprint are rechecked. Self-review is denied, decisions serialize, history persists and authority changes revoke affected approvals. No approval starts a process. HTTP upload/deploy/start/stop/restart/rollback/application deletion stays absent/disabled.
+- **Separate trusted channels:** M6 reader capability still reads only its snapshot and cannot become a user session; user sessions cannot replace it. M5's existing trusted local review/process boundary is preserved. Session credentials are never injected into application environments; operator/routing capabilities are removed from credential-helper children.
+
+## Schema, files and migration requirements
+
+Appended reviewed `src/Api/prisma/migrations/202610270003_auth/migration.sql`; earlier migrations unchanged. New models/tables are AuthSession/auth_sessions, AuthThrottle/auth_throttles and ApplicationGrant/application_grants. Added safe audit details and approval fingerprint/owner/request-time fields with foreign keys, indexes, role/status guards and a unique active approval per deployment. There are **18 models/three migrations**. API verifies current reviewed history; migration remains an explicit Node SQLite step. Existing app ownership stays unchanged/null unless an Administrator explicitly assigns it.
+
+Apply upgrades only with an authorized backup/review procedure. Conflicting legacy active approvals can fail the new uniqueness check; the controlled runner rolls back, never silently deletes history. This session verified fresh owned migration/reapplication/checksum/rollback/parity and persistence/restarts, not an upgrade of actual configured data.
+
+**Created:**
+
+- `src/Api/src/auth.ts`, `auth-controllers.ts`, `access.ts`, `approvals.ts` and `security-context.ts`.
+- `src/Api/prisma/migrations/202610270003_auth/migration.sql`.
+- `src/Api/test/auth.test.mjs`.
+- `AUTHENTICATION.md` and `docs/verification/M11-2026-10-27.md`.
+- Local verification artifacts: `artifacts/m11-api-tests.log`, `m11-auth-final.log`, `m11-routing.log` and `m11-verify.log`.
+
+**Modified:**
+
+- `src/Api/prisma/schema.prisma`; `src/Api/src/app.ts`, `http.ts`, `controllers.ts`, `registry.ts` and `vault.ts`.
+- `src/Api/package.json`, root `package.json` and `tools/tasks.mjs` for auth checks; no package dependency/lockfile change was needed.
+- `src/Api/test/database.test.mjs` and `tests/DeploymentAgent.Tests/Program.cs` for verified model/migration expectations.
+- `tests/Platform.Integration.Tests/Program.cs` for session, ownership, replay and real reviewed-release approval checks.
+- `README.md`, `API.md`, `DYNAMIC_ROUTING.md`, `ARCHITECTURE.md`, `SECURITY.md` and `INSTALLATION.md`.
+- The four tracked records: `PROJECT_REQUIREMENTS.md`, `AGENTS.md`, `IMPLEMENTATION_PLAN.md` and `PROGRESS.md`.
+
+Generated client/build/publish artifacts were refreshed. Production Gateway and Deployment Agent source and original sample source were unchanged by M11.
+
+## Actual commands, failures and corrections
+
+| Command/check                                                                     | Actual result                                                                                                                                               |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Initial `npm.cmd run build --workspace @ihp/api`                                  | Failed TS2769 (strict regexp capture nullability) and TS1206 (editing helper accidentally annotated constructors); corrected both before behavioral testing |
+| API rebuild                                                                       | Exit 0: guarded WASM validation/generation of 18 models and TypeScript compilation                                                                          |
+| Initial `npm.cmd run test:auth --workspace @ihp/api`                              | 31/34 pass, three failures: same-timestamp eviction ordering bug; Fetch rewrote Host test header; later fixture used a revoked session                      |
+| Corrections                                                                       | Parameterized SQLite rowid tie-break; exact headers through real Node HTTP client; refreshed the intended valid fixture; no weakened authorization          |
+| `npm.cmd run test --workspace @ihp/api`, intermediate gate                        | Exit 0: 78 HTTP/reference/routing/auth + 13 SQLite checks at that revision                                                                                  |
+| `npm.cmd run test:auth --workspace @ihp/api`, focused final auth gate             | Exit 0: **37/37**, zero failures/skips                                                                                                                      |
+| `npm.cmd run test:routing`, focused integration gate                              | Exit 0: **108 Gateway + 17 managed integration** before the final real-release approval case was added                                                      |
+| `npm.cmd run format` and `dotnet format InternalHostingPlatform.sln --no-restore` | Exit 0; interrupted formatting command was checked on resume and had completed successfully                                                                 |
+| `npm.cmd run verify`, final current implementation                                | **Exit 0: 381 checks**, zero failures/skips, plus full platform smoke                                                                                       |
+| `npm.cmd run doctor`                                                              | Exit 0; Windows 22631 x64, Node 26.12.1, npm 11.20.0, SDK 8.0.425, runtime/ASP.NET Core 8.0.31                                                              |
+| `npm.cmd audit --json`                                                            | Exit 0; zero vulnerabilities                                                                                                                                |
+| Current Windows principal role check                                              | Administrator=False                                                                                                                                         |
+| `git diff --check`                                                                | Passed; final documentation/index checks repeated before commit                                                                                             |
+
+Two editing/orchestration calls were rejected before execution (duplicate patch target and an unescaped template interpolation); corrected and resubmitted. No permission/security policy bypass or partial external action occurred. Initial plan-status patch context was corrected to the M11 section. All meaningful compile/test failures are retained above and in history.
+
+The final command used PowerShell Tee-Object to capture `artifacts/m11-verify.log` and propagated `$LASTEXITCODE`. Earlier counts are intermediate revisions, not claims that an earlier command was rerun at the final count.
+
+### Final full regression
+
+| Suite                                          |  Passed | Failed/skipped |
+| ---------------------------------------------- | ------: | -------------: |
+| Node foundation/lifecycle/sample configuration |      25 |              0 |
+| API HTTP/reference/policy/DPAPI/routing/auth   |      81 |              0 |
+| Guarded Prisma/SQLite/migration                |      13 |              0 |
+| Managed Foundation                             |      27 |              0 |
+| Managed Gateway                                |     108 |              0 |
+| Managed Samples                                |      82 |              0 |
+| Managed Deployment Agent                       |      27 |              0 |
+| Managed routing/auth integration               |      18 |              0 |
+| **Total**                                      | **381** |          **0** |
+
+This is the previous 340 plus 37 auth checks and four managed M11 checks. Existing API 44 remain within the final 81. All **ten** .NET publish roots passed no-.exe scans; type/format/solution checks passed. Separate smoke verified fresh reviewed SQLite migration/Agent compatibility, real Gateway/API/React responses, structured Gateway logs, literal loopback listeners on 5050/5065/5173, four owned child exits 0, released ports and cleanup of owned temporary storage.
+
+## Known limits, unresolved issues and blockers
+
+- **Native local API only:** No browser login/session UI is implemented; M8 integration remains future. Existing HTTP loopback is not TLS. Theft of both token and binding/client context or same-user malicious code is not prevented. Binding is not a cryptographic device proof, TLS substitute, MFA or SSO.
+- **Same-user trust remains:** Windows profile/source/SQLite write access can tamper with identity/audits/reviews. No OS ACL/firewall/certificate/registry/security setting was changed. Hosted application content still needs its own authorization.
+- **Operational recovery:** No anonymous/default-account/password-recovery bypass. Existing legacy users close bootstrap, and conflicting legacy approval data can block upgrade safely. Actual backup/restore/identity recovery is not claimed verified; use separately reviewed procedures. No actual registry/user was changed by this session.
+- **Resource/retention limits:** Login budgets and two hashing jobs bound password work, not all local denial of service. Audit/session retention/export/tamper resistance belongs to later work. Server clock must be correct. Password breach checks, MFA and automated recovery are not implemented.
+- **Approval is metadata authority only:** Review fingerprints are not signatures, malware scans or immutable files. Actual uploads, builds and self-service execution remain unavailable. M7 must explicitly integrate authenticated owner/approval checks before any execution path; M11 completion does not authorize that work.
+- **M5/M6 limits remain:** Trusted reviewed manual Agent boundary, launch/job-assignment window, best-effort application-log redaction, static route trust and last-good routing staleness during API failure persist. No unattended logout/reboot guarantee. Exact Node 24/manual Ctrl+C remains unverified as previously recorded.
+- **Only SQLite operations:** Non-SQLite connectivity is an accepted prohibited capability gap, not a task to obtain/connect servers.
+- No unresolved failing test or known blocking defect remains in the approved M11 backend scope. M7–M10 and M12 remain NOT STARTED.
+
+## Exact next task and commands to resume
+
+**Stop after this M11 handoff.** Await the next assigned milestone. If the user authorizes M7 later, first inspect its approved archive/build/isolation requirements and explicitly integrate M11 ownership/approval checks; do not enable arbitrary or untrusted application execution merely because M11 is complete.
+
+Start every session with AGENTS → current PROGRESS → relevant IMPLEMENTATION_PLAN/PROJECT_REQUIREMENTS, inspect actual code and compare evidence. Keep this implementation workspace/source backup; the progress repository contains only documentation.
+
+```powershell
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8 -TotalCount 240
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+Get-Content -LiteralPath PROJECT_REQUIREMENTS.md -Encoding UTF8
+git status --short
+npm.cmd run doctor
+npm.cmd run build
+npm.cmd --workspace @ihp/api run db:status
+npm.cmd run test:auth
+npm.cmd run test:routing
+npm.cmd run verify
+```
+
+Run dependency restoration only when needed (`npm.cmd ci --ignore-scripts`). For an authorized local registry upgrade, use explicit `npm.cmd --workspace @ihp/api run db:migrate` after reviewing backup/data conditions; never native Prisma Migrate or automatic/uploaded SQL. See local AUTHENTICATION.md for safe secret input/bootstrap/login, matrix, approvals and limitations. Never print session responses/headers, put passwords in arguments, or commit database/credentials.
+
+Synchronize only the four named records:
+
+```powershell
+git add -- PROJECT_REQUIREMENTS.md AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md
+git diff --cached --name-only
+git commit -m "Complete M11 local authentication and authorization"
+git push origin main
+git ls-remote origin refs/heads/main
+```
+
+Verify staged/committed paths and remote main SHA against local HEAD. The final handoff reports that commit; code remains deliberately excluded.
+
+## Preserved progress history
+
+All following entries are historical evidence. Earlier counts/statuses, milestone ordering and obsolete connectivity/runner instructions do not override the current snapshot or company policy.
+
+````````````text
+# Project Progress
+
+## Active M11 session — 2026-10-27
+
+M11 is IN PROGRESS under the user's explicit priority before M7, superseding the prior milestone order below. Read AGENTS/current evidence/plan and auth/role/security/approval requirements; inspected actual NestJS guards/controllers/registry, SQLite migration/adapter and M5/M6 boundaries. Baseline tracked documents are clean at 3e3cac1; implementation exists locally. Plan: Node built-in scrypt, hashed revocable server-side sessions with separate client binding, one-time operator bootstrap, fail-closed RBAC/ownership, transaction-bound sensitive authorization, metadata-only approvals and safe persistent security audits. No M7+, external database operation, corporate listener, untrusted execution or OS security change is authorized. No new functionality is yet claimed verified.
+
+Core step: appended a reviewed auth migration (18 models/three migrations), scrypt password/session services, persistent throttling, grants/ownership, metadata-bound approvals and atomic request authorization using the existing serialized Prisma/SQLite adapter. Wired separate reader capability and one-time maintenance bootstrap; after users exist, legacy operator requests cannot bypass sessions. Upload/process/rollback execution remains absent/disabled. Initial build exposed strict TypeScript regexp-capture nullability and accidental constructor metadata from an editing helper; corrected both before behavioral verification. One patch was rejected as a duplicate-target operation and resubmitted without partial code execution. Next: real HTTP security suite and complete regression; no new behavior is yet marked completed.
+
+Behavioral step: first auth run passed 31/34 checks; found a real same-timestamp session-eviction ordering issue, Fetch rewriting a Host test header, and a later fixture reusing an already-revoked session. Corrected eviction with parameterized SQLite insertion-order tie-breaking, sent exact headers through Node's HTTP client and refreshed that fixture. API rebuild passed. npm.cmd run test --workspace @ihp/api then passed 78 HTTP/reference/routing/auth checks plus 13 SQLite checks. Added approved-metadata/reviewer revocation, fail-closed audit rollback, global login throttling and real published Gateway/Agent session/ownership integration checks; these final additions are pending verification. No M7+ work or new execution endpoint exists.
+
+Focused final security gate passed 37/37 auth HTTP/SQLite checks. Dedicated test:routing passed 108 Gateway plus 17 managed integration checks with actual initialized user sessions, live owner route removal/republish, Viewer restrictions, replay rejection and credential-safe logs; the last real-release approval integration check was added afterward and awaits full regression. Created AUTHENTICATION.md with permission matrix, bootstrap/login/session/approval protocol and explicit unencrypted-loopback/native-client/same-user limits; updated existing architecture/setup/security/API/routing docs. No production registry/user was bootstrapped. Next: final format and complete M1–M6/M11 build/check/test/smoke gate before completion.
+
+**Updated:** 2026-10-27 (Asia/Bangkok)
+
+## Current milestone and handoff
+
 - **Current/last completed milestone:** M6 — Dynamic Routing, **COMPLETED**. Its acceptance criteria passed the final implementation gate below.
 - **Previously completed:** M1–M5 remain COMPLETED; full regression passed.
 - **First unfinished milestone:** M7 — ZIP Upload and Approved Source Builds, **NOT STARTED**. Do not start M7 or any later milestone without a new user instruction. Its existing M11/security dependencies remain relevant.
@@ -1578,3 +1752,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 `````````
 ``````````
 ```````````
+````````````
