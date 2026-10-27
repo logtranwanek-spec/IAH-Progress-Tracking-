@@ -34,6 +34,12 @@ The user confirmed on 2026-10-27 that no approved local SQL Server/PostgreSQL/My
 
 Only SQLite is allowed and available for real database operations on this machine. Do not install, connect to, or perform real connectivity tests against SQL Server, PostgreSQL, or MySQL, including local test fixtures that exercise their protocols. Keep their connection-reference data models and registration/read/update/assignment APIs as metadata-only capabilities; do not implement or claim real authenticated connectivity for those engines. Their connectivity verification is an **accepted gap caused by company policy**, not a blocker or an outstanding M4 acceptance requirement. Finish the remaining SQLite-only M4 work, verify the revised behavior, and mark M4 COMPLETED. Do not start M5. This clarification supersedes earlier requirements/instructions to enable or verify SQL Server/PostgreSQL/MySQL connections. All no-.exe, published-DLL, loopback, no-Administrator/Docker, credential protection, and four-document-only commit/push restrictions remain in force.
 
+## Authorized M5 scope — 2026-10-27
+
+After completed M1–M4, implement only M5: a controlled .NET 8 process/runtime manager for reviewed approved releases, Node.js/ASP.NET Core detection, persistent SQLite port leases in 6100–6999 with conflict/concurrency/recovery handling, lifecycle/status/exit/log/health tracking, loopback-only children, persistent desired state and bounded restart/backoff/reconciliation. Verify using published managed DLLs and document process-isolation limitations. Existing applications/security settings must remain unchanged; no Docker, Administrator requirement, .exe artifacts, non-SQLite operations, corporate-network deployment, or later milestone is authorized. Commit/push only the four project records.
+
+This new M5 authorization supersedes the preceding M4 session's instruction to wait before M5. The SQLite-only policy and all security constraints remain unchanged.
+
 ---
 
 # 1. PROJECT OVERVIEW

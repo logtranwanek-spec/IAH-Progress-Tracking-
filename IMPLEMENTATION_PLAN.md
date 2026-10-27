@@ -263,43 +263,61 @@ The underlying Node migrate/status CLI was also verified in a retained, new user
 
 **Final evidence (2026-10-27, SQLite-only completion):** npm.cmd run verify exited 0 with **259 passing checks**, zero failures/skips: 25 Node foundation/sample, **33 API/reference/policy**, **13 guarded Prisma/SQLite**, 27 managed Foundation, 79 Gateway, 82 managed Samples; plus real platform smoke. All seven .NET publish roots passed no-.exe scans. Formatting/type/solution checks passed, npm audit reported zero vulnerabilities, ignore-scripts=true, Administrator=False. The current 33 API checks replace the former protocol tests with policy-denial/no-credential-load and ID checks; an unchanged total must not be read as replaying forbidden tests. No SQL Server/PostgreSQL/MySQL connection/protocol/authentication test ran in this completion session.
 
-**Policy decision and handoff:** Only SQLite is allowed/available for real operations. The user explicitly accepted missing external-engine connectivity evidence as a company-policy gap and requested M4 completion. The former blocker and instructions to obtain/test those servers are superseded, not satisfied by invented evidence. Their models/reference APIs remain; the execution path is removed. No M4 blocker remains. M5 is the next milestone, NOT STARTED and not authorized for this session.
+**Policy decision and historical M4 handoff:** Only SQLite is allowed/available for real operations. The user explicitly accepted missing external-engine connectivity evidence as a company-policy gap and requested M4 completion. The former blocker and instructions to obtain/test those servers are superseded, not satisfied by invented evidence. Their models/reference APIs remain; the execution path is removed. No M4 blocker remains. The original M4 handoff deferred M5; the subsequent explicit M5 authorization and verified completion below supersede that session-specific wait.
 
 **Prisma/operational limits retained:** The custom Node migration runner is not native Prisma Migrate and does not implement automatic diff/shadow DB/history/drift repair. Pinned internal WASM/generator APIs and the published CommonJS entry remain version-sensitive. DPAPI is current-user protection, not same-user isolation; crash-time orphan reconciliation/identity backup and exact Node 24/manual Ctrl+C compatibility remain documented limits, not new completion claims. Details and preserved history are in PROGRESS.md and local API.md/docs/verification/M4-SQLite-only-2026-10-27.md.
 
 ### M5 — Deployment Engine
 
-**Objective:** Build a controlled .NET 8 process and runtime manager for approved application releases.
+**Objective:** Provide a controlled .NET 8 runtime/process manager for trusted, reviewed releases without enabling untrusted/ordinary-user deployment.
 
-**Tasks:**
+**Tasks — implemented and verified:**
 
-- Implement framework/runtime detection and runtime availability checks for Node.js and ASP.NET Core.
-- Implement persistent internal port allocation in the configured range, including occupied-port detection, concurrency control, restart recovery, and the select-to-bind race.
-- Implement process start, stop, restart, status, exit tracking, log capture, and health checks for separate application processes.
-- Bind child processes to loopback and prevent orphaned child processes as far as supported by the approved Windows execution model.
-- Persist desired state and reconcile actual processes on Agent restart; use bounded restart attempts and backoff.
-- Document process-isolation limits and the approved trust/approval boundary; do not imply that separate processes provide strong isolation.
+- Pure file/metadata Node ESM and published ASP.NET Core 8 detection; installed runtime checks, reviewed v1 contract, path/reparse/executable/native artifact validation, SHA-256 release fingerprints and canonical startup metadata.
+- SQLite-backed unique leases in 6100–6999 with immediate writer transactions, occupied/exclusive socket probes, concurrent allocation, exhaustion handling and select-to-bind conflict cleanup that never kills an occupant.
+- Reviewed release approval/selection; start/stop/restart/status, PID/start identity, instance/exit/end-reason persistence, CPU/working-set snapshots, stdout/stderr capture and bounded matching health checks.
+- Allowlisted child environment, fixed loopback contract, actual PID-owned IPv4/IPv6 listener inspection, Windows kill-on-close/single-process jobs and fail-closed ownership errors.
+- Durable desired state and bounded failure count/exponential backoff; graceful/hard Agent restart recovery, unknown-exit honesty, PID reuse protection and quarantine of matching live prior PIDs.
+- Explicit local stdin operator controls only when enabled; no Agent HTTP listener and no new Platform API deployment/control endpoint.
+- Managed DeploymentAgent.Tests plus a trusted fault fixture, all published with UseAppHost=false. Operator/setup/isolation instructions in local DEPLOYMENT_ENGINE.md.
 
-**Dependencies:** M1, M3, and M4's registry contracts. M11 authorization is required before deployment is enabled for ordinary users.
+**Dependencies:** M1/M3 and M4 registry contracts, all satisfied. M11 is still required before ordinary-user/unreviewed deployment is enabled.
 
-**Acceptance criteria:**
+**Acceptance evidence (2026-10-27):**
 
-- Unit/integration tests cover process lifecycle, health checks, occupied ports, concurrent allocation, failed startup cleanup, exit status, and bounded recovery.
-- Only loopback runtime binds are allowed and allocated ports are persisted/reconciled.
-- Failure logs are retained and associated with application/release identifiers.
-- The Agent runs without Administrator privileges and is not directly exposed to the company network.
-- Uploaded/unreviewed code is not executed as a side effect of detection or validation.
+| Criterion                                                   | Verified result                                                                                                                                                      |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lifecycle/health/conflict/concurrency/failure/exit/recovery | PASS: 27 managed checks; real Node/.NET samples, actual exit 17/23/137, unhealthy/declining health, bounded attempts across restarts, actual Agent hard kill/restart |
+| Loopback and durable leases                                 | PASS: real PID-owned socket checks; schema/unique leases; concurrent allocators; occupied/exhausted/racing port cases; reconciliation and port release               |
+| Failure logs associated with app/release                    | PASS: persisted deployment logs with instance IDs, fixed failures/exit codes, both streams, redaction and capture budgets                                            |
+| Ordinary-user Agent with no network exposure                | PASS: Administrator=False; published DLL processes; no Agent listener; explicit control-disabled check                                                               |
+| Detection never executes unreviewed code                    | PASS: inspection sentinel stays absent; unreviewed/changed/traversal/native-artifact/canonical-metadata cases rejected before application launch                     |
 
-**Verification commands (planned):**
+**Verification commands (implemented):**
 
 ```powershell
-dotnet publish .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\DeploymentAgent.Tests\bin\Release\net8.0\publish\DeploymentAgent.Tests.dll
-dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
+npm.cmd run test:agent
+npm.cmd run verify
+npm.cmd run doctor
+npm.cmd audit --json
 ```
 
-**Status:** NOT STARTED
+The dedicated command publishes Agent, DeploymentAgent.Fixture, DemoDotnet and DeploymentAgent.Tests, checks for .exe artifacts and runs the managed verification DLL. Equivalent manual publish/run, with the three prerequisite publish roots already prepared:
+
+```powershell
+dotnet publish .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/DeploymentAgent.Tests/
+dotnet .\artifacts\publish\DeploymentAgent.Tests\DeploymentAgent.Tests.dll
+```
+
+**Status:** COMPLETED
+
+**Final results:** npm.cmd run verify exited 0 with **286 passing checks** and no failures/skips: 25 Node foundation/sample, 33 API/reference/policy, 13 guarded SQLite/migration, 27 Foundation, 79 Gateway, 82 Samples, **27 Deployment Agent**. Full smoke passed real API/React/Gateway responses, fresh Node SQLite migration read by the Windows SQLite Agent, loopback sockets, four exit codes 0, released ports and removed owned smoke storage. All **nine** publish roots passed no-.exe scans. Static/type/solution checks, doctor and npm audit passed; zero npm vulnerabilities. Windows SQLite 3.43.2 and installed Node/.NET environment verified.
+
+**Schema and workflow:** Appended reviewed migration 202610270002_engine and four normalized Prisma models (15 total): agent_releases, agent_desired, agent_port_leases, agent_instances. Existing migrations/applications are unchanged. Apply the explicit db:migrate step before starting the new Agent. The managed provider uses Microsoft.Data.Sqlite.Core 8.0.33 plus SQLitePCLRaw.provider.winsqlite3 2.1.11 and the OS DLL in-process; no native executable/server is installed. No SQL Server/PostgreSQL/MySQL operation/test was performed.
+
+**Limits and decisions:** Trusted reviewed single-process loopback-v1 releases only; no shell/npm build/upload execution, injected platform credentials, Agent HTTP API, dynamic routing or later-milestone implementation. Jobs/environment checks are not same-user or network isolation. A small Process.Start-to-job-assignment window remains; no atomic suspended launch or orphan-proof guarantee. Hard-kill testing observes cleanup under the job/EOF contract; it does not distinguish which wins that race. Unknown prior exits remain null. Redaction is best-effort; unlabelled secrets can leak if trusted apps log them. No unattended reboot/logout startup, identity isolation, comprehensive crash recovery, exact Node 24 or manual Ctrl+C verification is claimed. Full detail/history is in PROGRESS.md and local DEPLOYMENT_ENGINE.md/docs/verification/M5-2026-10-27.md.
+
+**Next milestone:** M6 — Dynamic Routing, NOT STARTED. Wait for separate authorization; do not begin it in this M5 session.
 
 ### M6 — Dynamic Routing
 
@@ -564,4 +582,4 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
-M1–M4 are `COMPLETED`; M4 uses the explicit SQLite-only acceptance scope and accepted external-engine verification gap. M5–M12 remain `NOT STARTED`. Do not begin M5 in this session. Future .NET verification projects must be managed DLL programs; later milestone commands remain planned until those projects exist. Change a status only with matching verified evidence and the current authoritative policy.
+M1–M5 are `COMPLETED`; M4's SQLite-only policy/accepted gap remain in force. M6–M12 remain `NOT STARTED`. Do not begin M6 in this session. Future .NET checks must be published managed DLL programs; later milestone commands remain planned until those projects exist. Change a status only with matching verified evidence and current policy.

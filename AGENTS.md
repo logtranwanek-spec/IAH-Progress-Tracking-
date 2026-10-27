@@ -120,3 +120,12 @@ Do not commit any source code or other project files into this progress reposito
 - Supported Prisma commands are the API package's prisma:validate/build scripts, which use guarded pinned WASM/internal generation. Use npm.cmd ci --ignore-scripts; preserve project .npmrc ignore-scripts=true. Do not replace them with bare Prisma CLI/Migrate or enable dependency hooks.
 - Registry migrations are explicit db:migrate/db:status steps after building, never automatic API startup. Consult local API.md for the custom Node migration runner, paths, operator capability, DPAPI identity boundary, and limitations.
 - The 2026-10-27 SQLite-only clarification accepts missing SQL Server/PostgreSQL/MySQL connectivity verification as a company-policy gap. It supersedes the former M4 blocker and instructions to obtain/test instances. Complete M4 after SQLite/reference/policy checks pass; preserve historical results as history, never as current engine support. Do not start M5 in this session.
+
+## M5 deployment engine rules
+
+- The user explicitly authorizes M5 after completed M1–M4; this supersedes previous session-specific instructions to wait before M5. Do not start M6 or later milestones.
+- Execute only reviewed, fingerprinted releases inside platform-owned Applications storage. Detection must inspect files without executing code. Never run arbitrary manifests, scripts, npm installs/builds, executable artifacts, or uploaded/unreviewed code.
+- Use only installed node/dotnet hosts and published managed DLLs. Child environments must omit platform credentials, fix IPv4 loopback, and use the reviewed supervised-shutdown/health contract. Document that environment settings and process separation are not a sandbox.
+- Use SQLite for persistent leases, intent, instances, exits and recovery budgets. Keep schema changes in reviewed explicit migrations. Never contact other database engines.
+- Serialize Agent ownership and per-application operations, verify PID/start identity and listeners, and never terminate an unrelated port occupant or process discovered only by PID. Recovery must be bounded and persisted across Agent restarts.
+- Preserve the API deployment prohibition until M11; M5 control is restricted to the trusted local operator/verification boundary. Do not expose Agent HTTP/network control.

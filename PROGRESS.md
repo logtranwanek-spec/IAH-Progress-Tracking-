@@ -4,6 +4,201 @@
 
 ## Current milestone and handoff
 
+- **Current/last completed milestone:** M5 — Deployment Engine, **COMPLETED**. All M5 acceptance criteria have verified evidence below.
+- **Previously completed:** M1–M4 remain COMPLETED; the full regression passed with the new engine migration/schema.
+- **First unfinished milestone:** M6 — Dynamic Routing, **NOT STARTED**. Do not begin M6 or any later milestone without a new user instruction.
+- **Last completed task:** Completed the controlled runtime manager, managed verification, full regression and operator/isolation documentation. Recorded the final M5 acceptance results.
+- **Final verification:** `npm.cmd run verify` exited 0 with **286 passing checks**, zero failures/skips, plus the real platform smoke test.
+- **Blockers:** None for approved M5. Same-user isolation, unattended startup and prohibited external database operations remain explicit limits, not implemented capabilities.
+- **Git scope:** Commit/push ONLY PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md to `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git`, branch main. Source, tests, extra documentation, lockfiles and artifacts remain local/untracked. A fresh clone of that progress repository cannot run the implementation.
+- **History:** Every earlier entry, including intermediate M5 results, is preserved verbatim apart from line-ending normalization in the fenced historical section below. Historical milestone statuses, proposed commands and old external-engine tests are superseded by current policy and this snapshot.
+
+## Policy and scope
+
+**Only SQLite is supported and allowed for real database operations.** SQL Server/PostgreSQL/MySQL labels and protected connection-reference metadata remain in the M4 API. Their operational connections, protocol/authentication tests and server installation are prohibited. Missing real connectivity verification remains the user-accepted company-policy gap; no such operation/test ran in M5.
+
+.NET application/verification artifacts are published framework-dependent with `UseAppHost=false` and launched only through `dotnet <published>.dll`. No application apphost, .exe artifact, VSTest/testhost or native Prisma engine was launched. Installed node/dotnet/git/npm.cmd CLI hosts are invoked by command name under the established project execution convention. Prisma validation/generation stays on the pinned guarded JS/WASM path; migrations use reviewed SQL through Node's SQLite runner.
+
+All actual platform/sample/fault-fixture listeners used literal 127.0.0.1. No Docker, elevation, database server, Windows security-setting change, production access, corporate-network deployment or modification to an existing application was required. Original DemoNode/DemoDotnet sources were unchanged; verification ran new owned staged copies. Agent control has no HTTP listener.
+
+## Features implemented and verified
+
+1. **Reviewed release boundary:** Pure file/metadata inspection detects Node ESM and published framework-dependent ASP.NET Core 8 entrypoints; installed runtime availability is checked separately. Files must be in the platform-owned `Applications/<application UUID>/releases/<version>` directory, outside source and inside the current user's profile storage. Inspection rejects traversal, links/reparse points, arbitrary runners, executable/shell/native artifacts, unmanaged DLLs, unsupported metadata/contracts and file-budget excess. Review records SHA-256 file hashes; every launch rechecks hashes and canonical path/health metadata. Inspection does not execute the application.
+2. **Durable allocation:** SQLite records one unique application/port lease in 6100–6999. Immediate writer transactions serialize concurrent allocations; exclusive loopback probes skip occupied ports. Concurrency, duplicate leases, exhaustion and the real probe-to-bind race are verified. A conflicting occupant is never terminated.
+3. **Lifecycle/status:** Controlled local review/start/stop/restart/status/list/logs commands; per-application operation serialization; PID/start identity; desired and actual state; release/instance/exit/end-reason persistence; working-set/CPU snapshots. New instances run only through installed Node or published managed DLL hosts with fixed reviewed entrypoints.
+4. **Owned child handling:** Windows kill-on-close jobs with a single-process limit; assignment failures fail closed. Only cached owned process/job handles may stop a child. IPv4/IPv6 TCP inspection checks that the owned PID has exactly its allocated literal 127.0.0.1 listener. A clean environment omits platform tokens and runtime injection variables; loopback/port/release/build settings are supplied by the Agent.
+5. **Health/logs:** Bounded HTTP checks use a reconstructed literal-loopback URL, no proxy/redirect, expected JSON status and matching release/build/port. Both stdout/stderr are captured with per-line/text budgets, deployment/instance association and best-effort labelled/JSON credential redaction. Startup, termination, known/unknown exits and failure reasons are persisted.
+6. **Recovery:** An exclusive per-registry lock prevents two Agents. SQLite stores RUNNING/STOPPED intent, failure count, backoff and session identity. Graceful shutdown releases children/ports while retaining RUNNING intent; explicit app stop persists STOPPED. Agent restart reconciles old instances, restores safe intent and preserves retry exhaustion. A matching live prior PID is quarantined with its lease; a reused PID is never killed. Unknown prior exits remain null rather than invented success.
+7. **Managed verification:** A published DeploymentAgent.Tests DLL uses real Node/.NET sample copies, a separate trusted managed fault fixture, owned SQLite databases and actual published Agent subprocesses. It returns nonzero on any failed assertion.
+
+### M5 acceptance evidence
+
+| Criterion                                     | Actual verified evidence                                                                                                                                                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework/runtime detection                   | Node/.NET published metadata and installed runtime checks pass; inspection sentinel is never executed; malformed/native/unreviewed/changed/canonical-path/health-URI cases reject before launch                           |
+| Persistent ports, conflicts and concurrency   | Unique/range/FK constraints and eight concurrent SQLite allocators pass; occupied port skipped, exhaustion safe, actual select-to-bind conflict preserves occupant and releases failed child lease                        |
+| Start/stop/restart/status/exit                | Real concurrent Node/ASP.NET samples become healthy on distinct owned loopback ports; idempotent concurrent starts; restart creates new instance; graceful exit 0 and real exit 17/23/137 recorded                        |
+| Logs and health                               | Both streams captured/redacted/bounded; expected identity health passes; startup health failure cleans up; three failing running probes trigger recovery; live metrics are present                                        |
+| Loopback and safe ownership                   | Actual PID socket checks pass; pure wildcard/IPv6/foreign/extra-port rejection checks bind no unsafe listener; published Agent has zero TCP listeners; unrelated/reused PIDs remain alive                                 |
+| Persistent desired state and bounded recovery | Graceful restart resumes RUNNING intent; real hard Agent kill cleans owned sample/port and restart creates a healthy new instance; persisted failure budget exhausts after three failures and remains FAILED after reopen |
+| Ordinary-user/policy-compatible execution     | Administrator=False; nine published roots contain no .exe; managed DLL launch only; native-free Prisma/Node SQLite and in-process Windows SQLite interoperate                                                             |
+
+**All M5 criteria passed.** The trust/isolation boundary below is mandatory; this does not complete later upload, routing, dashboard, rollback or user-authorization milestones.
+
+## Storage/schema and decisions
+
+Appended reviewed migration `src/Api/prisma/migrations/202610270002_engine/migration.sql`; the original M4 migration was not changed. Added four normalized models/tables, for **15 Prisma models and two migrations** total:
+
+- `agent_releases`: reviewed deployment, runtime/entrypoint/relative directory, base/health paths, release/build and fingerprint.
+- `agent_desired`: per-application chosen release, RUNNING/STOPPED intent, status, failure budget and next attempt.
+- `agent_port_leases`: unique application/port, session ownership, constrained 6100–6999.
+- `agent_instances`: existing runtime-instance linkage, session/start identity, observed exit and end reason.
+
+The Agent verifies the reviewed engine migration checksum and refuses missing/changed history. It never auto-migrates. Apply the explicit API `db:migrate` command before starting it; builds/verifiers do not migrate the actual platform registry. Final smoke used a fresh owned Node-migrated registry that the managed Agent read successfully. API schema/model/type/FK parity and migration guards passed with all 15 models.
+
+The provider is `Microsoft.Data.Sqlite.Core 8.0.33` plus `SQLitePCLRaw.provider.winsqlite3 2.1.11` (raw core resolved 2.1.13), loading the OS's existing `winsqlite3.dll` in-process. Managed probing observed SQLite **3.43.2**; Node registry tooling observed **3.54.0**. No native database executable/server was downloaded or launched. OS SQLite servicing remains an IT dependency.
+
+M5 approval is an explicit trusted local operator assertion, recorded against exact reviewed hashes. It is not M11 login/RBAC/approval or proof of safe arbitrary code. Stdin controls default disabled and require `IHP_AGENT_CONTROL=1`; supervised shutdown is separate. The API still exposes no deployment/start/stop/restart/rollback execution path. The ordinary local launcher owns an Agent with controls disabled.
+
+Default budgets are implementation choices: 12-second startup, 5-second stop, three failures, exponential 1-second backoff capped at 30 seconds, three failed running probes and a 250-ms reconciliation timer. Tests use shorter bounded settings. Failure counts persist across restarts and are not reset merely by a healthy retry; an explicit local start/restart resets the budget.
+
+## Actual commands, failures and corrections
+
+| Command/check                                                                     | Actual result                                                                                                                             |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Provider-only managed publish/run probe using the command below                   | Exit 0; OS SQLite 3.43.2 opened and queried in-process                                                                                    |
+| Initial core publish                                                              | Passed                                                                                                                                    |
+| First full-verifier publish                                                       | Failed with CS0819 (multiple declarators in an implicitly typed declaration); fixed before executing the verifier                         |
+| Code review of console handling                                                   | Moved blocking console reads onto Task.Run so they cannot block the recovery timer; no runtime test failure was invented for this finding |
+| `npm.cmd run test:agent`, initial behavioral gate                                 | Exit 0; 25 checks passed                                                                                                                  |
+| `npm.cmd run test:agent`, after canonical metadata and actual bind-race checks    | Exit 0; **27 checks passed**, zero failures                                                                                               |
+| `npm.cmd run format` and `dotnet format InternalHostingPlatform.sln --no-restore` | Exit 0                                                                                                                                    |
+| `npm.cmd run verify`, final implementation gate                                   | **Exit 0; 286 checks passed**, zero failures/skips, plus full real smoke                                                                  |
+| `npm.cmd run doctor`                                                              | Exit 0; installed Windows/Node/npm/.NET environment and configuration accepted                                                            |
+| `npm.cmd audit --json`                                                            | Exit 0; zero npm vulnerabilities                                                                                                          |
+| Windows current-principal Administrator role check                                | **False**                                                                                                                                 |
+| `git diff --check`                                                                | Passed after correcting documentation whitespace; final documentation check repeated before commit                                        |
+
+The manual provider/verifier publish/run format actually used was:
+
+```powershell
+dotnet publish .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false -p:UseSharedCompilation=false -p:PublishDir=../../artifacts/publish/DeploymentAgent.Tests/
+dotnet .\artifacts\publish\DeploymentAgent.Tests\DeploymentAgent.Tests.dll
+```
+
+For the full verifier, its Agent, fixture and DemoDotnet publish prerequisites must exist; `npm.cmd run test:agent` publishes all four and checks their outputs automatically. The first provider-only probe was subsequently replaced by the full verifier; its early result was not treated as lifecycle evidence.
+
+### Final regression evidence
+
+| Suite                                          |  Passed | Failed/skipped |
+| ---------------------------------------------- | ------: | -------------: |
+| Node foundation/lifecycle/sample configuration |      25 |              0 |
+| API HTTP/reference/policy/DPAPI                |      33 |              0 |
+| Guarded Prisma/SQLite/migration                |      13 |              0 |
+| Managed Foundation                             |      27 |              0 |
+| Managed Gateway                                |      79 |              0 |
+| Managed Samples                                |      82 |              0 |
+| Managed Deployment Agent                       |      27 |              0 |
+| **Total registered checks**                    | **286** |          **0** |
+
+Build/type/format/solution checks passed. All **nine** .NET publish roots passed recursive no-.exe artifact checks. Full smoke separately verified real Gateway/API/React HTTP responses, structured Gateway logs, fresh SQLite migration/Agent compatibility, literal-loopback listeners on 5050/5065/5173, four owned child exit codes 0, released ports and cleanup of owned temporary smoke storage.
+
+The 27 engine checks additionally cover: missing/changed migration refusal; options/path budgets; reviewed fingerprint enforcement; occupied/exhausted/racing ports; concurrent leases and same-app starts; healthy concurrent real runtimes; startup exit 17 cleanup; actual crash exit 23; declining health; uncooperative owned job termination exit 137; stdout/stderr limits/redaction and omitted inherited credentials/injection settings; singleton ownership; graceful restart; live-prior-PID quarantine; PID reuse; default-denied controls; actual Agent listener absence; actual hard Agent restart with unknown prior exit and persisted recovery. These are real published-process tests except explicitly labelled pure inspection/listener-policy checks.
+
+## Files created or modified in M5
+
+Implementation files remain local; they are intentionally excluded from the progress-only Git commit.
+
+**Created:**
+
+- `src/DeploymentAgent/EngineDatabase.cs`, `EngineOptions.cs`, `EngineStore.cs`, `ReleaseInspector.cs`, `RuntimeEngine.cs`, `WindowsOwnership.cs`.
+- `src/Api/prisma/migrations/202610270002_engine/migration.sql`.
+- `tests/DeploymentAgent.Tests/DeploymentAgent.Tests.csproj`, `Program.cs`, `Checks.cs`, `Workspace.cs`, `AgentProcess.cs` and `packages.lock.json`.
+- `tests/DeploymentAgent.Fixture/DeploymentAgent.Fixture.csproj`, `Program.cs` and `packages.lock.json`.
+- `DEPLOYMENT_ENGINE.md` and `docs/verification/M5-2026-10-27.md`.
+
+**Modified:**
+
+- `src/DeploymentAgent/Program.cs`, `DeploymentAgent.csproj` and `packages.lock.json`.
+- `src/Api/prisma/schema.prisma` and `src/Api/test/database.test.mjs` for the appended schema/parity expectations.
+- `InternalHostingPlatform.sln`, root `package.json`, `tools/publish.mjs` and `tools/tasks.mjs` for the new publish roots/verifier.
+- `README.md`, `INSTALLATION.md`, `ARCHITECTURE.md`, `SECURITY.md` and `API.md`.
+- The four tracked records: `PROJECT_REQUIREMENTS.md`, `AGENTS.md`, `IMPLEMENTATION_PLAN.md`, `PROGRESS.md`.
+
+Generated API/client/build outputs and published artifacts were refreshed by approved build steps; they are not progress-repository source. Original samples/existing hosted applications were not modified.
+
+## Known issues, limits and unfinished work
+
+- **Trusted single-process contract only.** Releases must implement `ihp-loopback-v1` and obey fixed loopback/port/health/shutdown settings. Arbitrary uploads, package scripts, shell commands, installs/builds and unreviewed code are refused/out of scope.
+- **Process separation is not a sandbox.** Children use the same ordinary Windows identity. Jobs/environment checks do not prevent malicious code accessing that identity's files, secrets or network resources. Actual listener validation can reject misbehaviour but cannot prevent untrusted code briefly opening a wrong listener. No real unsafe listener was opened to test this.
+- **Small launch/assignment window.** Process.Start precedes job assignment; atomic suspended/job-list creation is not implemented. The trusted stdin-EOF contract and reconciliation reduce orphan risk, but full orphan-proof recovery is not claimed. The hard-kill test observes child/port cleanup under the job/EOF contract; it cannot distinguish which action won the race. A separate uncooperative fixture proves explicit job-based termination.
+- **Probe-to-bind race is handled, not removed.** The exclusive allocation probe closes before startup. The actual competing-listener test verifies safe failure/cleanup; the Agent never claims to hold an OS reservation after probe close.
+- **Same-user tampering.** Rechecked hashes/canonical metadata are not immutable ACL isolation or cryptographic IT approval; files/state can be raced by the same identity.
+- **Logs are best-effort redacted.** Unknown/unlabelled secrets could leak from a badly behaved trusted app. No platform secrets are injected. Capture is limited to 2048 characters/line and 64 KiB retained text/instance; at most 1000 SQLite log rows/deployment.
+- **Recovery safety beats guessing ownership.** A matching live prior PID/start identity is BLOCKED with its lease retained; it is not adopted/killed based only on persisted PID. Resolve the ownership condition, then restart the Agent or request a deliberate start. Interrupted exit status is null/unknown unless actually observed.
+- **No unattended startup guarantee.** No service, scheduler, login/logout/reboot policy or security setting was installed/changed.
+- **Current environment coverage.** Exact Node 24 and manual Ctrl+C compatibility remain unverified as before; current installed runtime and supervised shutdown are verified. Windows SQLite servicing belongs to the OS/IT.
+- **Operator configuration.** A standalone Agent reads IHP_STORAGE_ROOT/IHP_DATABASE_PATH/IHP_RUNTIME_PORT_START/IHP_RUNTIME_PORT_END from environment. For custom JSON API settings, supply identical effective Agent values; the standard launcher exports them. Agent Intent/Instance is the live M5 status boundary; existing API application metadata status is not a new live runtime endpoint.
+- **Later milestones remain unfinished.** No M6 registry-backed live routing, M7 upload/build execution, M8 deployment dashboard, M9 monitoring UI/search, M10 rollback or M11 end-user auth was implemented. M12 broad hardening remains future work.
+- No unresolved failing test or known blocking defect remains within the reviewed M5 scope. The accepted non-SQLite connectivity gap is retained; it must not become a future instruction to install/contact those engines.
+
+## Exact next task and resume commands
+
+**Stop after the M5 handoff.** The next implementation task, only after the user authorizes M6, is to read its acceptance criteria and inspect the current Gateway route-provider boundary, M4 route registry and M5 runtime/port contracts before implementing controlled live route updates. Keep API execution disabled and all listeners on loopback.
+
+Every new session: read AGENTS → this current snapshot → relevant IMPLEMENTATION_PLAN/PROJECT_REQUIREMENTS; inspect actual source/published inputs and verify the workspace matches evidence. A progress-only clone does not contain source; resume from the retained implementation workspace or an explicitly approved source backup.
+
+Useful commands in the existing workspace (database commands are explicit local steps; do not change existing applications):
+
+```powershell
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8 -TotalCount 260
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+Get-Content -LiteralPath PROJECT_REQUIREMENTS.md -Encoding UTF8
+git status --short
+npm.cmd run doctor
+npm.cmd run build
+npm.cmd --workspace @ihp/api run db:migrate
+npm.cmd --workspace @ihp/api run db:status
+npm.cmd run test:agent
+npm.cmd run verify
+```
+
+Run dependency restoration only if needed: `npm.cmd ci --ignore-scripts`. Never replace the pinned guarded Prisma scripts with native Prisma Migrate, bare engine commands, VSTest or dotnet test/run. See local DEPLOYMENT_ENGINE.md for staging/review/control and docs/verification/M5-2026-10-27.md for the concise evidence copy.
+
+For four-document synchronization, inspect the index/commit paths, then:
+
+```powershell
+git add -- PROJECT_REQUIREMENTS.md AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md
+git diff --cached --name-only
+git commit -m "Complete M5 trusted runtime deployment engine"
+git push origin main
+git ls-remote origin refs/heads/main
+```
+
+Only those four files may appear in the staged change/commit. Compare the remote main SHA with the local commit after pushing; the final session handoff reports the resulting commit. Source code is deliberately not pushed to this repository.
+
+## Preserved progress history
+
+The following complete earlier log is historical evidence, not active instructions or current status. Its former M4/M5 wait messages, earlier counts, blockers and superseded connectivity work must not override the current snapshot.
+
+``````````text
+# Project Progress
+
+## Active M5 session — 2026-10-27
+
+M5 is IN PROGRESS under the user's new explicit authorization, superseding the prior wait-for-M5 handoff below. Read AGENTS, current progress, M5 plan, process/runtime/recovery/security requirements, and actual Agent/Foundation/sample/SQLite sources. M1–M4 source/evidence is present; Agent is still a no-execution Worker shell and no M5 tests exist. Plan: reviewed fingerprinted releases only, SQLite registry migrations/leases/intent/exit state, single Agent ownership, safe child environment, Windows-owned process containment, actual listener/health verification, persisted bounded recovery and managed published verification. No M6+ work or external database operation is authorized. First task: verify a policy-compatible SQLite provider using the Windows SQLite DLL in-process (no downloaded executable) and implement the controlled core.
+
+Provider/core step: selected Microsoft.Data.Sqlite.Core 8.0.33 plus SQLitePCLRaw.provider.winsqlite3 2.1.11; a published managed DLL probe passed against Windows' existing SQLite 3.43.2. No SQLite server/native executable was installed/launched. Added reviewed M5 SQL migration and four Prisma models (15 total), durable release/intent/port/instance state, fingerprinted file inspection with no application execution, Windows job ownership/single-process containment, PID-owned IPv4/IPv6 listener checks, bounded health/start/stop/recovery, log capture/redaction and trusted local stdin control. Core publishes with no compiler errors. Added a separate trusted managed fault fixture; behavioral verification is not yet run, so no lifecycle criterion is marked complete. Next: publish all M5 artifacts and replace the provider-only probe with real end-to-end managed checks.
+
+First behavioral gate: the managed verifier initially had one C# multiple-var declaration error; corrected it before any execution. Review also moved console input to its own task so it cannot block the recovery timer. npm.cmd run test:agent then exited 0 with **25 real managed checks**, including concurrent real samples, exit 17/23 tracking, health failure, job-based forced termination, redacted bounded streams/clean environment, durable budgets, singleton ownership, live-PID quarantine/reuse protection, graceful recovery, and an actual published-Agent hard restart with owned-child cleanup. Added canonical persisted-release path/health URI checks before launch and real select-to-bind race verification; these final additions are pending rerun. M5 remains IN PROGRESS. Next: final focused/full regression and operator/isolation documentation; no M6+ work.
+
+Final dedicated M5 run passed **27 checks, zero failures** after the canonical-metadata and actual select-to-bind race regressions were added. The race fixture binds only 127.0.0.1; the competing listener remains alive, the failing child is stopped, and its SQL lease is released. Actual Agent listener inspection confirms no Agent HTTP port; hard restart records an unknown prior exit honestly and starts a new healthy instance with persisted intent/budget. Created DEPLOYMENT_ENGINE.md and updated architecture/security/setup boundaries. Node/.NET samples and existing applications are unchanged; only owned test copies ran. Next: full project regression against the appended migration/15-model schema, then final evidence/status and four-document-only synchronization.
+
+**Updated:** 2026-10-27 (Asia/Bangkok)
+
+## Current milestone and handoff
+
 - **Last completed milestone:** M4 — Platform API and Database, **COMPLETED under the authoritative SQLite-only policy**.
 - **Previously completed:** M1–M3 remain COMPLETED; regression checks passed.
 - **First unfinished milestone:** M5 — Deployment Engine, NOT STARTED. **Do not start M5 in this session.**
@@ -1201,3 +1396,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 ```````
 ````````
 `````````
+``````````
