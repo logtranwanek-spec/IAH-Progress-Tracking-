@@ -148,3 +148,12 @@ Do not commit any source code or other project files into this progress reposito
 - Enforce authorization and sensitive state changes atomically, protect all endpoints by default, scope application reads/writes, prevent self-approval/escalation and audit security actions without sensitive inputs.
 - Document loopback HTTP/client trust and same-user limitations accurately; no corporate/SSO/TLS/OS security configuration is authorized by this milestone. Verify real HTTP security behavior and full M1–M6 regression before marking M11 completed.
 - Use npm.cmd run test:auth for focused security checks and npm.cmd run verify for the full gate. Read local AUTHENTICATION.md for bootstrap transition, native-client protocol, permission matrix, transaction boundary, approval/execution separation and operational limits.
+
+## M7 package workflow authorization
+
+- The attached user request explicitly authorizes M7, superseding the M11 wait. Do not start M8 or other milestones.
+- Require real user sessions/RBAC/ownership for uploads and package actions; the pre-bootstrap maintenance capability must never upload or execute packages.
+- Never execute package code during ZIP/metadata inspection. Reject traversal, links, unsafe artifacts, malformed/oversized archives and unsupported commands. Use platform-owned storage and preserve previous releases.
+- Source builds remain disabled unless an explicitly reviewed safe build boundary is established; no uploaded scripts/npm installs/shell/build commands are authorized. Same-user processes are not a sandbox.
+- Only exact-fingerprint, distinct-Administrator-reviewed trusted prebuilt releases may enter the controlled Agent workflow. Recheck approval, current user authority and hashes before promotion/start; preserve M5 ownership/loopback and M6 validation.
+- If safe source builds/execution cannot be implemented, record the exact limitation and leave M7 IN PROGRESS or BLOCKED as appropriate; do not weaken acceptance or invent verification. Update/push only the four records and verify origin/main.

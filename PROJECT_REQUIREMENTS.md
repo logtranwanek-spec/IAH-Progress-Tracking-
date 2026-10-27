@@ -52,6 +52,11 @@ After completed M1–M6 (340 passing checks), implement M11 before M7: secure lo
 
 # 1. PROJECT OVERVIEW
 
+## Authorized M7 scope — 2026-10-27
+
+The user attachment authorizes M7 after M1–M6/M11 and 381 passing checks: authenticated owned ZIP upload; bounded safe archive extraction/inspection/integrity and strict metadata; exact-package Administrator approval; controlled non-overwriting release preparation; approved-build assessment; trusted prebuilt M5 execution and M6 routing; persistent validated deployment states/audits and real security/full regression tests. No arbitrary uploaded code, scripts/npm commands/installers/executables, corporate listening, existing application/security changes or non-SQLite operation is allowed. Source builds must stay disabled if no safe approved mechanism exists; document that limitation and keep M7 IN PROGRESS/BLOCKED if builds/execution cannot be implemented safely. Do not start M8 or another milestone. Preserve history/requirements and commit/push only the four records to progress origin/main, verifying the push. This supersedes the M11 session's wait; it does not authorize untrusted execution.
+
+
 ## 1.1. Background
 
 Our company currently develops multiple internal web applications using two primary backend technologies:

@@ -4,6 +4,195 @@
 
 ## Current milestone and handoff
 
+- **Current milestone:** M7 — ZIP Upload and Approved Source Builds, **IN PROGRESS**. The latest attached request authorized M7 after M11; earlier instructions to wait are historical.
+- **Completed milestones:** M1–M6 and M11 remain COMPLETED. Their full regression passed alongside M7.
+- **Last completed task:** Implemented and verified the secure trusted-prebuilt upload/review/preparation/runtime/routing workflow; completed full build/check/test/smoke and operating documentation.
+- **Final verification:** `npm.cmd run verify` exited 0: **418 passing checks**, zero failures/skips, plus real local platform smoke. This is the prior 381 plus 37 package checks.
+- **Why M7 remains unfinished:** Source builds/Node.js–React–ASP.NET build templates cannot safely execute under the available same-user boundary. No approved isolation exists. Source builds remain disabled, and the user's explicit instruction requires IN PROGRESS/BLOCKED rather than a completion claim. No source build or build-log acceptance success is recorded.
+- **Next task:** Resolve the documented approved source-build/isolation requirement within M7 before enabling any builder or changing its status. Review PACKAGES.md, M7 acceptance and the actual source/tests first. Do not start M8 or another milestone. With policy unchanged, preserve the disabled build path and this accurate status.
+- **Git scope:** Commit/push only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md to `https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git`, branch main. Source, tests, extra docs, packages, SQLite/vault data and artifacts remain local/untracked. A progress-only clone cannot reconstruct/run the implementation.
+
+## Mandatory policy and execution boundary
+
+Only **SQLite** is supported/allowed for real operations. SQL Server/PostgreSQL/MySQL labels and protected connection references remain metadata-only; server installation, connection attempts, real authentication/protocol tests are prohibited. Their missing connectivity evidence remains the accepted company-policy gap. No such operation ran in M7.
+
+All real listeners use literal 127.0.0.1; Gateway remains 127.0.0.1:5050. .NET applications/verifiers are framework-dependent publishes with UseAppHost=false, run only as `dotnet <published>.dll`; all twelve publish roots passed no-.exe scans. No apphost/testhost/VSTest, uploaded executable, native Prisma engine, Docker, elevation, security-policy/ACL/firewall change, production access or corporate listening/deployment was used. Installed node/dotnet/npm.cmd/git hosts follow the existing project convention. No new external package/native dependency was added.
+
+Verification created fresh owned temporary profile registries/users/archives/release copies and cleaned its own storage/processes afterward. It did not migrate/bootstrap configured user data or modify original samples/existing applications. Real execution used only copied trusted platform sample code and an owned deterministic exit-17 fixture. Malicious paths/scripts/native-looking bytes were inert inspection inputs, never executed.
+
+## Implemented features and verified evidence
+
+| Requirement                  | Actual evidence                                                                                                                                                                                                                                                                                          |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authenticated ZIP upload     | PASS: real M11 sessions/current RBAC/ownership; anonymous, Viewer and other Developer denied; raw streaming upload creates owned UUID storage and pending review                                                                                                                                         |
+| ZIP safety and budgets       | PASS: malformed/CRC/encrypted/oversized ZIP, traversal/absolute/drive/backslash/percent/device/alternate-stream/case aliases, symlink modes, count/ratio limits and forbidden scripts/native artifacts reject; oversized HTTP body rejects before a deployment record                                    |
+| Pure package inspection      | PASS: Node ESM and framework-dependent ASP.NET Core 8 metadata/entrypoint detection, SHA-256 archive/canonical metadata/per-file manifest; inert throwing Node entrypoint is inspected without running; source/script/runtime/port/path overrides reject                                                 |
+| Manifest compatibility       | PASS: strict platform.json and JSON-compatible platform.yaml subset; bounded normal dotnet web.config accepted and unsafe IIS command rejected without invoking IIS                                                                                                                                      |
+| Exact M11 approval           | PASS: automatic PENDING_APPROVAL, exact fingerprint and explicit trusted-code Administrator attestation, current separate reviewer, rejection history, unapproved action denial and tamper invalidation                                                                                                  |
+| Immutable preparation        | PASS: both reviewed prebuilt runtimes prepare to new release directories without process execution; duplicate version/collision rejected; previous healthy release and marker file preserved; hashes rechecked                                                                                           |
+| M5/M6 trusted execution      | PASS: approved Node/.NET start concurrently on distinct owned loopback ports; matching health succeeds; new dynamic routes proxy through the real unchanged Gateway; stop withdraws route and approved restart works                                                                                     |
+| Failure/recovery             | PASS: owned exit-17 startup tracked, leases released and previous release/stopped selection preserved; revoked approval stops only its package/removes route; interrupted preparation fails closed and cleans its owned staging; default Agent gate refuses even valid approval with no process instance |
+| Persistent states/audit/data | PASS: SQL immutable metadata/state guards, insertion-ordered events, foreign-key/model parity, package actions/audits and current deployment status; credential values absent from captured API/Gateway logs                                                                                             |
+| Existing functionality       | PASS: all previous M1–M6/M11 suites, WebSockets/dynamic updates/auth/SQLite/DPAPI/process recovery and real platform smoke                                                                                                                                                                               |
+| Approved source builds       | **NOT IMPLEMENTED/NOT RUN**: disabled due to unavailable approved isolation; no uploaded scripts/npm install/build/shell/manifest commands executed                                                                                                                                                      |
+
+The managed package suite contains **37 checks** (pure archive/metadata checks plus real HTTP/API/Agent/Gateway scenarios). It publishes/runs production managed DLLs, not VSTest. The full M6/M11 integration still has 18 checks and Gateway still has 108. New package tests verify M7 behavior, not an assertion that arbitrary applications are safe.
+
+## Architecture, permissions and operational decisions
+
+- **M11 integration:** Upload requires Administrator or owned Developer write authority; scoped reads require ownership/read grant or Administrator. Viewers cannot mutate. Administrator-only attachment download supports offline review; the former operator capability cannot upload or bypass initialized sessions. Existing native-client binding/User-Agent/Origin/Host policy stays in force; no browser login/UI is added.
+- **Streaming transaction boundary:** Raw ZIP reception runs outside long SQLite transactions; current session/ownership are checked before reception, after streaming and before approval creation. Mutation/audit operations still join atomic authorization transactions. No uploaded body is executed or logged.
+- **Fixed helper boundary:** The API allows only published CredentialProtection and metadata-only PackageInspector DLL subprocesses through dotnet, with scrubbed helper environments/bounded outputs/timeouts. Inspector reads ZIP/files/PE metadata only; no imports, entrypoint execution, runtime probe, database connection or build commands occur there.
+- **Immutable identity:** Fingerprint is lowercase SHA-256 of UTF-8 `m7\n<deploymentId>\n<archiveHash>\n<canonicalMetadataHash>\n<fileManifestHash>\n<ownerId>`. M5 sorted per-file SHA-256 manifest is reused. Distinct current Administrator must submit the exact fingerprint and trustedCodeReviewed=true. Archive bytes/metadata/files/owner bind the decision; review and launch recheck actual data and current authority. Approval alone is not proof of safety.
+- **Operator gate:** API and Agent independently default package execution disabled; both need literal IHP_TRUSTED_PACKAGE_EXECUTION=1 in their own environments after trust review. Preparation executes no code and does not need this flag. Runtime environments omit platform credentials and this flag. No direct Agent HTTP/unauthenticated process control is added; legacy M5 stdin remains separately opt-in.
+- **SQLite queue:** Authenticated prepare/deploy/stop stores the session ID/action, not a token. Agent singleton polls and checks current session expiry/revocation, current requester/reviewer roles/active state, owner and fingerprint before promotion/start. Queued admission is not completion or indefinite authorization. SQL guards constrain state transitions and immutable review data; Agent atomically records state/event/audit/general deployment status.
+- **Preparation:** Extract approved bytes into a fresh owned inspection directory, validate again, then move without overwrite to Applications/<application UUID>/releases/<version> and record the M5 release. Failure cleanup targets only owned new staging/releases, preserving existing versions and active applications.
+- **Execution/routing:** M5 retains process/job ownership, per-app gates, persistent port leases, listener/health identity, exits/log capture and bounded recovery. Packaged launch guard also applies to manual/recovery paths. Only healthy selected packages create/enable strict M6 prefix route intent; current approval is checked in API snapshots as well. A different version cannot deploy while an application runs: stop explicitly first. Prior stopped selection can be restored after failure, but no automatic previous runtime restart/online rollback/M10 is introduced.
+- **Revocation:** Agent samples authority/archive integrity every second and release files for running packages, then stops owned invalid packages/withdraws routes. M6 polling/last-known-good staleness still applies; revocation is not instantaneous or guaranteed while the source is offline.
+- **Trust limit:** Human code review plus hashes/loopback/jobs is a reviewed-trusted-code policy, not a same-user sandbox. Same-user code can access user files/network and writable registry; filesystem and launch checks cannot eliminate every race. No Windows identity isolation, signature authority, antivirus/CDR integration or corporate-network protection claim is made.
+
+## Supported package contract and limits
+
+Exactly one root platform.json or platform.yaml is required. Both use strict JSON syntax only (JSON-compatible YAML subset), <=16 KiB, depth eight, known required fields/no duplicates. Required schemaVersion=1, name, slug, runtime/framework (node/node or dotnet/aspnetcore), deploymentType=prebuilt, version, build, entryPoint, basePath=/<slug>, healthPath=/<slug>/health, contract=ihp-loopback-v1 and port=auto. Name/slug/runtime must match the registry and version the upload URL. Safe version/slug/prefix/device-name rules apply; ports come only from M5's approved 6100–6999 range/configured subset.
+
+Node requires reviewed ESM files/package.json with no scripts (or empty scripts), no native addons, and preincluded reviewed dependencies within budgets; no install runs. ASP.NET requires published managed DLL/deps/runtimeconfig, net8.0/framework-dependent ASP.NET Core 8; no self-contained/native payloads. Optional root web.config is narrowly validated XML (DTD/resolver prohibited, matching dotnet DLL, stdout files disabled), never used by IIS. Normal M5 shutdown/health contract is mandatory; arbitrary web applications are not automatically compatible.
+
+Budgets: raw application/zip with Content-Length 1–8 MiB, no Content-Encoding, 15-second stream deadline, two concurrent uploads and 50 stored records/uploader; ZIP <=256 entries, <=8 MiB/file expanded, <=32 MiB total expanded, <=100:1 ratio with 4-KiB small-file allowance. ZIP supports stored/deflated entries and validated descriptors, strict central/local/CRC layout; no ZIP64/encryption/extra fields/comments/multidisk/SFX/trailing payloads. Paths are bounded ASCII with strict segments/no links or aliases. Only managed/runtime metadata and allowlisted web/text assets are admitted. General ZIP exporter compatibility and production-sized dependency bundles are limited by these deliberate budgets.
+
+API prefix remains /_platform/api. POST /applications/:id/packages/:version accepts the raw ZIP; GET list/detail exposes scoped metadata/state/events; GET /applications/:id/packages/:deploymentId/archive is Administrator-only. Existing /approval-requests/:approvalId/decision handles exact review/rejection. Empty-JSON POST .../:deploymentId/prepare, /deploy and /stop queue actions (202); poll the scoped detail endpoint. No client filesystem path, destination host/port, start command, environment or build command is accepted. PACKAGES.md contains the full manifest/example/table and operating requirements.
+
+Validated states: UPLOADED → VALIDATING → PENDING_APPROVAL → APPROVED → PREPARING → READY → DEPLOYING → RUNNING; pending review may become REJECTED and active workflow states may become terminal FAILED. Approved stop returns RUNNING → READY. Events/audits retain fixed codes/IDs, not credential/body values. Failed recorded uploads occupy their immutable version/quota; retry with a new version rather than deleting history.
+
+## Schema, files created or modified
+
+Appended reviewed src/Api/prisma/migrations/202610270004_packages/migration.sql; earlier migration SQL is unchanged. New DeploymentPackage/deployment_packages and DeploymentEvent/deployment_events models/tables have indexed ownership/state/request-session/history links, foreign keys, immutable metadata and transition triggers. Existing deployment/user/session relations include package references and previous stopped selection. Current total **20 models/four migrations**. Apply migrations only through the explicit reviewed Node SQLite runner to authorized data; API startup never migrates it. Agent verifies its copied package migration checksum. This session verified fresh owned registries/reapplication/checksum/parity/rollback, not an actual user-data upgrade.
+
+**Created:**
+
+- src/DeploymentAgent/PackageArchive.cs and PackageWorkflow.cs.
+- src/PackageInspector/PackageInspector.csproj, Program.cs and generated pinned packages.lock.json.
+- src/Api/src/package-files.ts, packages.ts and package-controllers.ts; the package migration above.
+- tests/Packages.Tests/Packages.Tests.csproj, Program.cs, Integration.cs, Fixtures.cs, Checks.cs and packages.lock.json.
+- PACKAGES.md and docs/verification/M7-2026-10-27.md.
+- Local evidence artifacts/m7-packages.log, m7-verify-first-failure.log, m7-verify.log and preserved intermediate progress artifacts.
+
+**Modified:**
+
+- src/DeploymentAgent/ReleaseInspector.cs (shared pure directory inspection), RuntimeEngine.cs (packaged launch/recovery preflight), EngineStore.cs (internal atomic helpers), EngineOptions.cs (default-disabled gate), Program.cs (queue/policy) and DeploymentAgent.csproj (reviewed package SQL content).
+- src/Api/prisma/schema.prisma; src/Api/src/app.ts, registry.ts, access.ts, approvals.ts, routing.ts and native-policy.ts.
+- src/Api/test/api.test.mjs and database.test.mjs; tests/DeploymentAgent.Tests/Program.cs and AgentProcess.cs (model/migration counts and explicit owned-fixture execution flag).
+- InternalHostingPlatform.sln, package.json, tools/publish.mjs and tasks.mjs (two new publish roots/focused and full package verification; no external dependency additions).
+- README.md, API.md, ARCHITECTURE.md, AUTHENTICATION.md, DEPLOYMENT_ENGINE.md, DYNAMIC_ROUTING.md, SECURITY.md and INSTALLATION.md for current M7 boundary/operations.
+- Four tracked records PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md.
+
+Generated Prisma/TypeScript/dashboard/managed build/publish output was refreshed locally. Production Gateway source, dashboard UI and original sample application sources are unchanged. Implementation/additional documentation remains local as instructed; only four records belong to the progress Git repository.
+
+## Actual commands, failures, corrections and results
+
+| Command/iteration                                                          | Actual result                                                                                                                                                                                        |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Initial PackageInspector publish/API build                                 | Passed metadata helper publish and guarded WASM generation/TypeScript compile                                                                                                                        |
+| Initial Agent publish                                                      | Failed four CS0819 multiple-var declarators; changed to explicit string declarations before running                                                                                                  |
+| Initial focused rebuild                                                    | Failed CS8604 after stricter slug validation; marked throwing validation helper DoesNotReturn                                                                                                        |
+| First running npm.cmd run test:packages                                    | 17 passed/3 failed: standard ASP.NET web.config rejected; later integration assertions cascaded from that rejection. Corrected with restricted nonexecuting XML acceptance; never invoked IIS        |
+| Focused rerun                                                              | Exit 0: 32/32 including real Node/.NET lifecycle/route, hash/approval/collision/exit/revocation checks                                                                                               |
+| Expanded npm.cmd run test:packages                                         | Exit 0: 37/37 including HTTP oversize/rejection/default gate/interrupted staging/JSON-YAML subset checks                                                                                             |
+| Status consistency correction                                              | Synchronized general deployment record/package states and added actual RUNNING/READY assertions; included in final full gate                                                                         |
+| npm.cmd run format; dotnet format InternalHostingPlatform.sln --no-restore | Exit 0; final format/type/.NET format checks also passed in verify                                                                                                                                   |
+| First npm.cmd run verify                                                   | Failed at API 80/81 after successful full build/check/25 Node checks: old OpenAPI assertion required every deploy path absent. SQLite/managed/smoke were not reached in that run                     |
+| OpenAPI correction/API rebuild                                             | Exposed accurate M7 default-disabled trusted execution policy; test allows exactly the package deploy path with user-session security and still excludes legacy deploy endpoints. API rebuild passed |
+| Final npm.cmd run verify                                                   | **Exit 0: 418 passing checks, zero failures/skips, plus real local smoke**                                                                                                                           |
+| npm.cmd run doctor                                                         | Exit 0: Windows 22631 x64, Node 26.12.1, npm 11.20.0, SDK 8.0.425, .NET/ASP.NET runtime 8.0.31                                                                                                       |
+| npm.cmd audit --json                                                       | Exit 0: zero vulnerabilities                                                                                                                                                                         |
+| Current principal check                                                    | Administrator=False                                                                                                                                                                                  |
+| Recursive artifacts/publish scan                                           | Twelve project roots; zero .exe artifacts                                                                                                                                                            |
+| git fetch origin main / base comparison                                    | Local HEAD and origin/main both 94c59dbb5e9ae6f0f8b244c434df69b7766b298c before delivery; no incoming conflict                                                                                       |
+
+Commands used PowerShell Tee-Object for artifacts/m7-packages.log and artifacts/m7-verify.log and propagated LASTEXITCODE. tools/publish.mjs invoked dotnet publish in Release/net8.0, --no-self-contained, --disable-build-servers, -p:UseAppHost=false, -p:UseSharedCompilation=false and project-specific artifacts/publish output, scanned output, then invoked the DLL with dotnet. No dotnet run/test or blocked runner was used. A few rejected patch contexts/orchestration attempts were corrected before execution; no external action or policy bypass resulted. Intermediate counts above describe those revisions, not final completion evidence.
+
+Final handoff checks: npm.cmd run check exited 0 after the documentation update. Full previous progress text and every original requirements line were verified preserved; git diff --check passed and the recursive publish scan again found zero .exe artifacts. Only the four authorized Markdown records are tracked for delivery.
+
+### Final full regression
+
+| Suite                                          |  Passed | Failed/skipped |
+| ---------------------------------------------- | ------: | -------------: |
+| Node foundation/lifecycle/sample configuration |      25 |              0 |
+| API HTTP/reference/policy/DPAPI/routing/auth   |      81 |              0 |
+| Guarded Prisma/SQLite/migration                |      13 |              0 |
+| Managed Foundation                             |      27 |              0 |
+| Managed Gateway                                |     108 |              0 |
+| Managed Samples                                |      82 |              0 |
+| Managed Deployment Agent                       |      27 |              0 |
+| Managed routing/auth integration               |      18 |              0 |
+| Managed packages                               |      37 |              0 |
+| **Total**                                      | **418** |          **0** |
+
+Separate smoke applied/verified fresh reviewed SQLite migrations, checked actual Gateway/API/React and structured Gateway logs, inspected literal loopback 5050/5065/5173 listeners, stopped four owned components successfully, verified released ports and deleted only owned temporary storage. Existing dynamic-routing WebSocket tests passed; M7's own test additionally proxied both newly admitted releases. There was no Gateway restart during those package route changes.
+
+## Known limitations, unresolved issues and blockers
+
+- **M7 source-build acceptance remains unfulfilled:** no safe approved isolated build environment. Node.js/React/ASP.NET source templates/build logs/dependency install/custom build commands are not implemented or tested. Do not enable them under the same ordinary identity. This is the reason for IN PROGRESS; the verified prebuilt subset is not full M7 completion.
+- **Restricted shapes:** JSON-compatible YAML subset only; no general source manifest/standalone React build/static-only template. Standard ZIP exporters/large apps/native dependencies may exceed the strict formats/budgets. Exact Node 24 compatibility/large-package throughput remains unverified on installed Node 26.12.1.
+- **Crash/retention gaps:** PREPARING/DEPLOYING restart fails closed. A crash between filesystem promotion and database recording can leave an orphaned version directory; collision protection prevents overwrite and requires explicit operator reconciliation. API death during receive/validation can leave owned upload/orphan records; no automatic retention/forensic recovery service or quota reclamation is implemented. These are documented limits, not successful crash-atomicity claims.
+- **No online upgrades/rollback:** new deploy requires stopped application; failed startup preserves files and may restore stopped selection, not service continuity or automatic prior runtime restart. M10 is not started.
+- **Same-user/transport/staleness:** local HTTP/native-client trust and writable same-user filesystem/registry cannot isolate malicious code or eliminate TOCTOU. M5 job-assignment window, best-effort redaction and bounded recovery, M6 polling/LKG/offline revocation limits and M11 session transport assumptions remain. No arbitrary package safety, instant revocation, OS identity isolation, TLS/SSO/MFA or unattended boot/logout operation is claimed.
+- **User registry upgrade not exercised:** fresh owned migrations/parity/checksum/rollback passed; no actual configured registry/vault/user data was changed. Authorized backup/upgrade/restore/retention procedures remain future work.
+- No reproducible failure remains in the tested trusted-prebuilt subset after fixes. The limitations above are not hidden by passing tests. No new IT approval request, stronger isolation, network deployment or later milestone has been inferred as authorized.
+
+## Exact next task and commands to resume
+
+Read AGENTS.md, this current snapshot, M7 in IMPLEMENTATION_PLAN.md and relevant requirements; inspect the actual local source/output/state. Confirm M1–M6/M11 remain complete and M7 IN PROGRESS. Review PACKAGES.md and the source-build limitation before doing any new execution work. The first unfinished requirement is an approved safe build boundary/allowlisted source templates with genuine build-log evidence. With the current policy, retain source builds disabled; an explicit reviewed isolation/policy or acceptance decision is needed before implementing those templates or declaring M7 complete. Do not start M8/another milestone.
+
+To verify the existing local implementation safely:
+
+```powershell
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8 -TotalCount 220
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+Get-Content -LiteralPath PACKAGES.md -Encoding UTF8
+git status --short
+npm.cmd run doctor
+npm.cmd run test:packages
+npm.cmd run verify
+```
+
+Do not migrate actual configured data just to resume tests: verifiers create their own SQLite registry. Apply reviewed migrations to configured development data only through an explicitly authorized backup/review process. Do not copy test credentials or turn on trusted execution automatically. No .exe artifacts, Docker, Administrator/security changes or forbidden database/network operations are needed for these checks.
+
+For authorized progress-only delivery after documentation checks:
+
+```powershell
+git diff --check
+git add PROJECT_REQUIREMENTS.md AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md
+git diff --cached --name-only
+git commit -m "Record M7 trusted package workflow and source-build limitation"
+git push origin main
+git ls-remote origin refs/heads/main
+git rev-parse HEAD
+```
+
+Require the staged/committed paths to be exactly those four records and compare remote main to local HEAD. Push result/commit identity is confirmed in the session handoff; source/data/artifacts are never included. Historical progress below is preserved in full; older milestone statuses/wait instructions/results are history and do not override this snapshot.
+
+## Preserved progress history
+
+The following complete prior log includes intermediate M7 work and all earlier sessions. Its obsolete status and wait instructions are historical.
+
+`````````````text
+# Project Progress
+
+## Active M7 session — 2026-10-27
+
+M7 is IN PROGRESS under the attached user instruction, superseding the previous wait. Read AGENTS/current progress/plan and ZIP/manifest/deployment/security requirements; inspected actual M11 authorization/approval, M5 inspection/runtime and M6 route boundaries. Baseline tracked docs are clean at 94c59db; source exists locally. Plan: bounded strict managed ZIP inspection, authenticated owned package records, immutable exact-fingerprint reviews, safe promotion and controlled SQLite Agent queue for reviewed trusted prebuilt releases. Source builds remain disabled because same-user execution is not an approved sandbox; do not run uploaded scripts/builds. Per user instruction this limitation prevents claiming full M7 completion. No M8+, corporate deployment or production/user data change is authorized.
+
+Core implementation step: added managed ZIP/CRC/metadata inspection (8-MiB archive/32-MiB expansion/256-entry budgets), a fixed published inspector helper, authenticated raw ZIP streaming with post-upload reauthorization, immutable package/event schema (20 models/four migrations), exact fingerprint/trusted Administrator review and a controlled Agent preparation/deploy/stop queue. M5 inspection is shared without running entrypoints; original trusted flows remain separate. The Agent preflight runs under its singleton lock before recovery; packaged launches check policy/approval/hashes and M6 additionally checks package authority. API compiles; the initial Agent publish found four C# multiple-var declarators, corrected before execution. No M7 lifecycle behavior is yet verified. Next: real managed ZIP/HTTP/runtime fixtures, failure cleanup/recovery checks and full regression. Source builds remain disabled; M7 is not complete.
+
+**Updated:** 2026-10-27 (Asia/Bangkok)
+
+M7 verification step: the first running package suite reported 17 passed/3 failed because standard ASP.NET publish web.config was excluded. Added narrow nonexecuting root XML validation (no IIS/config changes), then verified 32/32 checks including real Node/.NET upload/review/promotion/start/proxy/stop, archive tampering, promotion collision, exit-17 cleanup, prior stopped-selection restoration and authority revocation. An intermediate compile nullability error was corrected with the throwing helper's DoesNotReturn annotation. Added size/rejection/default-gate/interruption and YAML-subset checks; these are running and are not yet claimed passing. Source builds remain disabled and M7 IN PROGRESS. Full regression is next.
+
+Expanded package gate passed 37/37. Added synchronization of general deployment status with package states and corresponding RUNNING/READY assertions. Full verification built/scanned all 12 published roots and passed format/type checks and 25 Node checks; API stopped at 80/81 because an old OpenAPI assertion prohibited every deploy path. Updated it to allow exactly the M7 packaged route with user-session security and default-disabled policy text, retaining legacy endpoint absence. No managed regression/SQLite/smoke completion is claimed for that failed run. Next: rerun full verification after formatting.
+
+## Current milestone and handoff
+
 - **Current/last completed milestone:** M11 — Authentication and Authorization, **COMPLETED**, prioritized before M7 by explicit user instruction.
 - **Previously completed:** M1–M6 remain COMPLETED; their full regression and real Gateway/Agent integration passed.
 - **First unfinished milestone by roadmap order:** M7 — ZIP Upload and Approved Source Builds, NOT STARTED. **Do not start M7 or any other milestone without a new instruction.**
@@ -1753,3 +1942,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 ``````````
 ```````````
 ````````````
+`````````````

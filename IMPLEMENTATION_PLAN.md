@@ -6,6 +6,8 @@ Internal Application Hosting & Deployment Platform (project code: Internal Hosti
 
 This roadmap translates those requirements into independently verifiable milestones. It does not claim that planned functionality already exists.
 
+**Current assignment (2026-10-27):** M7 only, authorized by the latest attachment after completed M1–M6/M11. Older milestone handoffs saying to wait for M7 are historical and superseded. M7 remains IN PROGRESS because approved isolated source builds are unavailable; do not start M8 or another milestone.
+
 ## Status rules
 
 - `NOT STARTED`: work has not begun.
@@ -26,6 +28,7 @@ src/DeploymentAgent/         .NET 8 Worker
 src/Dashboard/               React + TypeScript + Vite
 src/Foundation/              shared .NET host configuration
 src/CredentialProtection/    published current-user DPAPI helper (M4)
+src/PackageInspector/        published metadata-only ZIP helper (M7)
 packages/config/             shared Node configuration
 packages/contracts/          TypeScript contracts
 tools/                       local development lifecycle and checks
@@ -35,8 +38,9 @@ samples/DemoNode/            trusted dependency-free Node.js sample
 samples/DemoDotnet/          trusted ASP.NET Core 8 sample
 tests/Samples.Tests/         published managed sample/process verification
 tests/Gateway.Tests/         managed YARP HTTP/WebSocket verification
-tests/DeploymentAgent.Tests/ planned M5
-tests/Platform.Integration.Tests/ planned integration suite
+tests/DeploymentAgent.Tests/ published M5 lifecycle/recovery verification
+tests/Platform.Integration.Tests/ published M6/M11 integration suite
+tests/Packages.Tests/        published M7 archive/HTTP/trusted-runtime verification
 ```
 
 M1 commands below refer to existing artifacts. Commands for later milestones remain planned and require their future projects/tests. Use `npm.cmd` from PowerShell.
@@ -372,7 +376,7 @@ dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests
 
 **Operational limits:** Opt-in polling/eventual activation; a successful PUT stores intent rather than acknowledging Gateway activation. Static collisions reject at the Gateway and require operator correction. Failed/offline feeds retain last accepted in-memory destinations, which can become stale; no offline revocation or independent API OS ownership authority is claimed. Fresh Gateway startup loads static routes only until the API responds. Registry projection trusts M5 state and same-user operator discipline. Existing WebSockets keep their old selected connection. No arbitrary upload/build, zero-downtime/rollback orchestration, hostname routing, login/RBAC, sandbox, unattended startup or corporate-network access is implemented.
 
-**Next milestone:** M7 — ZIP Upload and Approved Source Builds, NOT STARTED. Wait for a new user instruction and review its M11/approval/isolation dependencies before proceeding.
+**M6 historical handoff:** M7 was NOT STARTED at M6 completion. The latest attachment now authorizes M7 and integration of completed M11; see the current assignment and M7 status below.
 
 ### M7 — ZIP Upload and Approved Source Builds
 
@@ -380,34 +384,37 @@ dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests
 
 **Tasks:**
 
-- Implement upload size/file checks, package/archive integrity checks, archive entry/expanded-size limits, safe extraction, path traversal and link handling protections, ownership, authorization hooks, and temporary cleanup.
-- Detect supported Node.js, React, and ASP.NET Core package shapes; validate strict `platform.yaml` and ASP.NET deployment templates.
-- Support prebuilt packages and allowlisted build templates for Node.js, React, and ASP.NET Core.
-- Invoke npm through `npm.cmd` on Windows. Do not execute manifest commands blindly; require the configured approval policy for custom commands.
-- Capture build output and failure state, clean up failed staging areas, and prepare immutable release directories.
-- Do not run untrusted builds or application code unless the approved security boundary/policy is in place; restrict to reviewed, trusted packages if adequate isolation is unavailable.
+- Implemented: session/ownership-protected raw ZIP streaming; compressed/expanded/file/count/ratio/time/concurrency/quota budgets; strict structure/CRC/path/link/artifact validation; owned extraction and cleanup; SHA-256 archive/configuration/file manifests.
+- Implemented: reviewed prebuilt Node ESM and framework-dependent ASP.NET Core 8 inspection shared with M5; strict required platform.json or JSON-compatible platform.yaml metadata. General YAML/source manifests, standalone React build/static-only templates and dependency installation remain unsupported; backend-served prebuilt assets are permitted within budgets.
+- Implemented: automatic pending exact-package approval; distinct current Administrator fingerprint/code attestation; session/current-role/owner/hash checks at preparation/start; immutable SQL metadata/state guards and event/audit history (20 models/four migrations).
+- Implemented: SQLite Agent prepare/deploy/stop queue, non-overwriting promotion, M5 lifecycle/ports/health/jobs/recovery launch guard and M6 healthy routing. API and Agent execution default disabled and independently require explicit operator opt-in. Original M5/M6 workflows remain compatible.
+- Implemented: failed staging/start cleanup, prior release preservation and stopped-selection restoration; restart fails closed on interrupted preparation. No rolling update/automatic rollback is introduced.
+- **Unfinished/policy-limited:** allowlisted Node.js/React/ASP.NET source-build templates and build-output evidence. No safe approved build isolation exists. Same-user processes cannot contain build scripts; no uploaded npm/install/build/shell commands run. Do not enable templates merely to pass acceptance. Future reviewed npm operations would use npm.cmd on Windows only.
+- Implemented/verified: workflow, package schema/budgets, permission/trust boundary, default execution gate, failure/recovery/stale-route/storage limits and unsupported-shape documentation; full existing regression and new managed package suite. Actual results are recorded in PROGRESS.md.
 
-**Dependencies:** M4, M5, M6, M11 authorization/approval gates, and a documented deployment policy. M11 may be implemented before this milestone; until then, deployment remains disabled.
+**Dependencies:** Completed M4–M6 and M11; documented trusted-prebuilt policy in local PACKAGES.md. Approved build isolation/policy remains unavailable. Only reviewed trusted prebuilt code may execute under the explicit opt-in; arbitrary/source code stays disabled.
 
 **Acceptance criteria:**
 
-- Tests reject malformed archives, path traversal, reserved/unsafe entries, oversized uploads/expansions, unsupported packages, and unauthorized deployments.
-- Prebuilt Node.js and ASP.NET Core packages can be staged and validated without arbitrary script execution.
-- Approved source templates build the supported sample applications and retain build logs.
-- Failure cleanup does not touch platform source or existing applications.
-- Clear validation errors are returned for incompatible packages.
+- Verify rejection of malformed archives, traversal/links/reserved/unsafe entries, oversized uploads/expansions, unsupported runtime/configuration and unauthorized deployment.
+- Verify Node.js/ASP.NET Core prebuilt upload/inspection, exact approval/rejection/tampering, immutable preparation, trusted real M5 execution and M6 route add/remove without arbitrary script execution.
+- Verify state/event/audit history, current sessions/RBAC/ownership, default-disabled execution, duplicate/collision protection, failed-start/lease cleanup and interrupted preparation recovery.
+- Verify failure cleanup preserves platform source, existing applications and previous releases; validation failures return controlled codes and logs omit credential values.
+- **Still unfulfilled:** approved source templates build the supported samples and retain build logs. Source builds are disabled by policy assessment, not recorded as successfully built or accepted away. Per explicit user instruction, retain IN PROGRESS/BLOCKED until a safe approved mechanism or explicit acceptance decision resolves this requirement.
+- Run full M1–M6/M11 regression plus package checks, formatting/build/no-.exe scans and local smoke. No corporate deployment/OS security change or later milestone.
 
-**Verification commands (planned):**
+**Verification commands (implemented):**
 
 ```powershell
-npm.cmd --prefix .\src\Api run test
-dotnet publish .\tests\DeploymentAgent.Tests\DeploymentAgent.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\DeploymentAgent.Tests\bin\Release\net8.0\publish\DeploymentAgent.Tests.dll
-dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
+npm.cmd run test:packages
+npm.cmd run verify
+# Focused gate publishes all prerequisite managed tools/samples before invoking:
+dotnet .\artifacts\publish\Packages.Tests\Packages.Tests.dll
 ```
 
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
+
+**Verified evidence (2026-10-27):** focused package gate passed 37/37; final npm.cmd run verify exited 0 with **418 passing checks**, zero failures/skips, plus real platform smoke. All twelve published roots passed no-.exe scans. Exact Node/.NET upload/review/preparation/start/proxy/stop, rejection/tampering/collision/failure cleanup, interrupted staging, default Agent gate and full M1–M6/M11 regression passed. General deployment states track package state. PROGRESS.md records commands, corrected failures, files, security decisions and remaining limits. Approved source builds/build logs remain unfulfilled, so M7 stays IN PROGRESS; never infer full completion from its verified prebuilt subset. Do not start M8.
 
 ### M8 — React Dashboard
 
@@ -556,7 +563,7 @@ The dedicated auth command builds through guarded Prisma WASM generation and run
 
 **Security scope/limits:** Native local API clients only, existing unencrypted loopback HTTP; no cookie/browser-login UI, TLS, MFA, SSO, device proof or same-user isolation claim. Theft of both secrets/client context and local DB/source tampering remain risks. M5 trusted local operator and hosted apps' own content auth remain separate. No recovery bypass; audit retention/tamper resistance and real backup/recovery remain future work. Legacy maintenance closes after any user exists; M6 reader remains read-only. Actual upload/deployment/process/rollback/application-deletion execution stays absent/disabled even with a valid approval.
 
-**Handoff:** M11 is complete; M7–M10 and M12 are NOT STARTED. Await a new assignment. M7 must explicitly integrate ownership/approval/isolation gates before any future execution path.
+**M11 historical handoff:** M11 is complete. The latest attachment subsequently authorized M7, which now integrates these ownership/approval gates under its restricted trusted-prebuilt policy. M8–M10 and M12 remain NOT STARTED; no later milestone is assigned.
 
 ### M12 — Security Hardening and Final Testing
 
@@ -617,4 +624,4 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                   | M11                  |
 | Security, resilience, compatibility, docs, final acceptance | M12                  |
 
-M1–M6 and the explicitly prioritized M11 are `COMPLETED`; M4's SQLite-only policy/accepted gap remain in force. M7–M10 and M12 remain `NOT STARTED`. Do not begin another milestone in this session. Future .NET checks must be published managed DLL programs; later milestone commands remain planned until those projects exist. Change a status only with matching verified evidence and current policy.
+M1–M6 and the explicitly prioritized M11 are `COMPLETED`; M4's SQLite-only policy/accepted gap remain in force. M7 is `IN PROGRESS` with approved source builds unavailable; M8–M10 and M12 remain `NOT STARTED`. Do not begin another milestone in this session. All .NET checks use published managed DLL programs; uncreated later-milestone commands remain planned. Change status only with matching evidence and current policy.
