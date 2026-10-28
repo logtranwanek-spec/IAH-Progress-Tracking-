@@ -1,5 +1,9 @@
 # Project Progress
 
+## Dashboard compiled-assets rebuild — 2026-10-28
+
+Ran the existing **npm.cmd run build --workspace @ihp/dashboard** script: **exit 0**, TypeScript check and Vite production build succeeded. Generated src/Dashboard/dist/index.html and bundled assets including index-WueZkaNV.js. Read-only bundle checks confirmed the 52428800-byte cap, Maximum ZIP size: 50 MB label and 52,428,800-byte error text. No source/configuration code changed, no acceptance environment/server/browser was started, and no tests/full verification were rerun. Historical 529-check verification and every milestone/browser-acceptance status remain unchanged. Only this related build record is updated; compiled assets remain local and excluded from Git delivery. Next task remains operator-assisted M8 acceptance when explicitly requested.
+
 ## 50 MiB ZIP upload limit — verified handoff, 2026-10-28
 
 **Last completed task:** increased the compressed ZIP cap consistently to **50 MiB = 52,428,800 bytes, inclusive**. Dashboard label: **Maximum ZIP size: 50 MB**. Final `npm.cmd run verify` exited **0 with 529 passing checks, zero failures/skips, plus complete local smoke**. Earlier checkpoints/failures below are retained as history. This completes the assigned size-limit refinement only: **M7/M8 remain IN PROGRESS**, M1–M6/M11 COMPLETED and M9/M10/M10-DB/M12 NOT STARTED. Actual-browser acceptance remains **53 NOT RUN**, and production browser management remains default disabled.
