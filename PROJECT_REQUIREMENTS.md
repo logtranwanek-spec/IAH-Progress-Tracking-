@@ -518,6 +518,10 @@ The platform must validate the package and launch it using the appropriate runti
 
 ### Upload Security
 
+The maximum compressed ZIP upload is **50 MiB (52,428,800 bytes), inclusive**, consistently enforced by the Dashboard, authenticated Platform API, Gateway browser-upload boundary and package inspector/storage constraint. The Dashboard displays **"Maximum ZIP size: 50 MB"**; that label uses the same binary 50 MiB limit, not 50,000,000 bytes. Validate size before reading/uploading the file; reject even one byte above the cap with a clear size error/HTTP 413 at server ingress. Archives below/at the cap still require all normal integrity, structure, ownership, authorization, fingerprint and Administrator approval checks.
+
+This compressed-size change does **not** raise extraction limits: retain **32 MiB expanded total, 8 MiB per expanded file, 256 entries and maximum 100:1 expansion ratio with the existing 4-KiB allowance**. Keep ZIP Slip/path/link checks, strict CRC/structure/type validation, compression-bomb protection, bounded upload concurrency/deadlines and owned temporary cleanup. Only the explicitly allowlisted browser ZIP operation receives the larger request budget; ordinary application proxy and JSON request limits remain unchanged. The native API streams to owned storage; avoid redundant archive-sized memory copies at the signed browser boundary. Source builds/unreviewed execution remain disabled.
+
 Implement:
 
 - Maximum upload size.

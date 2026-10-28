@@ -386,6 +386,8 @@ dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests
 
 ### M7 — ZIP Upload and Approved Source Builds
 
+**Verified ZIP cap refinement (2026-10-28):** compressed ZIP uploads now allow **50 MiB / 52,428,800 bytes inclusive**, Dashboard label **Maximum ZIP size: 50 MB**. Valid one-byte-below/exact-cap archives passed native API and signed Gateway inspection into pending approval; one-byte-above is rejected in the client before hashing/network and at server ingress with 413. Expanded total/per-file/count/ratio/CRC/path/type/fingerprint/approval/source-build/ordinary-proxy policies are unchanged. Additive fifth migration preserves old checksums/rows/indexes/foreign keys/immutable-state guards; configured data was not migrated and requires an explicit authorized operator step before updated components run. Final npm.cmd run verify exited **0 with 529 passing checks, zero failures/skips, plus owned local smoke**, with all twelve no-.exe publish scans/build/type/format checks passing. Focused package 37/37, API 84 + SQLite 14, Dashboard 43/43, signed protocol 51/51 and Agent 27/27 passed. PROGRESS.md records files, memory review, corrected HTTP-fixture/stale migration-count failures and operator-resolved DLL lock. This completes only the cap refinement: **M7 remains IN PROGRESS** (source-build isolation/templates unfulfilled), **M8 remains IN PROGRESS/default-off with 53 browser scenarios NOT RUN**; all later statuses are unchanged.
+
 **Objective:** Accept safe application packages and perform only policy-approved preparation/build operations.
 
 **Tasks:**
@@ -403,6 +405,7 @@ dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests
 **Acceptance criteria:**
 
 - Verify rejection of malformed archives, traversal/links/reserved/unsafe entries, oversized uploads/expansions, unsupported runtime/configuration and unauthorized deployment.
+- ZIP cap refinement: verify valid compressed ZIPs below and exactly **50 MiB (52,428,800 bytes)** are accepted through native API and signed Gateway, one byte above is rejected before buffering/persistence, and Dashboard displays **Maximum ZIP size: 50 MB** with client-side rejection. Preserve existing 32 MiB expanded-total/8 MiB per-file/count/ratio/CRC/path/type/fingerprint/approval budgets and ordinary proxy limits. Verify additive migration of old package rows preserves checksums, data, foreign keys, indexes and immutable metadata/state triggers; never auto-migrate configured data. Record focused/full regression evidence without claiming actual-browser acceptance or M7 source-build completion.
 - Verify Node.js/ASP.NET Core prebuilt upload/inspection, exact approval/rejection/tampering, immutable preparation, trusted real M5 execution and M6 route add/remove without arbitrary script execution.
 - Verify state/event/audit history, current sessions/RBAC/ownership, default-disabled execution, duplicate/collision protection, failed-start/lease cleanup and interrupted preparation recovery.
 - Verify failure cleanup preserves platform source, existing applications and previous releases; validation failures return controlled codes and logs omit credential values.

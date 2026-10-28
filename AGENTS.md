@@ -1,5 +1,13 @@
 # Repository Instructions for Codex and Development Agents
 
+## Current ZIP upload-limit assignment — 2026-10-28
+
+The latest user authorizes only raising the compressed ZIP cap to 50 MiB (52,428,800 bytes), its boundary/security tests and documentation. This supersedes the previous documentation-only/operator-wait scope for this task, not any security rule. Preserve milestone statuses, M11/M7 controls, default-off production browser management and the 53 NOT RUN browser scenarios. Run focused upload checks and npm.cmd run verify; use published DLLs only. Never modify an applied checksummed migration: prepare a reviewed additive migration and test it only on owned disposable data, leaving configured Registry migration as an explicit operator step.
+
+## Permanent ZIP size rule
+
+- Compressed ZIP uploads are limited to **52,428,800 bytes (50 MiB), inclusive**; Dashboard label is **Maximum ZIP size: 50 MB**. Keep client/API/Gateway/inspector/SQLite constraints consistent and test below/exactly/one-byte-above boundaries. Do not increase the independent 32 MiB expanded-total, 8 MiB per-file, 256-entry or 100:1 ratio budgets, weaken any ZIP validation/approval/fingerprint check, widen ordinary proxy/JSON limits or enable source execution. API uploads remain streamed with bounded concurrency; review archive-sized allocations/copies when changing limits. No automatic migration of configured data.
+
 ## Current workflow-configuration assignment — 2026-10-28
 
 The latest user assigns workflow configuration/documentation only. Configure lean optional delegation and update AGENTS.md/PROGRESS.md; do not implement application features, run application tests/builds, start applications, migrate databases or start another milestone. A minimum supported repository-local Codex configuration may be prepared; do not change global settings or install extensions. This assignment supersedes earlier active implementation directives for this task only. Preserve all security rules, milestone statuses, the M7 source-build restriction, default-off production browser management and all 53 NOT RUN M8 browser scenarios. Use documentation/configuration consistency checks and git diff --check. Commit/push only changed files within the four authorized Markdown tracking paths; local configuration stays out of that progress repository.
