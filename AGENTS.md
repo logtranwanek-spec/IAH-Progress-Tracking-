@@ -1,5 +1,9 @@
 # Repository Instructions for Codex and Development Agents
 
+## Current workflow-configuration assignment — 2026-10-28
+
+The latest user assigns workflow configuration/documentation only. Configure lean optional delegation and update AGENTS.md/PROGRESS.md; do not implement application features, run application tests/builds, start applications, migrate databases or start another milestone. A minimum supported repository-local Codex configuration may be prepared; do not change global settings or install extensions. This assignment supersedes earlier active implementation directives for this task only. Preserve all security rules, milestone statuses, the M7 source-build restriction, default-off production browser management and all 53 NOT RUN M8 browser scenarios. Use documentation/configuration consistency checks and git diff --check. Commit/push only changed files within the four authorized Markdown tracking paths; local configuration stays out of that progress repository.
+
 ## Current M8 continuation — 2026-10-28
 
 The latest user explicitly resumes M8 implementation and verification, superseding the preceding documentation-only assignment for this session. Diagnose API readiness, secure and verify the existing browser candidate, integrate authorized Dashboard operations and run focused/full regression. Earlier task-specific scope statements are historical when superseded by an explicit user assignment. Preserve M7 IN PROGRESS/source-build restrictions and M10-DB NOT STARTED; do not start M9/M10/M10-DB/M12. Actual-browser acceptance requires permitted real-browser evidence; do not launch browser executables/drivers or infer acceptance from HTTP/WebCrypto/DOM simulation. Keep private production browser operations disabled if that gate remains unmet. Push only the four official records to progress origin/main.
@@ -29,6 +33,57 @@ At the end of every development session:
 5. Provide a concise handoff summary.
 
 The user approved the documentation and authorized local implementation on 2026-10-26. Continue within the current milestone without requesting that approval again. Corporate-network deployment and production access still require separate explicit authorization.
+
+## Lean Multi-Agent Orchestration
+
+### Root ownership and delegation decision
+
+- Use the current Root Agent alone by default. Orchestration and integration are two responsibilities of the same accountable Root, not two automatically spawned agents. No sub-agent is required for a routine edit, documentation task, simple lookup or already-understood fix.
+- Delegate only when a bounded investigation, implementation or independent review provides a clear benefit that exceeds coordination/context cost. State the benefit, owner, exact scope and expected result before spawning. Do not delegate the same investigation twice or automatically invoke every role.
+- This section authorizes optional delegation within the user's currently assigned task when the active host permits applicable repository instructions to authorize it. It never overrides a higher-priority no-delegation instruction, a user request to work alone, missing tool/model access or project security limits. If unavailable, Root performs the work directly.
+- Root owns scope/architecture, task decomposition, acceptance criteria, integration/conflict resolution, final verification, milestone decisions, official progress records, Git delivery and the final report. Delegate results are evidence to inspect, not automatic completion.
+
+### Optional roles and model preferences
+
+| Role                | Preferred model / native identifier | Preferred reasoning | Assigned responsibility and access                                                                                                                                                   |
+| ------------------- | ----------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Root / Orchestrator | GPT-6.1 Sol / gpt-6.1-sol           | medium              | Decide whether delegation helps; own the task and security boundaries                                                                                                                |
+| Explorer            | GPT-6 Luna / gpt-6-luna             | high                | Investigate one specific module/defect; read-only; concise findings and relevant file references                                                                                     |
+| Worker              | GPT-6.1 Sol / gpt-6.1-sol           | high                | Implement an explicitly bounded task in assigned files; focused relevant tests; report changes/results/unfinished work                                                               |
+| Researcher          | GPT-6 Luna / gpt-6-luna             | high                | Answer one narrow technical question; prefer local project documentation, then authoritative sources when needed; read-only; concise evidence/recommendation                         |
+| Reviewer            | GPT-6 Astra / gpt-6-astra           | low                 | Optional independent review justified by security risk, architectural complexity or significant changes; concrete findings with evidence; read-only unless separately assigned edits |
+| Root / Integrator   | GPT-6.1 Sol / gpt-6.1-sol           | medium              | Same Root integrates/reviews changes, runs the final gate and reports verified outcomes/blockers                                                                                     |
+
+These are preferences, not claims about the currently executing model, account entitlements or guaranteed routing. Check available tools/model IDs/reasoning values at the beginning of a session; do not invent aliases, configuration keys or model availability. Avoid delegation/high reasoning for trivial work. Use the listed high levels for suitably complex delegated work; choose a supported lighter level when the actual bounded task warrants it. Do not automatically escalate to extra-high/max/ultra. If an override/model is unavailable, continue on the current Root or a verified supported choice; disclose the fallback rather than repeatedly probing models or installing tools.
+
+### Native capability and local configuration boundary
+
+- The inspected native collaboration interface supports spawn_agent, follow-up, messaging, listing, interruption and waiting. Its spawn arguments include model and reasoning_effort; gpt-6.1-sol, gpt-6-luna and gpt-6-astra and the requested effort levels are advertised. This is interface evidence, not a live model/entitlement test. Recheck future-session capabilities before use.
+- On this host, a model/reasoning override requires fork_turns="none". Supply a concise self-contained task with repository path, current authorized milestone, file scope, acceptance/verification instructions and security constraints; tell the child to read this AGENTS.md and relevant progress/requirements. Do not fork the whole conversation just to repeat broad exploration. When using another host, use its actual supported controls instead of assuming these argument names.
+- Repository .codex/config.toml prepares the documented model=gpt-6.1-sol, model_reasoning_effort=medium and agents.max_concurrent_threads_per_session=2 settings for clients that load trusted project configuration. It does not switch an already-running Root or prove that this session's host loaded it. If project configuration is ignored/not trusted, retain current Root and report the unmet preference; do not change trust/global settings as a workaround.
+- Specialized model/effort choices are supplied explicitly on justified native spawn calls; no custom-role TOML files or speculative role keys are needed. AGENTS.md controls workflow intent; it does not implement a permission sandbox or force host model selection. No global Codex setting, extension, provider, authentication, network or security setting may be changed by this policy.
+- Prefer one delegated agent at a time. At most two may run concurrently for genuinely independent, non-overlapping scopes; always obey any lower runtime limit. The inspected session advertises four total slots, but the local policy is deliberately leaner. Do not spawn children solely to test that spawning works, and do not allow recursive delegation without an explicit bounded Root assignment and available capacity.
+
+### Task contract, file ownership and integration
+
+- Every task has one accountable owner. Before delegating, specify role, precise question/change, allowed files, read-only versus edit authority, required focused verification, expected deliverable and stopping condition. Send only necessary context; reuse already-verified findings instead of rereading every large document.
+- Assign non-overlapping file scopes where possible. Never allow simultaneous edits to the same file. If overlap becomes necessary, stop/wait for the existing owner and explicitly transfer ownership before edits. Shared workspace changes are immediately visible; do not assume branch or filesystem isolation.
+- Keep AGENTS.md, PROGRESS.md, IMPLEMENTATION_PLAN.md, PROJECT_REQUIREMENTS.md, model/workflow configuration, final staging/commit/push and milestone statuses under Root control. A worker may propose documentation text but must not edit official tracking records or deliver Git changes without an explicit scope transfer.
+- Explorer/Researcher/Reviewer do not modify files, launch applications or run builds/tests by default. A Worker edits only assigned files and performs only authorized focused checks. All roles stop at their scope boundary and report blockers rather than starting another milestone, changing security or expanding execution authority.
+- Required return: concise findings/changes, file references, exact commands/results, unresolved risks/blockers and next action. No raw logs or secrets. Root inspects changes, resolves conflicts, checks acceptance/security and integrates before reporting success. Do not repeat an investigation or passing test without a concrete unresolved concern.
+
+### Verification, quota and security inheritance
+
+- During authorized implementation, Workers run relevant focused tests; Root runs the required project final gate at the appropriate integration point. Do not run the whole suite separately in every child. Repeat/broaden only after changes, failures or unresolved concerns. Never skip required security/regression acceptance to save quota.
+- For documentation/configuration-only tasks, perform read-only consistency/configuration checks and git diff --check; do not run application builds/tests or represent the historical 520-check result as a new run. Real-browser acceptance still needs permitted actual-browser evidence, never Node/jsdom substitution.
+- Delegation grants no additional authority. Every child inherits the user's scope and all IHP restrictions: SQLite-only real operations; external engines metadata-only; no .exe artifacts; .NET UseAppHost=false publish then dotnet <published>.dll; literal 127.0.0.1 listeners/Gateway 5050; no Docker/elevation/firewall/Windows-policy changes/corporate exposure; no deployed-application changes; no secrets in logs/source control. Preserve M11 authorization, M7 approval/fingerprint/trusted-prebuilt/source-build restrictions and Managed Application Database requirements; M10-DB is not implicitly assigned.
+- Read-only instructions/file ownership are behavioral controls, not OS-level isolation. All agents remain subject to current host permissions and company policy. Keep production browser management default disabled until its required acceptance is verified. Root validates that a progress commit contains only changed allowed Markdown records and verifies remote main after push; source, tests, configuration, credentials, databases, artifacts/logs and extra docs stay local.
+
+### Invocation
+
+For normal tasks, Root handles the work directly. To use the optional workflow, ask: "Use the lean workflow for [authorized task]; delegate only if it helps." Root then chooses only necessary roles. A bounded explicit request can say: "Use one read-only Explorer on [module/question], return references, then have Root decide the next step." Implementation and independent review each require their own justified bounded assignment. Merely invoking the workflow never authorizes a new milestone, unavailable browser tooling or security bypass.
+
+Capability/configuration references (checked 2026-10-28): [official OpenAI subagent documentation](https://learn.chatgpt.com/docs/agent-configuration/subagents) and [project configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference). Runtime tool metadata governs the actual session; configuration loading/model selection remains host- and access-dependent.
 
 ## Source of truth and architecture
 
