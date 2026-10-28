@@ -6,6 +6,10 @@
 **Development Approach:** Production-oriented, modular architecture  
 **Primary Objective:** Self-service deployment of Node.js and ASP.NET Core applications through a centralized hosting platform.
 
+## Current M8 continuation authorization — 2026-10-28
+
+The latest user resumes M8 implementation after the documentation task: resolve and verify the recorded API startup/readiness failure, assess and secure the opt-in browser authentication candidate, integrate only authorized real Dashboard operations and run focused/full regression. Preserve M11 protections, approved trusted-prebuilt execution gates and all company restrictions. Actual-browser acceptance requires permitted real-browser evidence; keep private production operations disabled and M8 IN PROGRESS if that gate or another required criterion remains unmet. M7 remains IN PROGRESS; M9/M10/M10-DB/M12 are not assigned. The Managed Application Database requirements in section 9.1 are unchanged future work. This supersedes the prior documentation-only scope for the current task, not any security restriction.
+
 ## Current documentation-only directive — 2026-10-27
 
 Define the future Managed Application Database architecture in section 9.1: **1 Platform Database + N Independent Application Databases**, with application databases optional. This assignment authorizes changes only to PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md; it does not authorize implementation, schema changes, migrations, application execution, builds or application tests. It supersedes earlier active implementation assignments for this task only. Preserve all existing milestone statuses: M1–M6/M11 COMPLETED, M7/M8 IN PROGRESS, and M9/M10/M12 NOT STARTED. The new M10-DB sub-milestone is NOT STARTED and requires a future explicit implementation assignment.

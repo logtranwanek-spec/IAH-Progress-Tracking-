@@ -1,20 +1,160 @@
 # Project Progress
 
+## M8 continuation handoff — 2026-10-28 (Asia/Bangkok)
+
+**Current milestone: M8 — React Dashboard, IN PROGRESS.** The latest user explicitly resumed M8 implementation after the documentation-only task. The complete project verification now exits 0 with **497 passing checks, zero failures/skips, plus real local stack smoke**. Actual-browser acceptance is unavailable; private production browser operations remain default disabled. No later milestone was started.
+
+**Unchanged statuses:** M1–M6/M11 COMPLETED; M7 IN PROGRESS; M9/M10/M10-DB/M12 NOT STARTED. M7 trusted-prebuilt workflows remain verified, but approved source-build isolation/templates/build evidence remain unavailable and source builds stay disabled. Managed Application Database architecture/requirements are preserved; provisioning/backup/restore/service implementation remains NOT STARTED.
+
+### Last completed work and implemented features
+
+- API startup now records safe configuration/module_load/initialization/listen/ready phases and elapsed times; failures expose fixed phase/codes, not raw errors, secrets or paths.
+- LocalStack verifies actual API JSON identity and a real SQLite health query before launching dependent Agent/Gateway/Dashboard components. Probes reject redirects, wrong-service HTTP 200 and oversized/malformed/stalled bodies, have bounded deadlines and preserve the last concrete failure. Each dependency phase is bounded to 45 seconds with actual health polling, not a fixed startup sleep. Unexpected owned exits are reported immediately with safe PID/phase/exit state; startup failure cleans owned processes only.
+- BrowserSessionApi binds queued operations, including archive downloads, to the identity that scheduled them. An old intent cannot execute under a later login. Identity/expiry is checked before dispatch and after response; expired/forgotten authority cannot be restored by late data. Successful logout notifies private-state subscribers; uncertain response/nonce state fails closed without retrying mutations.
+- Visible authenticated views revalidate on focus/visibility changes and every 30 seconds. Failed identity/session checks clear private state; this is bounded authentication freshness, not instant revocation push or M9 monitoring.
+- Confirmed deployment stop and route removal now have explicit dialogs with inert background, Cancel-first focus, keyboard containment/Escape and focus restoration. Backend authority remains mandatory. Atomic restart is unavailable and labeled honestly; existing stop -> READY -> separately authorized deployment can restart the same exact approved release.
+- Real signed tests verify application creation/list/detail/ownership, Administrator/Developer/Viewer enforcement, ZIP inspection/pending state, exact approval/rejection/history, trusted preparation/start/stop/redeploy, live authorized route remove/publish, audit access, request tampering/replay/Host/Origin/CSRF rejection, session revocation/expiry and private-state cleanup. DOM coverage remains simulation.
+- The smoke fixture uses its own validated temporary API/Dashboard ports/configuration and restores environment/storage. Gateway stays fixed at 127.0.0.1:5050; existing development listeners are never stopped, moved or reconfigured.
+
+### Investigation of historical API ECONNREFUSED
+
+**Observed cause of the refused connection:** no API listener was available on 127.0.0.1:5266 at the historical readiness probe. The old log has no API output or phase evidence, so the precise underlying reason for not reaching listen is **unconfirmed**. Do not claim the old failure is conclusively diagnosed or permanently resolved.
+
+Unchanged reproduction attempts passed: focused browser 28/28 and full Node sequence 175 checks. First-test/setup durations were about 31 s and 7.6 s, including migration/bootstrap, not isolated API startup measurements. Import latency, startup ordering, scheduling and other environmental explanations remain possibilities, not established root causes.
+
+Current startup/readiness behavior and controlled failures are verified: real initialized API/SQLite readiness, missing Registry failure at initialization, bind collision at listen, refused/timed-out probes, hanging bodies, child exit and cleanup. The final full run recorded API phases configuration=0, module_load=8, initialization=2565, listen=3017, ready=3053 ms after its owned restart. New diagnostics allow a future recurrence to identify the failed phase without exposing sensitive data. No firewall/security change or arbitrary startup delay was used.
+
+### Security design and operating boundary
+
+The existing opt-in candidate isolates http://localhost:5050/admin/ management from hosted application content at http://127.0.0.1:5050/<prefix> on the same fixed IPv4 listener. It uses page-memory nonextractable P-256 keys, single-use login challenges/request nonces and signatures over exact method/target/body. Native M11 tokens/bindings remain in Gateway memory. There are no authentication cookies or localStorage/sessionStorage tokens, no unrestricted API proxy and no browser-supplied native credentials. Only explicit operation mappings construct native M11 requests. Original native Origin/Fetch Metadata/session/RBAC/ownership guards remain unchanged; the fixed shorter native browser issuer and Agent authorization continue to enforce expiry/revocation.
+
+Localhost HTTP is not TLS or OS identity isolation. The design assumes a trusted local OS/account/platform origin and cannot attest browser proxy/resolution/profile/service-worker/CSP behavior from Node tests. No permitted actual-browser tool/session is connected, and no browser executable/driver was launched or installed. Keep the candidate default off for private production use pending permitted actual-browser and security acceptance. The local BROWSER_AUTHENTICATION.md checklist is explicitly NOT RUN, not evidence of approval.
+
+Only SQLite performs real database operations. SQL Server/PostgreSQL/MySQL remain metadata-only with the accepted policy gap; no connection/authentication/migration/provisioning/connectivity test was attempted. No schema/migration was added: guarded generation remains 20 models and four reviewed migrations. Tests used only fresh owned registries and the existing explicit migration runner; actual configured Registry/users/applications were not migrated or bootstrapped.
+
+All real listeners/fixtures are literal 127.0.0.1, Gateway 5050. .NET inputs are framework-dependent UseAppHost=false publishes run via dotnet <published DLL>; twelve publish roots contain zero .exe artifacts. No apphost/testhost/VSTest, browser executable/driver, Docker, elevation, Windows policy/firewall/ACL change, corporate listener/deployment or existing application modification occurred. Installed node/dotnet/npm.cmd/git hosts follow the established project convention. Only reviewed trusted sample packages executed under existing independent API/Agent opt-ins; uploads never auto-deploy, approvals/fingerprints are mandatory and source/custom commands remain disabled.
+
+### Files created or modified in this continuation
+
+| Scope                           | Local files                                                                                                                                                                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Created                         | tools/readiness.mjs; tests/foundation/readiness.test.mjs; tests/foundation/fixtures/startup.mjs; src/Api/test/startup.test.mjs; src/Dashboard/src/components/confirm-action.tsx                                                                  |
+| API/startup tooling modified    | src/Api/src/main.ts; src/Api/package.json; tools/local.mjs; tools/tasks.mjs; tools/smoke.mjs                                                                                                                                                     |
+| Dashboard/client/tests modified | src/Dashboard/src/browser-session.ts; src/Dashboard/src/app.tsx; src/Dashboard/src/style.css; src/Dashboard/test/browser.test.mjs; src/Dashboard/test/dashboard.test.mjs                                                                         |
+| Documentation modified          | BROWSER_AUTHENTICATION.md locally; PROJECT_REQUIREMENTS.md current-assignment clarification only (section 9.1 unchanged); AGENTS.md continuation/permanent rules; IMPLEMENTATION_PLAN.md M8 evidence/status; PROGRESS.md current handoff/history |
+
+No Gateway/Agent/sample source, Prisma schema, migration, dependency lock or deployed existing application was changed in this continuation. Earlier local browser-candidate source remains present; this session hardened/integrated/verified it rather than claiming it was newly created. Source/tests/extra docs/logs/artifacts/data stay local and must not enter the progress repository.
+
+### Actual commands and failure history
+
+| Command/iteration                                                             | Actual result                                                                                                                                                                     |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unchanged npm.cmd run test:browser                                            | Exit 0, 28/28; historical refusal not reproduced                                                                                                                                  |
+| Unchanged npm.cmd run test:node                                               | Exit 0, 175 checks: 25 foundation/sample + 81 API + 13 SQLite + 28 DOM + 28 browser protocol                                                                                      |
+| npm.cmd run build --workspace @ihp/api                                        | Exit 0; pinned guarded WASM generation, 20 models, no native Prisma engine                                                                                                        |
+| First node --test tests/foundation/readiness.test.mjs                         | 7/8; Windows unavailable-listener probe timed out before refusal; assertion corrected to report either observed bounded transport failure                                         |
+| node --test tests/foundation/readiness.test.mjs src/Api/test/startup.test.mjs | Initially 9/11 because the final deadline hid a prior specific error; helper now retains it. Final focused run exit 0, 11/11                                                      |
+| Expanded root npm.cmd run test:browser                                        | 34/35: an expiry fixture's direct SQLite write hit SQLITE_BUSY; added production-equivalent bounded busy timeout to that owned fixture only                                       |
+| Next expanded browser run                                                     | 34/35: focus-revocation fixture referenced an undeclared dom variable; corrected its destructuring. No production authorization was relaxed                                       |
+| npm.cmd run test:browser --workspace @ihp/dashboard                           | Final focused exit 0, 35/35, no skips                                                                                                                                             |
+| npm.cmd run test --workspace @ihp/dashboard                                   | Exit 0, 28/28; real native-client/SQLite integration and simulated React DOM, not browser acceptance                                                                              |
+| First complete npm.cmd run verify                                             | All 497 automated checks passed, but command EXIT 1 at smoke: existing loopback port 5173 occupied. This attempt is a failure, not a successful full gate                         |
+| npm.cmd run smoke after disposable-port fix                                   | Exit 0 on API 49191/Dashboard 49192, Gateway 5050; real assets/CSP/health/Origin rejection, socket inspection, four clean exits, released owned ports and removed fixture storage |
+| Final npm.cmd run verify                                                      | **EXIT 0: 497 passing checks, zero failures/skips, plus complete real stack smoke on API 55084/Dashboard 55085/Gateway 5050**                                                     |
+| npm.cmd run doctor                                                            | Exit 0: Windows 22631 x64, Node 26.12.1, npm 11.20.0, .NET SDK 8.0.425, .NET/ASP.NET runtime 8.0.31                                                                               |
+| npm.cmd audit --json                                                          | Exit 0, zero vulnerabilities; no dependency installation or policy hook changes                                                                                                   |
+| Principal/publish inspection                                                  | Administrator=False; 12 publish roots and zero .exe artifacts                                                                                                                     |
+| Read-only port-owner inspection                                               | Existing 127.0.0.1:5173/node PID 14848 remained running after focused smoke; never killed or reconfigured                                                                         |
+| Git baseline check                                                            | Branch main, exact approved origin; HEAD/origin/main both ad5cb3b309d5ca5507572c275c8a620cb8002cc7 before delivery                                                                |
+
+Local evidence logs: artifacts/m8-resume-browser-baseline.log, m8-resume-node-baseline.log, m8-readiness-first.log, m8-startup.log, m8-startup-fixed.log, m8-resume-api-build.log, m8-resume-browser.log, m8-resume-browser-fixed.log, m8-resume-browser-final.log, m8-resume-dashboard.log, m8-resume-verify.log, m8-resume-smoke.log and m8-resume-verify-final.log. Corrected patch-context failures occurred before file mutation; previous attempts/results are retained accurately. The final command propagated LASTEXITCODE through Tee-Object.
+
+### Final full-suite results
+
+| Suite                                                            |  Passed | Failed/skipped |
+| ---------------------------------------------------------------- | ------: | -------------: |
+| Node foundation/lifecycle/sample configuration/readiness         |      33 |              0 |
+| API reference/policy/DPAPI/routing/auth/real startup             |      84 |              0 |
+| Guarded Prisma/SQLite/migration                                  |      13 |              0 |
+| React DOM/model/owned-native-client Dashboard                    |      28 |              0 |
+| Browser protocol/WebCrypto/real services plus explicit DOM cases |      35 |              0 |
+| Managed Foundation                                               |      27 |              0 |
+| Managed Gateway                                                  |     113 |              0 |
+| Managed Samples                                                  |      82 |              0 |
+| Managed Deployment Agent                                         |      27 |              0 |
+| Managed routing/auth integration                                 |      18 |              0 |
+| Managed packages                                                 |      37 |              0 |
+| **Total**                                                        | **497** |          **0** |
+
+The total is historical 451 plus 35 browser-protocol checks and 11 new startup/readiness checks. Smoke and documentation checks are separate from that assertion total. Build/Prettier/type/solution checks and all twelve publish scans passed in the final gate. Existing M1–M7/M11 behavior, WebSockets, live routing and trusted Node/.NET package execution regressions passed.
+
+### Remaining blockers, limitations and exact next task
+
+1. **M8 actual-browser/security acceptance remains unmet.** No permitted browser tool/session is available under the no-executable/driver policy. Actual secure context/P-256, browser headers, origin/proxy/profile/service-worker/CSP behavior, user workflows and real viewport/assistive-technology checks were NOT RUN. Keep private production operations default disabled and M8 IN PROGRESS.
+2. **Historical :5266 cause remains an evidence gap.** Current real startup/readiness and negative cases pass; the exact old pre-listen failure was not reproduced. If it recurs, retain the new safe phase/PID/exit/probe diagnostics; do not label speculation a confirmed cause or alter IT controls.
+3. **Original M8 page/API scope remains.** Existing two-step registration plus package/review/action views cover current supported workflows. The original full unified wizard, user/grant/configuration/policy editors and unavailable legacy release/runtime read contracts remain incomplete/disabled; no endpoint or monitoring data is fabricated. Atomic restart is unsupported; no M9 metrics or M10 rollback was added.
+4. **M7 stays IN PROGRESS.** Approved source-build isolation and build evidence remain unavailable; no uploaded scripts, installs or custom builds run. Prebuilt regression success does not waive that acceptance requirement.
+5. **Future database work stays NOT STARTED.** M10-DB requirements/target storage are unchanged; no managed application database provisioning, backup, restore or Dashboard service is enabled. Same-user files/processes are not a sandbox.
+6. **Trust/operational limits persist.** Plain loopback HTTP, same-user process/storage access, Gateway polling/last-known-good staleness, bounded recovery and logout/reboot startup dependencies remain as previously documented. Response loss clears local authority without claiming confirmed server revocation; fixed server expiry/revocation still applies.
+
+**Smallest safe next step:** Obtain permitted actual-browser evidence in a disposable authorized local setup using the NOT RUN checklist in BROWSER_AUTHENTICATION.md and review the localhost transport/profile assumptions. Never launch a prohibited executable/driver or change security/network settings to do so. Then finish any remaining M8 page/API scope under explicit M8 authorization, preserving source-build/default-off gates. If startup refuses again, capture the new phase diagnostics before changing code. Do not start M9/M10/M10-DB/M12 or change M7 status.
+
+### Commands to resume and progress-only delivery
+
+Read the latest snapshot and inspect actual local source before relying on historical notes. These verification tasks use owned fixtures and do not authorize migrating actual configured user data.
+
+```powershell
+Get-Content -LiteralPath AGENTS.md -Encoding UTF8
+Get-Content -LiteralPath PROGRESS.md -Encoding UTF8 -TotalCount 175
+Get-Content -LiteralPath IMPLEMENTATION_PLAN.md -Encoding UTF8
+Get-Content -LiteralPath PROJECT_REQUIREMENTS.md -Encoding UTF8
+Get-Content -LiteralPath BROWSER_AUTHENTICATION.md -Encoding UTF8
+git status --short
+npm.cmd run test:browser
+npm.cmd run verify
+```
+
+Only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md may be committed/pushed to https://github.com/logtranwanek-spec/IAH-Progress-Tracking-.git, branch main. Source code/tests/data/credentials/configuration/build artifacts/logs/additional docs remain local; a progress-only clone cannot reconstruct the application. Final documentation consistency/format/whitespace and staged-path checks run before commit; compare remote main with HEAD after push. The final handoff reports that verified commit identity.
+
+## Preserved earlier progress and session checkpoints
+
+Final documentation checks passed: **29/29** consistency assertions verified all 13 milestone statuses, unchanged Managed Application Database requirements, preserved prior content, balanced Markdown fences and accurate results/limitations/delivery scope. The checker was adjusted to normalize Markdown table separator widths introduced by Prettier; no historical requirement/progress content was removed. Targeted Prettier and git diff --check passed. Staged/committed path checks and remote-main identity verification accompany the progress-only delivery.
+
+All earlier records and intermediate M8 checkpoint/failure notes follow as history. Their earlier active assignments/pending states do not override the current handoff. Prior table alignment was normalized by the project formatter; historical content was not removed.
+
+````````````````text
+
+# Project Progress
+
+## Active M8 continuation — 2026-10-28
+
+**First complete verify attempt:** Build/format/type/solution checks and **497 automated checks** passed, but `npm.cmd run verify` exited 1 at final smoke because an existing loopback listener occupied 5173. Its owner was inspected read-only and was not stopped or modified. Changed only the disposable smoke fixture to select validated temporary API/Dashboard ports via an owned configuration file; Gateway remains fixed 127.0.0.1:5050. Fixture environment/configuration/storage are restored/cleaned and existing application ports remain untouched. Smoke and complete verify must be rerun; the failed command is not reported as success. Earlier 31 s/7.6 s figures are first-test/setup durations including migration/bootstrap, not isolated API timings or proof of the historical root cause.
+
+**Focused verification checkpoint:** Corrected an undeclared DOM-fixture variable in the focus-revocation case; no production security restriction changed. Final focused browser protocol/real-service suite passed **35/35**, and React DOM/native-client suite passed **28/28**, both exit 0/no skips. API startup phases after restart were configuration=0, module_load=4, initialization=1414, listen=1615, ready=1637 ms in that run. Startup/negative/cleanup checks passed 11/11. All testing is real owned loopback services plus Node WebCrypto and explicitly simulated DOM, not actual-browser acceptance. Full project verification is next; do not infer its result from focused checks.
+
+**Expanded browser checkpoint:** First expanded real-service run passed 34/35 checks, including signed role/ownership/approval/route controls, confirmed real stop, approved stop/start, queue identity isolation, response-loss fail-closed behavior and late-response expiry. One existing expiry fixture's direct SQLite write failed with SQLITE_BUSY while the Agent used its connection. Added the same bounded busy timeout used by production SQLite connections to that fixture only; no sleep, policy bypass or migration. Added active-session revalidation on window focus/visibility and every 30 seconds while visible so revocation does not require a manual data refresh; private state clears on a failed identity check. Final reruns remain pending; no real-browser claim.
+
+**Implementation checkpoint:** New readiness/real API entry-point suite passed 11/11 after correcting diagnostics to retain the last concrete failure when a final deadline probe times out. Missing Registry fails in initialization, actual listener collision fails at listen, owned processes are cleaned, and an unrelated occupant survives. Added session-bound queued-intent checks and rejection of private responses arriving after client expiry; added inert-background/focus-contained cancellation/confirmation for stop and route removal, with atomic restart explicitly unavailable. Expanded real Gateway/API/Agent protocol and DOM-simulation tests are running. Only fresh owned test registries use the existing four reviewed migrations; no schema/migration or configured user data change. Private browser mode remains default off, and no actual-browser acceptance is claimed.
+
+**Readiness investigation checkpoint:** Unchanged focused browser gate passed 28/28; unchanged full Node/API/Dashboard sequence passed 175 checks (25 foundation/sample + 81 API + 13 SQLite + 28 DOM + 28 protocol). Original :5266 refusal was not reproduced; observed first-stack readiness about 31 seconds versus 7.6 seconds on the subsequent run. Historical logs do not establish why the old API had not listened, so no exact historical root cause/resolution is claimed. Added API phase-only startup diagnostics, actual JSON identity/registry readiness, bounded streaming probes, API-before-dependent-components startup, immediate owned-exit diagnostics and automatic failure cleanup. First new readiness run passed 7/8: a 500-ms unavailable-listener fixture produced a legitimate probe timeout before Windows reported refusal; the assertion now accepts either observed bounded transport failure. New real-entry-point startup checks and final focused/full verification remain pending. No browser or configured data operation occurred.
+
+The latest user explicitly resumes M8 implementation/testing, superseding the preceding documentation-only task. Read the four official records and inspected the existing readiness launcher, API entry point, real-service browser suite and restricted browser-session candidate. Baseline commit ad5cb3b; last successful historical full gate 451 checks, later full browser run failed all 28 browser checks after API :5266 readiness refused connections while API output was empty. No root cause/fix is yet claimed. Reproduce first, then add actionable bounded readiness diagnostics without arbitrary delays; retain loopback/no-.exe/SQLite-only/M11/M7 policies. No permitted browser tool is connected, so actual-browser acceptance is unavailable and must not be inferred from DOM/WebCrypto tests. M7/M8 remain IN PROGRESS and M10-DB NOT STARTED; no other milestone is assigned. Full verification and final evidence remain pending.
+
 ## Current task — Managed Application Database documentation only — 2026-10-27
 
 **Authoritative handoff:** This documentation-only record supersedes the earlier active M8 implementation/resume instructions preserved below. No application code, schema, migration, configuration, database or existing application was changed by this task. No application build, test or execution was initiated or resumed for this task. Earlier local M8 implementation changes and artifacts were left untouched. Managed Application Database provisioning, initialization, backup, restore, lifecycle APIs and Dashboard controls are **not implemented or verified** by this update.
 
 ### Milestone status — unchanged
 
-| Milestone | Status |
-| --- | --- |
-| M1–M6 | COMPLETED |
-| M7 — ZIP Upload and Approved Source Builds | IN PROGRESS |
-| M8 — React Dashboard | IN PROGRESS |
-| M9 — Monitoring and Logging | NOT STARTED |
-| M10 — Version Management and Rollback | NOT STARTED |
-| M11 — Authentication and Authorization | COMPLETED |
-| M12 — Security Hardening and Final Testing | NOT STARTED |
+| Milestone                                                                | Status      |
+| ------------------------------------------------------------------------ | ----------- |
+| M1–M6                                                                    | COMPLETED   |
+| M7 — ZIP Upload and Approved Source Builds                               | IN PROGRESS |
+| M8 — React Dashboard                                                     | IN PROGRESS |
+| M9 — Monitoring and Logging                                              | NOT STARTED |
+| M10 — Version Management and Rollback                                    | NOT STARTED |
+| M11 — Authentication and Authorization                                   | COMPLETED   |
+| M12 — Security Hardening and Final Testing                               | NOT STARTED |
 | M10-DB — Managed Application Database Service (new future sub-milestone) | NOT STARTED |
 
 M7's trusted-prebuilt subset remains verified; approved source-build isolation/templates/build evidence remain unavailable and source builds stay disabled. M8's secure browser workflow/actual-browser acceptance and other recorded scope gaps remain unresolved; the browser-authentication candidate stays default disabled. No completion status or acceptance waiver was changed.
@@ -25,12 +165,12 @@ Defined **1 Platform Database + N Independent Application Databases**, with appl
 
 Only the four official Markdown records were edited for this task:
 
-| File | Sections added or updated |
-| --- | --- |
+| File                    | Sections added or updated                                                                                                                                                                                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | PROJECT_REQUIREMENTS.md | Current documentation-only directive; section 9 policy precedence and new 9.1 Managed Application Databases (modes, isolation, target storage, lifecycle, release persistence, minimum configuration, future Dashboard, SQLite-consistent backup/restore); cross-references in sections 10, 14, 16.2 and 17. |
-| IMPLEMENTATION_PLAN.md | Current task override; cross-milestone database boundary; future M10-DB objective/tasks/dependencies/acceptance/verification/status after M10; requirement coverage and final extension-status note; reconciliation of the prior M8 failure from existing logs. Existing milestone IDs/statuses retained. |
-| AGENTS.md | Current documentation-only scope and permanent database separation/storage/data-preservation/SQLite-only/authorization/backup/restore/migration/audit rules. Existing security instructions retained. |
-| PROGRESS.md | This documentation-only architecture/change/verification/handoff record; complete earlier progress preserved below as history. |
+| IMPLEMENTATION_PLAN.md  | Current task override; cross-milestone database boundary; future M10-DB objective/tasks/dependencies/acceptance/verification/status after M10; requirement coverage and final extension-status note; reconciliation of the prior M8 failure from existing logs. Existing milestone IDs/statuses retained.    |
+| AGENTS.md               | Current documentation-only scope and permanent database separation/storage/data-preservation/SQLite-only/authorization/backup/restore/migration/audit rules. Existing security instructions retained.                                                                                                        |
+| PROGRESS.md             | This documentation-only architecture/change/verification/handoff record; complete earlier progress preserved below as history.                                                                                                                                                                               |
 
 The target logical IHP_STORAGE_ROOT layout is registry/platform.db plus Applications/<application-uuid>/releases/, data/application.db, logs/ and config/, with shared Uploads/, Temporary/ and Logs/. It is a future target, not a statement that existing paths were moved. Implemented storage/configuration is preserved until a future explicitly authorized, compatible migration.
 
@@ -2204,3 +2344,4 @@ Record actual outputs, failures, and test results before updating milestone stat
 `````````````
 ``````````````
 ```````````````
+````````````````

@@ -1,5 +1,9 @@
 # Repository Instructions for Codex and Development Agents
 
+## Current M8 continuation — 2026-10-28
+
+The latest user explicitly resumes M8 implementation and verification, superseding the preceding documentation-only assignment for this session. Diagnose API readiness, secure and verify the existing browser candidate, integrate authorized Dashboard operations and run focused/full regression. Earlier task-specific scope statements are historical when superseded by an explicit user assignment. Preserve M7 IN PROGRESS/source-build restrictions and M10-DB NOT STARTED; do not start M9/M10/M10-DB/M12. Actual-browser acceptance requires permitted real-browser evidence; do not launch browser executables/drivers or infer acceptance from HTTP/WebCrypto/DOM simulation. Keep private production browser operations disabled if that gate remains unmet. Push only the four official records to progress origin/main.
+
 ## Current documentation-only assignment — 2026-10-27
 
 The latest user request is documentation only and supersedes the earlier M8 implementation assignment for this task. Modify only PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md. Do not implement/modify/build/test application code, change database schemas/migrations, execute applications or start another milestone. Review documentation consistency and run git diff --check; application tests/builds are not authorized for this task. Preserve every existing milestone status and historical progress. M7/M8 remain IN PROGRESS; M10-DB is future NOT STARTED work and requires a separate explicit implementation assignment. Earlier implementation/test/resume instructions below are historical or conditional and do not override this scope.
@@ -186,6 +190,8 @@ Do not commit any source code or other project files into this progress reposito
 - Keep real listeners loopback-only, managed .NET verification/publish policy, SQLite-only operations and four-document-only progress delivery. Run the full regression and verify origin/main after pushing.
 
 ## M8 browser authentication follow-up
+
+- Bind queued browser operations to the session identity that scheduled them; do not let an old intent execute under a later login. Discard private responses after session expiry/clearing. Preserve backend authorization, explicit disruptive-action confirmation and honest unsupported-operation labels. Keep startup diagnostics phase/code-only, verify actual API/SQLite health before dependent components, and never kill an unrelated port owner or report an unreproduced historical failure as conclusively resolved.
 
 - The latest user explicitly authorizes designing/implementing a browser authentication boundary. Preserve original M11 native Origin/session/RBAC/ownership checks; no generic proxy or direct native token in the browser is allowed.
 - Isolate the management hostname from application routing on the existing 127.0.0.1:5050 listener. Do not use cookies/path separation as an origin boundary or expose session material to application routes.
