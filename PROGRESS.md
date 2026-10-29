@@ -1,5 +1,83 @@
 # Project Progress
 
+## Proposed M7 folder-intake workflow and feasibility (documentation-only) - 2026-10-29
+
+**Assignment:** Analysis and planning only, from the user's attached request. Re-read AGENTS.md, PROJECT_REQUIREMENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md; reviewed current M7 requirements/API upload contracts, Dashboard package flow and RuntimeEngine's child environment. Changed only the four authorized tracking documents. No source, tests, schema/migration, database, app, ZIP, build, listener or milestone implementation was changed, run or tested. No .exe, Docker, Administrator or security settings were used.
+
+### Proposed simplified user experience
+
+1. Ordinary Developer enters an application name and selects a folder.
+2. Dashboard shows server-confirmed detected runtime/startup and aggregate payload size.
+3. User submits; the authenticated Platform API streams the files, resolves/creates identity and creates canonical package metadata/archive only for supported prebuilt layouts.
+4. The unchanged package inspector validates the generated archive; server owns its file hashes/fingerprint and requests existing distinct-Administrator review.
+5. Only actual backend evidence is displayed. Source-only/unknown cases are review-only, Build required or Deployment blocked. Upload never automatically builds, approves, starts or deploys.
+
+The user does not create ZIPs/manifests, provide UUIDs or calculate fingerprints. Existing authenticated ZIP upload remains a backward-compatible advanced path. Detailed identifiers/fingerprints are for authorized reviewers.
+
+### Feasibility and security findings
+
+A folder upload is feasible as a separate M11-protected, owner-scoped streaming operation. Browser directory-selection paths and file/runtime/size metadata are untrusted and require validation at the API. Folder payload is the sum of actual received file bytes, capped at **52,428,800 bytes inclusive (50 MiB)**; request framing needs a separately bounded allowance. Preserve the existing compressed ZIP cap **52,428,800 bytes**, expanded total **32 MiB**, individual entry **8 MiB**, all file/folder entries **256**, ratio **100:1 plus 4-KiB allowance**, and existing CRC/path/link/type/timeout/concurrency/quota protections. The 50-MiB intake budget does not mean every folder fits the stricter 32-MiB release budget. Do not raise limits without threat analysis and explicit approval.
+
+Normalize relative browser paths beneath owned temporary staging. Reject rooted/traversal/alternate-stream/device paths, malformed names, duplicate/case-colliding entries, link/reparse escapes, unsupported artifacts and entry/depth overruns. Recognize and strip only the validated common selected-folder prefix. Exclude or reject sensitive/development material by a fixed visible policy, including .git, dependency trees, environment files, keys and credentials. Never run .gitignore, dependency hooks or uploaded commands; never log secret values. Generate application identity, unique review/release token, manifest and fingerprints from authenticated Registry state; resolve an existing application by authorization, never by name alone. Keep temporary source intake separate from releases/public assets and clean only owned incomplete uploads.
+
+Treat run.cmd as text for static analysis. Recognize only exact, allowlisted Node/DLL intent; a matching npm start script may be translated as text into a direct runtime entry only when its whole value is the single supported form. Never run cmd.exe /c, run.cmd/.bat, npm, PowerShell, hooks or arbitrary commands. Dynamic/unknown constructs require Administrator review and stay blocked; Administrator review is not permission to execute unsafe commands. Source-only uploads may be stored in bounded protected review storage but remain **Build required / deployment blocked** because approved source-build isolation is unavailable. M7's existing build/isolation acceptance stays unfulfilled.
+
+Read-only RuntimeEngine review confirms child processes inherit only a fixed environment allowlist and loopback/release settings; there is no current per-application SQLite configuration projection. Database-dependent applications must remain deployment-blocked until a separately authorized capability exists. Never pass Platform Registry details, put app data in a release, or create/migrate a database through upload. M10-DB remains NOT STARTED.
+
+### Roadmap and documentation changes
+
+- PROJECT_REQUIREMENTS.md: added proposed folder-intake, aggregate byte/path/content/state/identity/package rules; added static run.cmd grammar; revised the ordinary New Application flow while keeping legacy ZIP upload.
+- IMPLEMENTATION_PLAN.md: added the SIMPLIFIED_FOLDER_UPLOAD_WORKSTREAM under M7 with objective, dependencies, implementation sequence, acceptance and future verification. Its status is explicitly NOT STARTED. It does not waive M7's source-build/isolation criteria.
+- AGENTS.md: added permanent folder-intake limits/path, run.cmd static-only, source-only, server-generated identity and approval rules.
+- PROGRESS.md: this dated analysis and next-step handoff. Historical records preserved.
+
+Top-level statuses are unchanged: **M1-M6/M11 COMPLETED; M7/M8 IN PROGRESS; M9/M10/M10-DB/M12 NOT STARTED.** No folder upload, generated package, startup parser or Dashboard support is claimed implemented.
+
+**Verification actually run:** focused Markdown cross-document consistency assertions passed; confirmed the proposed 50-MiB folder and ZIP ceilings, unchanged 32-MiB/8-MiB/256-entry/ratio rules, run.cmd static-only language, source-build blocker and milestone statuses. git diff --check passed. No app tests/builds/full verification ran because the task forbids implementation/build/test work. Historical 529 PASS is not a result for this task.
+
+**Exact next implementation task:** only after a separate implementation assignment, implement the M7 owner-bound streamed folder-intake API and server-side path/size/count/quarantine/cleanup checks first; exercise safe/unsafe path and no-execution run.cmd fixtures; then integrate server-generated archives with the unchanged inspector and exact Administrator review before the Dashboard folder picker. Keep source builds disabled and M7 IN PROGRESS.
+
+
+## Proposed M7 folder-upload simplification (documentation-only) - 2026-10-29
+
+**Scope:** Read AGENTS.md, PROJECT_REQUIREMENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md; inspected current M7 requirements/API and Dashboard upload contracts. This turn is analysis/planning only. Updated only the four authorized Markdown files. No application source, tests, schema, migration, database, build, API, listener, existing application or ZIP was modified or executed. No new test/build was authorized or run; git diff --check and focused documentation consistency checks are the verification gate. The prior 529-PASS verification and previous My Work Center ZIP inspector result remain historical and are not new results for this product-direction task.
+
+### Proposed ordinary-user workflow
+
+1. Developer enters an application name and selects a folder.
+2. Dashboard reports server-confirmed runtime/startup evidence and total file-payload size.
+3. Developer submits; API streams and validates files, resolves/creates identity and creates canonical metadata/archive only for supported prebuilt layouts.
+4. Package inspector validates that exact server-created artifact; backend binds its identity/fingerprint and creates the existing Administrator review request.
+5. Source-only or unsupported startup remains review-only/build-required/deployment-blocked; successful transfer does not imply readiness, approval, build or deploy.
+
+Ordinary users need not create ZIPs/manifests, type UUIDs or calculate fingerprints. The authenticated existing ZIP route remains backward-compatible as an advanced option. Nothing auto-approves/deploys. The workstream is proposed and NOT STARTED.
+
+### Feasibility and limits
+
+Folder selection and transfer are feasible with browser file/directory selection plus relative-path metadata, but browser-provided paths, file sizes, MIME types and runtime claims are untrusted. The target approved browser must be acceptance-tested; no browser was opened or tested here. A separate authenticated, owner-bound folder operation can stream each entry into temporary nonpublic storage, canonicalize and validate paths, count actual bytes, then use the existing strict package inspector after canonical archive generation. It must not become a generic multipart proxy or raise ordinary Gateway/JSON limits.
+
+Folder file-content payload is capped at **52,428,800 bytes (50 MiB), inclusive**, plus an explicit separately bounded multipart framing budget. Preserve existing compressed ZIP cap **52,428,800 bytes**, extracted total **32 MiB**, per-file **8 MiB**, total **256 file/directory entries**, and **100:1 plus 4-KiB allowance**, as well as CRC/path/link/type/timeout/concurrency/quota checks. A 50-MiB source folder can exceed the 32-MiB release extraction ceiling; transport acceptance must not be reported as package validation or deployment readiness. Do not raise existing limits without threat analysis and explicit approval.
+
+Normalize browser relative paths server-side inside unique owner/app staging. Reject traversal, rooted paths, Windows device/alternate-stream names, malformed or case-colliding duplicates, links/reparse escapes, invalid extensions, excessive nesting/count and untrusted metadata conflicts. Apply a fixed, visible exclusion/rejection policy for .git, node_modules/dependency trees, .env/environment files, keys and credentials; never invoke .gitignore/package hooks or log secret values. Generate Registry/application identity, slug, package manifest and fingerprint server-side. Preserve per-user ownership, M11 RBAC, distinct current Administrator exact-artifact approval, and nonoverwriting preparation controls.
+
+run.cmd is static input only. A narrow grammar can identify a single direct Node or dotnet DLL entrypoint and translate it to an allowlisted host plus validated relative path. npm.cmd run start can be parsed as text only; translate only an exact supported single scripts.start value, never invoke npm/lifecycle hooks. Reject/flag chaining, expansion, redirects, variables, nested scripts, helpers or unknown forms; require Administrator review and keep deployment blocked. Never invoke cmd.exe /c or execute uploaded command files. Administrator review does not legalize an unsafe command. Source-only folders may be retained in a protected bounded review area but no install/build/run is allowed absent a separately approved isolation boundary. M7 source-build acceptance stays unresolved and M7 remains IN PROGRESS.
+
+Read-only RuntimeEngine inspection confirmed that M5 clears inherited child environment and passes only its fixed allowlist and loopback/release settings; there is no current app-specific SQLite configuration projection. Database-dependent uploads must therefore remain deployment-blocked until a separate authorized capability exists. Do not use Registry storage or releases as a fallback.
+
+Managed application database provisioning/configuration remains outside this workstream. Use no Platform Registry connection or external database engine. M10-DB stays NOT STARTED; obey section 9.1 separation/storage requirements.
+
+### Documentation changes
+
+- PROJECT_REQUIREMENTS.md: proposed M7 folder-intake requirements under upload management; aggregate payload, path/content, server identity/archive generation, truthful outcomes and review-only source behavior; static run.cmd policy; ordinary-user New Application sequence while preserving ZIP compatibility.
+- IMPLEMENTATION_PLAN.md: proposed M7 sub-workstream explicitly NOT STARTED, with dependencies, tasks, acceptance and current byte/file/extraction budgets, distinct from unfinished source-build/isolation requirements. Existing milestone IDs/statuses are unchanged.
+- AGENTS.md: permanent folder-path, streaming/budget, static startup-intent, source-only, server-generated metadata and approval rules.
+- PROGRESS.md: this dated feasibility/handoff record; historical evidence is preserved.
+
+**Current milestone statuses:** M1-M6 and M11 COMPLETED; M7 and M8 IN PROGRESS; M9, M10, M10-DB and M12 NOT STARTED. No status was changed. No claim of folder upload, automatic packaging, parser, Dashboard support or new test pass is made.
+
+**Exact next task:** after a separate implementation assignment, start the M7 folder-intake API contract and streamed owner-bound temporary-file receiver. Validate server-side path normalization, actual byte/count/depth budgets, quarantine and cleanup with managed fixtures; static-script inspection must use a no-execution sentinel. Then integrate canonical package generation with the unchanged inspector and exact approval flow, followed by Dashboard UX. Keep source builds disabled and this workstream NOT STARTED until that assignment begins.
+
+
 ## My Work Center mwc/v2 isolated review package - 2026-10-29
 
 **Completed assigned packaging preparation:** operator confirmed **My Work Center / mwc / v2** and explicitly chose **shared-localhost access, documented for package review**. Prepared an isolated Node-compatible export without modifying original application files or the original ZIP. A replacement ZIP passed the existing IHP managed package inspector. It is a **trusted-prebuilt review candidate only**, not an approved/running deployment or evidence of runtime/browser acceptance. No application code was executed, no database was opened/initialized/migrated and no approval/deployment occurred. M1-M6/M11 remain COMPLETED; M7/M8 IN PROGRESS; M9/M10/M10-DB/M12 NOT STARTED. Production browser management remains default-disabled; 53 actual-browser cases remain NOT RUN.

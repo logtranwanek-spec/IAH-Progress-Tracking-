@@ -244,6 +244,15 @@ Do not commit any source code or other project files into this progress reposito
 - Only exact-fingerprint, distinct-Administrator-reviewed trusted prebuilt releases may enter the controlled Agent workflow. Recheck approval, current user authority and hashes before promotion/start; preserve M5 ownership/loopback and M6 validation.
 - If safe source builds/execution cannot be implemented, record the exact limitation and leave M7 IN PROGRESS or BLOCKED as appropriate; do not weaken acceptance or invent verification. Update/push only the four records and verify origin/main.
 
+## M7 folder-intake and startup-script rules
+
+- Folder intake is a proposed M7 workstream, not a claim that the Dashboard/API supports it. Keep the existing strict ZIP operation backward-compatible. Do not mark M7 complete; source-build/isolation acceptance remains unresolved.
+- Enforce the inclusive 52,428,800-byte folder file-payload limit on bytes actually received; separately bound multipart framing. Preserve the compressed 50 MiB limit and all existing expanded/file/count/ratio/CRC/path/type/ownership/approval budgets. Do not increase extraction or entry limits without a threat analysis and explicit approval.
+- Treat browser relative paths, metadata, file sizes, runtime claims and run.cmd as hostile input. Validate and normalize paths server-side inside owned staging; do not trust client UUIDs/manifests or run .gitignore. Do not log secret contents or credentials.
+- Never execute run.cmd/.bat, cmd.exe /c, PowerShell, npm hooks, install/build scripts or arbitrary commands. Startup detection is static only. Translate only exact documented startup patterns to validated allowlisted Node/dotnet host arguments; unknown/ambiguous intent stays review-only and deployment-blocked. Administrator review alone is not authority to execute an unsafe command.
+- Source-only uploads may be retained only in separately authorized protected review storage. They are not release artifacts and cannot reach Agent preparation/start while approved build isolation is unavailable. Keep upload accepted, package validated, ready, build required and deployment blocked distinct; do not infer backend status.
+- Generate application identity, unique package token, manifests, package archives and fingerprints server-side from authenticated Registry state. Node package metadata must contain no scripts; use only already-resolved runtime dependencies and never install them. Preserve M11 ownership/authorization and distinct-Administrator exact-package review. Upload does not approve, build or deploy. Preserve SQLite-only, M10-DB NOT STARTED, no-.exe, no-Docker, no-elevation, loopback and no-existing-application-modification restrictions.
+
 ## M8 dashboard assignment
 
 - The latest user request authorizes M8 despite unfinished M7; this supersedes older wait instructions. Preserve M7 IN PROGRESS and its source-build/isolation dependency. Do not start M9 or any other milestone.

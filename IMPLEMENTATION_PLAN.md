@@ -412,6 +412,32 @@ dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests
 - **Still unfulfilled:** approved source templates build the supported samples and retain build logs. Source builds are disabled by policy assessment, not recorded as successfully built or accepted away. Per explicit user instruction, retain IN PROGRESS/BLOCKED until a safe approved mechanism or explicit acceptance decision resolves this requirement.
 - Run full M1–M6/M11 regression plus package checks, formatting/build/no-.exe scans and local smoke. No corporate deployment/OS security change or later milestone.
 
+### SIMPLIFIED_FOLDER_UPLOAD_WORKSTREAM - Proposed M7 folder intake (NOT STARTED)
+
+**Scope/status:** Proposed M7 workstream, not a new top-level milestone or waiver of M7 acceptance. Overall M7 remains **IN PROGRESS**; trusted-prebuilt ZIP stays compatible and approved source-build/isolation remains unmet. This assignment authorizes documentation/analysis only.
+
+**Objective:** Developer enters application name, selects a folder, sees truthful static runtime/startup and upload-size findings, then submits for exact-package Administrator review. Ordinary users do not create ZIPs/manifests, enter UUIDs or calculate fingerprints. Nothing auto-approves, builds or deploys.
+
+**Dependencies:** M4 Registry and M11 session/RBAC/ownership/audit; M5 runtime/health and M6 route validation; existing M7 streamed ZIP intake, inspector, fingerprint, exact Administrator approval and deployment gates; M8 typed dashboard/auth flow. M8 default-off browser gate still applies. No dependency authorizes source builds. M10-DB remains NOT STARTED.
+
+**Proposed tasks:**
+
+1. **Dashboard:** Folder picker, application name, server-confirmed runtime/startup, payload size, validation/review result and Submit. Preserve advanced legacy ZIP path. Show exclusions/blockers; expose UUID/fingerprint only to authorized reviewers.
+2. **Safe transport:** Dedicated M11-authorized, owner-scoped folder intake, not a generic multipart proxy. Stream bytes into owned temporary storage under deadlines, bounded concurrency/quota and cleanup. Count bytes actually received; enforce **52,428,800 bytes inclusive** for total file payload plus separately bounded multipart framing. Reject at ingress; do not trust client File.size/Content-Length/runtime/path. Do not widen ordinary proxy/JSON budgets.
+3. **Paths/content:** Treat relative paths as hostile. Normalize under staging; reject traversal/rooted/ADS/device names, malformed names, links/reparse escapes, case collisions, duplicates, depth/type/entry overrun. Keep **256 file-and-directory entry cap** unless separately approved. Exclude/reject by reviewed fixed policy .git, dependency trees, env/credential/private-key files; never run .gitignore or disclose secrets in logs. Do not trust folder manifests.
+4. **Identity/package:** Resolve/register via authenticated Registry ownership checks; generate identity/slug/unique package token/manifest server-side and reject reserved/duplicate paths. Emit minimal Node ESM metadata without scripts and retain only already-present, resolved runtime dependencies; never install dependencies. Generate bounded canonical ZIP with a reviewed platform-side writer, then use the unchanged inspector. Keep **50 MiB compressed, 32 MiB expanded, 8 MiB/file, 256 entries, 100:1 plus 4-KiB allowance**. Compute hashes/fingerprint over the exact artifact server-side. Preserve exact review and no auto-deploy.
+5. **Static detection:** Detect only supported Node ESM prebuilt entry/dependencies and framework-dependent ASP.NET Core published DLL plus matching dependency/runtime configuration. Read bounded files; never execute a probe, restore, install or build. Unknown/incomplete layouts remain review-only/blocked.
+6. **run.cmd:** Strict static grammar only. Exact node relative-entry.js or dotnet App.dll may translate to fixed allowlisted host/arguments after file/runtime checks. Parse npm.cmd run start only as text; translate only if package.json start is the same single supported form. Never invoke cmd.exe, cmd.exe /c, npm, .bat, PowerShell or uploaded commands/hooks. Chaining, expansion, redirection, variables, helpers and unknown forms require Administrator review and remain blocked. Review does not make unsafe execution safe.
+7. **Source-only:** Store, if authorized, only in a separately protected review/quota/retention area, never release storage/Agent. Label **Build required / deployment blocked** while isolation is unavailable. No install/build/arbitrary execution.
+8. **Truthful state:** Distinguish Upload accepted (transport/storage), Package validated (static checks), Ready for deployment (supported prebuilt and prerequisites), Build required (no accepted prebuilt output) and Deployment blocked (limit/security/runtime issue). These are presentation meanings, not persisted API enum values; map only to backend evidence.
+9. **Verification after separate implementation assignment:** test below/exact/one-byte-over; limits, hostile paths/types/secrets, stream abort/concurrency/cleanup, Node/DLL/unknown layouts, safe/unsafe scripts, generated identity, inspector/hash/fingerprint/approval, never-run sentinel, M11 authorization and legacy ZIP. Run existing npm.cmd run test:packages and npm.cmd run verify. Actual browser acceptance is distinct from DOM/native checks.
+
+**Database/runtime limitation:** Current M5 child environment has no app-specific SQLite configuration contract. Database-dependent folders remain blocked until a separately authorized capability exists; do not start M10-DB, fall back to the Platform Registry or store app data in releases.
+
+**Acceptance criteria:** (a) user needs no UUID/manifest/fingerprint/ZIP; (b) server enforces streamed payload and unchanged extraction budgets; (c) hostile paths/ownership fail closed with cleanup; (d) server-generated identity and ZIP pass unchanged inspector; (e) startup detection is static and scripts never execute; (f) unknown intent remains blocked; (g) source-only remains review-only with no build; (h) M11 and exact distinct-Administrator approval remain intact, no auto-deploy; (i) legacy ZIP and M1-M6/M11 regression pass; (j) evidence is recorded. This does not satisfy/waive M7's separate source-build/isolation criterion.
+
+**Current workstream status:** NOT STARTED. No code/tests were run for this proposal.
+
 **Verification commands (implemented):**
 
 ```powershell

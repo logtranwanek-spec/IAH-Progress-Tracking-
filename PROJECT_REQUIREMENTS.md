@@ -538,6 +538,30 @@ Do not execute arbitrary uploaded scripts merely because they are present in an 
 
 Source builds and runtime execution must require an approved deployment policy.
 
+## 5.4. Simplified folder intake for M7 (proposed; not implemented)
+
+The target ordinary-user workflow is: enter an application name, select its folder, review detected runtime/startup and upload size, and submit for review. The browser must not ask the user to create deployment ZIPs/manifests, enter an application UUID, release/version token or calculate fingerprints. The server owns application identity, slug, unique package/release identifier, build/version tokens, manifest generation, archive validation and fingerprinting from validated Registry state. M11 identity, role, ownership and authorization checks still apply.
+
+A folder picker can send the selected files with relative-path metadata (including a browser-supplied selected-root component), but browser paths and all client-supplied size/type/runtime/metadata claims are untrusted. Define one protocol for recognizing and stripping only the validated common selected-folder prefix; reject inconsistent roots and never trim arbitrary path components. The Platform API must canonicalize every path and enforce limits from bytes actually received. A later implementation must test the approved browser's directory-selection support; no actual-browser acceptance is implied by this requirement. Keep the existing authenticated ZIP operation available for backward compatibility. Folder intake is a separate explicitly allowlisted upload operation; it must not create a general file or proxy endpoint.
+
+The folder payload budget is **52,428,800 bytes (50 MiB) inclusive**, measured as the sum of file-content bytes, with a separately bounded transport/framing budget. Enforce the limit while streaming, not only from browser file sizes or Content-Length. Reconcile the transport bound with Gateway request limits without widening ordinary proxy/JSON budgets. Retain existing ZIP/package ceilings: **32 MiB extracted total, 8 MiB per file, 256 file-and-directory entries, 100:1 expansion with the 4-KiB allowance**, existing timeout/concurrency/storage quotas, and the inclusive 50 MiB compressed ZIP limit. Do not raise them without a separate threat analysis and explicit approval. A folder upload can be accepted for review while remaining unpackageable or deployment-blocked by stricter release limits; show that distinction clearly.
+
+The server must stream files into an owned, non-public temporary intake; bind the intake to the authenticated user and selected/registered application; reject ambiguous/duplicate names and never attach to an existing app by name alone; require existing-app selection/ownership to be resolved server-side; normalize and validate paths, detect duplicate/case-colliding names, reject absolute paths, traversal, device/alternate-stream names, malformed encoding, links/reparse points and unsafe artifacts, and limit depth and entry count. Never use a client path as a filesystem path before validation. Reject conflicting client-supplied platform manifests or treat them as untrusted review material; generate deployment metadata from validated server-side Registry state. Keep uploads out of releases and static/public trees until separately approved preparation. Clean owned incomplete intake on all failures without changing the existing application or its data.
+
+Ignore or reject development-only and sensitive inputs by an explicit reviewed policy (including .git, dependency trees, environment/credential files and private keys); do not run .gitignore, package hooks, dependency installation, builds or user scripts to decide what to upload. Tell the user which files were excluded/rejected without displaying secret contents or logging sensitive filenames/values. Keep the file count and byte budgets explicit. Source-only material may be retained in a protected review state, but does not become a validated package or runnable release.
+
+The folder workflow must distinguish these user-facing conditions: **Upload accepted** (transport/storage only), **Package validated** (static format/security checks passed), **Ready for deployment** (supported reviewed prebuilt runtime and required approvals/configuration exist), **Build required** (source material has no accepted prebuilt output), and **Deployment blocked** (unsupported startup, limit/security issue or unavailable approved build boundary). These are proposed UI meanings, not new persisted API enum values; map them only to evidence supplied by the backend. Do not claim build/deployment readiness from a successful upload.
+
+Runtime detection and startup discovery are static only. Candidate Node.js evidence includes a reviewed ESM package descriptor and an existing supported server entry; candidate ASP.NET Core evidence includes a compatible framework-dependent published DLL and matching dependency/runtime metadata. Ambiguous or incomplete layouts remain review-only. Supported startup intent may be translated into fixed Node or dotnet arguments only from a strict documented grammar and allowlisted relative entrypoint. Never call cmd.exe /c, execute run.cmd/.bat/PowerShell, or launch arbitrary commands. See section 13.1A. No source build, npm install, restore or build template is authorized by folder upload.
+
+For supported prebuilt folders, the Platform generates the canonical package metadata from authenticated Registry identity and detected runtime; it assigns a unique nonoverwriting package/release identifier server-side. Create a minimal canonical Node ESM package descriptor with no scripts and only already-present, reviewed runtime dependencies. Do not install dependencies; reject unresolved imports. Create a bounded internal archive using a reviewed server-side process, then run the existing ZIP inspector over the result and compute file/archive fingerprints server-side. The exact inspected package must still pass current-user authorization, package ownership and a distinct current Administrator's exact-fingerprint review before any preparation/start. Submission never auto-approves or deploys. If no safe archive can be produced, keep the upload review-only and report a specific reason. Existing trusted-prebuilt ZIP uploads remain compatible.
+
+Source-only uploads may be stored solely for authorized review under independent bounded retention/quota and cleanup controls. Until an approved isolated build service exists, label them **Build required / deployment blocked** and never build, run, prepare as a release or pass them to the Agent. Administrator review alone does not authorize executing arbitrary source. M7's source-build/isolation acceptance remains unfulfilled. Folder intake does not implement M10-DB: application database selection, initialization, migration, backup or restore remains separately governed by section 9.1 and its future milestone.
+
+The existing M5 RuntimeEngine clears inherited child-process environment and supplies only its fixed allowlist plus supervised host/port/release values; it does not currently project an application SQLite path/configuration. Until a separately authorized and implemented app-specific configuration capability exists, a database-dependent upload must remain deployment-blocked. Never point it at Platform Registry storage, put data inside a release, inherit host secrets or silently create/migrate a database. The folder workflow does not start M10-DB.
+
+Dashboard review should show the entered name, server-resolved application identity to authorized roles, owner, detected runtime/startup, aggregate/entry count, excluded/flagged-file summary, package-validation result, exact package identity/fingerprint to authorized reviewers, and the next safe action. Keep UUIDs and fingerprint calculation internal for ordinary users; keep detailed review evidence administrator-only. Show only backend-confirmed progress; while source builds are disabled do not show Build SUCCESS, synthetic runtime metrics or unverified readiness. Do not fabricate status or hide unsupported features.
+
 ---
 
 # 6. DEPLOYMENT CONFIGURATION
@@ -1180,6 +1204,16 @@ Where adequate isolation cannot be achieved with the available Windows permissio
 
 The Agent must not attempt to bypass enterprise endpoint security.
 
+## 13.1A. Static startup-intent inspection for M7 (proposed)
+
+Any run.cmd/.bat file is untrusted data. Read/parse it as text only; never invoke it through cmd.exe, ShellExecute, PowerShell, WSH, a manifest command field or any other interpreter. Do not run a command to ask the script what it would do. Never use cmd.exe /c for an uploaded command.
+
+A strict, versioned static grammar may recognize only exact, root-relative application launch forms such as node dist/server/index.js and dotnet App.dll. npm.cmd run start may be considered only as text: parse the start value from package.json, and translate it to a fixed Node/dotnet host and validated relative entrypoint only if the complete script is exactly one supported form and contains no hooks, chaining, arguments with unsafe semantics, expansion or shell metacharacters. Never execute npm.cmd run start; npm lifecycle hooks are not part of the approved runtime. Validate target files and framework/dependency metadata by static inspection. Do not accept CMD syntax such as call, start, pipes, redirects, variable expansion, delayed expansion, substitutions, control flow, PowerShell, nested scripts or opaque helpers as a launch configuration.
+
+Unknown, ambiguous, multi-command or unsupported intent must be surfaced as **Administrator review required** and deployment remains blocked. Administrator review is a policy decision on evidence; it does not by itself make an arbitrary command safe or authorize execution. Preserve the run.cmd content only in the access-controlled review source when allowed; never place an executable run.cmd into the deployment package or output raw command contents/secrets to ordinary users or logs. Static script parsing does not build, restore or execute source code. Only a separately approved execution boundary could change the source-build prohibition.
+
+---
+
 ## 13.2. Gateway Security
 
 Implement:
@@ -1458,15 +1492,14 @@ Display all applications with search, filters and status indicators.
 
 ### New Application
 
-Provide a deployment wizard:
+The default M7 intake is a folder-based workflow:
 
-```text
-Step 1: Application Information
-Step 2: Upload Package
-Step 3: Framework Configuration
-Step 4: Database Configuration
-Step 5: Review & Deploy
-```
+1. Enter the application name.
+2. Select its local folder.
+3. Review server-detected runtime/startup intent and the aggregate upload size.
+4. Submit for package validation and Administrator review.
+
+The Dashboard must not require ordinary users to manually create a ZIP or manifest, enter an application UUID or calculate a fingerprint. The server resolves application identity and creates deployment metadata only from authorized Registry state. Advanced configuration/review information remains available to authorized roles. Folder selection does not authorize source builds or execution; the UI must show review-only/build-required/blocked outcomes honestly. The existing authenticated trusted-prebuilt ZIP workflow remains as a backward-compatible advanced option.
 
 ### Deployment Progress
 
