@@ -6,6 +6,10 @@
 **Development Approach:** Production-oriented, modular architecture  
 **Primary Objective:** Self-service deployment of Node.js and ASP.NET Core applications through a centralized hosting platform.
 
+## Current TASK 021 implementation record — 2026-10-29
+
+The default-off Dashboard candidate now provides the M7 folder upload flow through the existing authorized APIs. Keep M7 and M8 IN PROGRESS; actual-browser acceptance remains NOT RUN, and private production browser management stays disabled by default. Source builds remain disabled and M10-DB remains NOT STARTED. Section 5.4 distinguishes this implemented, automated-test-verified candidate from remaining acceptance; the normative security and workflow requirements below remain in force.
+
 ## Current M8 continuation authorization — 2026-10-28
 
 The latest user resumes M8 implementation after the documentation task: resolve and verify the recorded API startup/readiness failure, assess and secure the opt-in browser authentication candidate, integrate only authorized real Dashboard operations and run focused/full regression. Preserve M11 protections, approved trusted-prebuilt execution gates and all company restrictions. Actual-browser acceptance requires permitted real-browser evidence; keep private production operations disabled and M8 IN PROGRESS if that gate or another required criterion remains unmet. M7 remains IN PROGRESS; M9/M10/M10-DB/M12 are not assigned. The Managed Application Database requirements in section 9.1 are unchanged future work. This supersedes the prior documentation-only scope for the current task, not any security restriction.
@@ -538,9 +542,9 @@ Do not execute arbitrary uploaded scripts merely because they are present in an 
 
 Source builds and runtime execution must require an approved deployment policy.
 
-## 5.4. Simplified folder intake for M7 (target workflow; backend intake partially implemented)
+## 5.4. Simplified folder intake for M7 (target workflow; default-off Dashboard candidate implemented)
 
-The current implementation provides only the authenticated, owner-scoped API intake boundary at `POST /_platform/api/applications/:id/folder-intakes`. It streams files to private review staging and reports `STAGED_REVIEW_ONLY`; it does not provide Dashboard folder selection, canonical package generation, package inspection, approval submission or deployment readiness. The requirements below remain the target for the complete workflow.
+The implementation provides authenticated, owner-scoped folder intake and package-generation APIs plus a default-off React Dashboard candidate that registers or selects an authorized application, previews selected files and size, stages the folder, invokes the server-side package inspection path, and displays backend-confirmed outcomes such as pending review, BUILD_REQUIRED or DEPLOYMENT_BLOCKED. The Dashboard uses only explicit existing API operations and does not auto-approve, build, execute, prepare or deploy. Automated DOM and loopback HTTP/WebCrypto integration checks passed, but actual-browser acceptance has not been run; private production browser management remains disabled by default. The requirements below remain the target for full acceptance, including actual-browser verification and any unsupported capability.
 
 The target ordinary-user workflow is: enter an application name, select its folder, review detected runtime/startup and upload size, and submit for review. The browser must not ask the user to create deployment ZIPs/manifests, enter an application UUID, release/version token or calculate fingerprints. The server owns application identity, slug, unique package/release identifier, build/version tokens, manifest generation, archive validation and fingerprinting from validated Registry state. M11 identity, role, ownership and authorization checks still apply.
 
