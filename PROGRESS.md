@@ -1,5 +1,14 @@
 # Project Progress
 
+## My Work Center export identity confirmed - 2026-10-29
+
+Operator supplied exact Registry identity: **name My Work Center**, **slug mwc**, **release v2**. Export paths must therefore be **/mwc** and **/mwc/health**. Saved these confirmed/derived fields to local C:/Users/logtran/IhpWorkCenterReview-odHZXy/export-metadata.draft.json and updated local EXPORT_PLAN.md. The draft is explicitly NOT UPLOADABLE; no entry point, build identifier or contract verification is invented. No application build/execution/database initialization/approval/deployment occurred and no new ZIP was created. Original project and archive remain unchanged. The source incompatibilities and first zip_invalid cause recorded below remain valid.
+
+Outstanding access-model clarification: existing My Work Center application APIs have no application login, and M11 management sessions do not protect /mwc application routes. Asked whether the intended application requires its own sign-in or explicitly reviewed shared-localhost data access. No model is silently selected or enabled. External-to-release SQLite initialization remains a separate unauthorized operation; missing configuration must fail closed. Export/build preparation authorization remains in effect and is not permission for application execution, database provisioning or M10-DB implementation.
+
+Focused local metadata consistency and git diff --check passed. No application tests/builds were run; previous 529 PASS is historical. Only PROGRESS.md is changed in tracked files; local review metadata/plan remain outside progress Git. All milestone statuses, M7 restrictions and default-disabled browser management remain unchanged. **Next task:** resolve the application access model, then implement the isolated /mwc v2 Node-compatible export with honest fail-closed database behavior; inspect a real resulting ZIP before claiming package acceptance. Do not re-request the already supplied name/slug/version or export-preparation authorization.
+
+
 ## My Work Center ZIP diagnosis and isolated export preparation ? 2026-10-29
 
 **Result:** original rejection reproduced; a runnable replacement ZIP is **not yet produced**. The operator authorized isolated IHP export/build preparation after reviewing the runtime blockers. This is not permission to execute the application, initialize/migrate its database, approve or deploy it. No original application/source/ZIP or configured database was changed. No IHP application code/security validator was changed. Milestone statuses remain unchanged: M1?M6/M11 COMPLETED; M7/M8 IN PROGRESS; M9/M10/M10-DB/M12 NOT STARTED. Production browser management remains default-disabled and actual-browser acceptance remains 53 NOT RUN.
