@@ -4,6 +4,8 @@
 
 Internal Application Hosting & Deployment Platform (project code: Internal Hosting Platform / IHP). The complete, canonical requirements are in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md).
 
+**Latest assignment (2026-10-29): TASK 024 — secure unified folder/ZIP intake with SQLite artifact separation.** Extend only authenticated upload/intake, static candidate classification, private staging, bounded read-only SQLite validation and Dashboard review results. Keep package approval unchanged and code packages free of database bytes. This does not authorize application execution/deployment, DB replacement/restore/provisioning/migrations, runtime path injection, Gateway changes, or M10-DB lifecycle work. M7 remains IN PROGRESS; M10-DB remains NOT STARTED. Preserve existing budgets and run the full approved verification suite.
+
 **Latest assignment (2026-10-29): TASK 023 — My Work Center SQLite compatibility investigation, documentation only.** This supersedes the TASK 022 next-task note for this task. Inspect the available application folder and IHP package/runtime boundaries without executing the app or touching its database; document findings and exact future requirements in the four tracking records. M7/M8 remain IN PROGRESS and M10-DB remains NOT STARTED. No source, app, schema, migration, package-validator, runtime or filesystem behavior is changed.
 
 **Latest assignment (2026-10-29): TASK 022 — Persistent application workspace and SQLite architecture design, documentation only.** This supersedes active implementation assignments for this task. Inspect and document actual package/folder/runtime behavior, define a safe persistent workspace and database-artifact workflow, update only the four tracking documents, and run documentation consistency/format/diff checks. Do not implement, build, test, migrate, execute applications or change milestone states. M7/M8 remain IN PROGRESS; M10-DB remains NOT STARTED. Stop after documentation and wait for explicit authorization before implementation.
@@ -465,6 +467,39 @@ dotnet .\artifacts\publish\Packages.Tests\Packages.Tests.dll
 **Status:** IN PROGRESS
 
 **Verified evidence (2026-10-27):** focused package gate passed 37/37; final npm.cmd run verify exited 0 with **418 passing checks**, zero failures/skips, plus real platform smoke. All twelve published roots passed no-.exe scans. Exact Node/.NET upload/review/preparation/start/proxy/stop, rejection/tampering/collision/failure cleanup, interrupted staging, default Agent gate and full M1–M6/M11 regression passed. General deployment states track package state. PROGRESS.md records commands, corrected failures, files, security decisions and remaining limits. Approved source builds/build logs remain unfulfilled, so M7 stays IN PROGRESS; never infer full completion from its verified prebuilt subset. The latest user separately authorizes M8 while preserving this M7 status.
+
+### UNIFIED_SQLITE_INTAKE_WORKSTREAM — M7 TASK 024 (IN PROGRESS)
+
+**Scope/status:** Extend the existing authenticated folder intake with ZIP intake that automatically separates application files from existing SQLite candidates. This is a sub-workstream within M7, not a new milestone and not the M10-DB lifecycle service. M7 remains **IN PROGRESS** because approved source-build isolation is unavailable; M8 remains **IN PROGRESS** because production browser management remains default-disabled pending actual-browser acceptance; M10-DB remains **NOT STARTED**.
+
+**Objective:** Let an authorized owner select one application folder or ZIP containing both code and SQLite artifacts; stage each category privately, inspect candidates read-only under bounded resource limits, and show truthful review metadata without attaching or changing a database or executing the application.
+
+**Dependencies:** Existing M7 authenticated intake, `application.write` ownership/RBAC, PackageInspector, package fingerprint and distinct Administrator approval; existing M11 authorization; current default-off signed browser boundary. M10-DB lifecycle and actual browser acceptance are separate gates.
+
+**Implemented and verified:**
+
+1. Authenticated folder/ZIP intake with streamed 50 MiB inclusive upload cap, 256 entries, existing expanded/per-entry/ratio constraints, one ZIP multipart field, timeout, quota, concurrency and owned cleanup.
+2. `.db`, `.sqlite`, `.sqlite3`, matching `-wal`/`-shm`, and inert SQL classification; multiple candidates; normalized relative paths; opaque data blobs under per-owner/application/upload `database/` staging; manifest format 2.
+3. Evidence-based potential active/backup/unknown classification, sidecar association, bounded static source scan, SQLite header check and read-only `quick_check(1)` worker with extension loading disabled, query-only/trusted-schema settings, memory limits, candidate cap and deadline. Candidates and sidecar sets remain `REVIEW_REQUIRED`.
+4. Managed PackageInspector ZIP split mode applies existing ZIP structure, count, expansion, per-file, ratio, path, link, CRC and file-type checks, optionally strips one validated common wrapper directory, and emits opaque private blobs. It never evaluates application code, manifests or SQL.
+5. Canonical code packages exclude database bytes/sidecars and do not include their bytes in the code file fingerprint. Inert `drizzle/*.sql` and scoped static `.webmanifest` support is narrow; exact package approval and deployment restrictions remain intact.
+6. New authenticated `POST /_platform/api/applications/:id/folder-intakes/zip` and exact signed browser operation `/admin/browser/applications/:id/folder-intakes/zip`; no generic proxy or application route change. Dashboard supports folder or ZIP selection, inclusive client size checks, and backend-confirmed candidate/review results. A valid selected ZIP is actually submittable.
+
+**Remaining acceptance gaps:** The API provides sanitized unsupported-type reason codes but not a per-file rejected-path/reason list for Dashboard review. Individual unsupported-file reporting remains unfinished. The private browser client remains disabled by default and actual-browser acceptance was not run; automated Node/HTTP/WebCrypto/DOM tests are not browser acceptance. Database attachment, database lifecycle, runtime database configuration, replacement, restore, migrations, and app execution remain outside scope.
+
+**Verification evidence (2026-10-29):** `npm.cmd run verify` exited 0 with **569 passing automated checks, 0 failures, 0 skips**, followed by successful owned local smoke and cleanup. Groups: Node foundation/readiness 33; API/auth/routing/folder intake 116; SQLite migrations/database 14; Dashboard DOM 46; signed browser-boundary protocol simulation 53; managed Foundation 27; Gateway including HTTP/WebSocket/dynamic routes 114; samples 82; Deployment Agent 27; routing integration 18; package/ZIP approval and runtime integration 39. The 53 browser-boundary checks are Node/HTTP/WebCrypto/DOM evidence and do not represent actual-browser acceptance. All managed .NET publishes used `UseAppHost=false` and passed scans for prohibited `.exe` output. Focused `node --test src/Api/test/folder-intake.test.mjs` passed **32/32**; Dashboard production build and 46-test suite passed. No application code was executed by inspection or upload tests; approved test samples ran only in their existing managed verification scenarios.
+
+**Verification commands:**
+
+```powershell
+npm.cmd --workspace @ihp/api run build
+node --test src/Api/test/folder-intake.test.mjs
+npm.cmd --workspace @ihp/dashboard run build
+npm.cmd --workspace @ihp/dashboard test
+npm.cmd run verify
+```
+
+**Current work-package status:** **IN PROGRESS** until safe per-file unsupported-item feedback is implemented and verified. This does not alter any top-level milestone status or M7's independent source-build/isolation requirement.
 
 ### M8 — React Dashboard
 
