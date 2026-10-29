@@ -1,5 +1,48 @@
 # Project Progress
 
+## TASK 022 — Persistent application workspace and SQLite management design — 2026-10-29
+
+**Scope:** Documentation and read-only architecture investigation only. No APIs, Dashboard, Agent, source/test files, database files, schema, migrations, package-validation rules or runtime behavior were modified. No application, build or test was run. This design record does not start M10-DB.
+
+### Status and handoff
+
+- M1–M6 and M11 remain **COMPLETED**. M7 and M8 remain **IN PROGRESS**. M9, M10, M10-DB and M12 remain **NOT STARTED**. No milestone acceptance status changed.
+- The official design now records the approved requirement: one separate Platform Registry and optional independent application SQLite data, with application-relative DB paths preserved; application files/configuration are not automatically rewritten; upgrade defaults to KEEP; explicit replacement requires authorization/confirmation and a consistent verified backup; multiple databases remain distinct; no empty file silently replaces supplied valid data.
+- All application database provisioning, import/validation, workspace/runtime integration, backup/restore, replacement, Dashboard controls and API contracts remain proposed future functionality. M10-DB remains NOT STARTED pending a separate implementation assignment.
+- **Exact next task:** product-owner/security review of the seven open decisions in PROJECT_REQUIREMENTS.md section 9.1.14 (path/CWD contract, workspace versus default data path and import mode, candidate/WAL budgets and quiescence, replacement approval, database groups, approved SQLite provider/limits, and same-user isolation expectation). Then separately authorize implementation packages DB-W0 onward. Until then, do not alter code, allowlists, runtime CWD or storage.
+
+### Architecture findings and exact validation error cause
+
+- `src/Api/src/folder-intakes.ts` uses `validateContentPath` with explicit type allowlists/denylists. `.db`, `.sqlite`, `.sqlite3` and `.sql` are explicitly denied; `.db-wal`, `.db-shm`, and `.webmanifest` are unsupported because absent from the allowlist. Only a file named exactly `run.cmd` passes the `.cmd` exception; it remains inert and is not run. `.git`/other development directories are excluded, while `.gitignore` is a filename exception.
+- The API reports HTTP 415 `folder_file_type_unsupported`; `src/Dashboard/src/api.ts` renders “The folder contains an unsupported file type.” It does not identify the first rejected path. For the provided sample list, several independent entries match rejection rules. Therefore the exact verified root cause is the folder validator's explicit-deny/allowlist-miss condition; the first offending file in that particular folder cannot be named without a path-specific sanitized response or additional request evidence. This is distinct from ZIP structural error `zip_invalid`.
+- `src/Api/src/folder-packages.ts` has a second/narrower file allowlist and `src/DeploymentAgent/PackageArchive.cs` rejects DB/sidecar/SQL entries from release ZIPs as `package_file_type_forbidden`. A database feature needs its own review-only data-artifact lane; globally permitting these extensions would not satisfy the full M7 package pipeline and is not proposed.
+- Existing package storage uses generated `Uploads/<deployment-id>` paths; exact code-package/archive, metadata and file-manifest evidence is fingerprinted and reviewed by a distinct Administrator. Agent promotion rechecks approval/hash and extracts without overwriting to `Applications/<application-uuid>/releases/<version>`.
+- `src/DeploymentAgent/RuntimeEngine.cs` starts the approved entry point from the versioned release with `ProcessStartInfo.WorkingDirectory` set to that release. There is no persistent application workspace, per-app SQLite configuration/lifecycle contract, consistent data backup/restore or DB-aware update/rollback. Current runtime path assumptions cannot be transparently changed without separately reviewed implementation and compatibility tests.
+
+### Proposed architecture and lifecycle (not implemented)
+
+- Retain a code-only approved release/fingerprint at `Applications/<app-uuid>/releases/<version>`. Add a future stable app-scoped `workspace/` for database files at their exact declared relative paths; keep default `data/application.db` only for a managed DB with no existing application-required path, subject to product-owner approval. Put consistent backups under separate app-scoped `backups/` outside all release/public trees; stage candidate imports privately under `Temporary/DatabaseImports/`.
+- Proposed narrow path support is for reviewed CWD-relative DB paths with a controlled workspace-root working directory while launching executable code by absolute path from the immutable release. `__dirname`, module/assembly-relative, hardcoded absolute, arbitrary environment-variable and unsupported path cases remain blocked absent explicit app changes/another approved mechanism. CWD-relative non-DB assets and release-CWD assumptions require per-app review. No mutable executable tree, symlink or junction is proposed as a shortcut.
+- Data candidates are separate from the code-release fingerprint and need explicit identity/relative-path mapping. `.db` extension alone does not prove an active SQLite DB. Multiple files are not merged. A WAL file may contain committed state and stays associated with its exact DB snapshot; SHM is transient index/coordination state and is not promoted as database content. Active raw-file copying is not an acceptable snapshot. Future integrity/snapshot/backup must use a reviewed in-process SQLite provider, read-only/bounded checks and an approved quiescence/Online Backup API procedure; no uploaded SQL executes.
+- First deploy with NONE provisions nothing. Existing supplied data is preserved, not replaced by an empty DB. Incoming data on later releases defaults to **Keep Existing Database**. Explicit replacement requires server-side M11 ownership/authorization, clear per-file selection and confirmation, stop/writer coordination, verified non-overwriting consistent backup, target revision recheck, candidate validation and journaled recovery. Related DBs require a declared consistency group; rollback changes application code only, not DB schema/state.
+- Requirements define proposed application-scoped import/read/status/replace/history API shapes and a Dashboard view showing candidate paths/status, incoming vs active data, backup/usage and default KEEP. These contracts, approval responsibilities, audit model and UI are not implemented.
+- Same Windows user identity means process/filesystem separation, fingerprints and separate SQLite files are not an OS sandbox. Application code that can access user-writable storage may mutate it; do not claim malicious-code isolation. Keep trusted-reviewed-code, M7 exact approval, no-source-build, M11 RBAC, loopback and SQLite-only requirements.
+
+### Files and verification
+
+- Updated only `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `AGENTS.md` and `PROGRESS.md` for this task. The plan adds DB-W0 through DB-W8 as future, independently testable work packages with scope, dependencies, likely files, acceptance, verification and security constraints. M10-DB remains **NOT STARTED**.
+- Read-only code references inspected: `src/Api/src/folder-intakes.ts`, `folder-packages.ts`, `packages.ts`, `src/Dashboard/src/api.ts`, `src/DeploymentAgent/PackageArchive.cs`, `PackageWorkflow.cs`, `RuntimeEngine.cs`, and `ReleaseInspector.cs`. No code was edited.
+- Test/build/application commands: **NOT RUN**, as required by documentation-only scope. No new feature behavior is claimed verified.
+- `git diff --check` — exit 0. Read-only PowerShell consistency checks passed: balanced fenced code blocks in all four documents; every milestone status extracted from `IMPLEMENTATION_PLAN.md` matches the pre-task HEAD (M1–M6/M11 COMPLETED, M7/M8 IN PROGRESS, M9/M10/M10-DB/M12 NOT STARTED); future behavior is labeled proposed/unimplemented.
+- `node .\\node_modules\\prettier\\bin\\prettier.cjs --check AGENTS.md PROJECT_REQUIREMENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md` — exit 0; all four files use Prettier style. An initial `npm.cmd exec -- prettier --check ...` attempt exited 1 because the workspace path contains `&` and npm's command-path parsing resolved the binary incorrectly; no source or package files were changed. Direct invocation of the already-installed local formatter avoided that path issue.
+- No application build, automated test suite, API, database, or browser verification ran. No runtime feature is claimed tested or implemented.
+
+### Decisions still required
+
+See PROJECT_REQUIREMENTS.md section 9.1.14. Main gates: supported path-base/CWD contract; mapping between `workspace` and `data/application.db`/modes; bounded candidate formats/sizes and WAL snapshot/quiescence policy; separate Administrator review for destructive replacement; database consistency groups; approved in-process SQLite snapshot provider/limits; and whether same-user isolation limitations are acceptable for the supported app set. No decision is silently assumed.
+
+---
+
 ## TASK 021 — M7 folder-upload Dashboard workflow — 2026-10-29
 
 **Current status:** M1–M6 and M11 remain **COMPLETED**. M7 and M8 remain **IN PROGRESS**. M9, M10, M10-DB and M12 remain **NOT STARTED**. The TASK 021 folder workflow is implemented locally and its automated verification passed; this does not complete M7 or M8. Source builds remain disabled, private production browser management remains default-disabled, and actual-browser acceptance remains NOT RUN.

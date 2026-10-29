@@ -1,5 +1,10 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
+
+## Current TASK 022 — Persistent application workspace and SQLite design — 2026-10-29
+
+This assignment is **investigation and documentation only**. It records approved requirements to preserve existing SQLite data and application-relative database paths, and proposes an implementation design for a per-application persistent workspace distinct from approved releases and backups. No API, Dashboard, Agent, schema, migration, package-validation or database behavior is implemented by this document. M7/M8 remain IN PROGRESS; M10-DB remains NOT STARTED. Do not treat design proposals or historical tests as implementation evidence. Wait for a separate explicit implementation assignment before starting M10-DB.
+
 **Project Code:** Internal Hosting Platform (IHP)  
 **Project Type:** Internal Developer Platform / Self-Service Application Hosting  
 **Target Environment:** Windows 11 Enterprise Environment  
@@ -960,8 +965,17 @@ Use the existing configurable `IHP_STORAGE_ROOT`. The required target logical st
 |       |   +-- v2/
 |       |   +-- v3/
 |       |
+|       +-- workspace/
+|       |   +-- database/                 (example app-relative directory)
+|       |       +-- workcenter.db         (example app-relative file)
+|       |       +-- settings.db           (optional second database)
+|       |
 |       +-- data/
 |       |   +-- application.db
+|       |
+|       +-- backups/
+|       |   +-- <database-id>/
+|       |       +-- <backup-id>/
 |       |
 |       +-- logs/
 |       |
@@ -974,7 +988,9 @@ Use the existing configurable `IHP_STORAGE_ROOT`. The required target logical st
 +-- Logs/
 ```
 
-`data/application.db` applies to MANAGED_SQLITE; NONE does not require that file. EXISTING_SQLITE uses its explicitly approved registered location. Application UUIDs, rather than mutable slugs or release labels, identify target application storage. Database files, their SQLite sidecars and backups must remain outside every release directory. Backup locations must be separately approved, application-scoped and outside publicly served trees; their exact configurable layout is a future design decision.
+`workspace/` is a **proposed target** for stable application-relative data paths and is distinct from every release. A managed database that must retain a path such as `database/workcenter.db` is stored at that same relative path below the application's workspace root. `data/application.db` remains the default target for a future MANAGED_SQLITE configuration where the application has no existing required relative path; it is not a second copy of a database already represented in the workspace. NONE does not require either location. EXISTING_SQLITE uses its explicitly approved registered location and is not implicitly copied into workspace. The exact relationship between the default `data/application.db` convention and app-relative workspace mappings requires product-owner approval before implementation.
+
+Application UUIDs, rather than mutable slugs or release labels, identify target application storage. Database files and their SQLite sidecars must remain outside every release directory. Backups must remain outside releases and public trees in a separately approved application-scoped location. This structure is a future logical target only; preserve implemented `IHP_STORAGE_ROOT`, Registry/application paths and current runtime behavior until an explicitly authorized implementation and compatibility/recovery plan are approved.
 
 This is a **target logical structure**, not an assertion about current physical paths. Preserve implemented `IHP_STORAGE_ROOT`, Registry location, slug/UUID directories and all existing configurations. The older examples in sections 10 and 17 are retained as examples; they do not authorize relocating data. Any future physical layout migration requires an explicitly authorized implementation milestone, compatibility/recovery planning and verified data preservation. This documentation task does not create or move directories/databases.
 
@@ -1037,6 +1053,94 @@ Every management operation must enforce M11 RBAC and application ownership on th
 - Restore requires explicit authorization, destructive-action confirmation, verified application/database/backup identity, integrity and compatibility checks, adequate space, and controlled application downtime or coordinated access that excludes conflicting writers/connections. Coordinate SQLite sidecar handling through the approved provider; do not overwrite a live file blindly.
 - Stage and validate the restore with a documented failure/recovery plan that preserves the current recoverable database. Prevent restore from overwriting the Registry, another application's database, an unrelated registered file or any path outside approved storage. Revalidate target containment/identity before the destructive step.
 - Record restore status, audit actor/outcome and post-restore integrity/application health evidence before reporting success. A database restore and an application release rollback are distinct authorized operations; neither implies automatic permission for the other.
+
+### 9.1.9. Existing application SQLite files and current IHP compatibility
+
+**Approved requirements:** Preserve application-relative database paths; do not rewrite uploaded source, binaries, configuration or connection strings; do not merge databases; support multiple separately identified databases; do not create an empty replacement when a valid existing database is supplied; keep existing database content by default on upgrade. These requirements do not make the workflow available today.
+
+**Current implementation observed during TASK 022 (read-only source inspection; not a new test run):**
+
+- Folder intake in `src/Api/src/folder-intakes.ts` applies an explicit allowlist and denylist in `validateContentPath`. It returns HTTP 415 `folder_file_type_unsupported` when an entry is denied or absent from the allowlist. `.db`, `.sqlite`, `.sqlite3` and `.sql` are explicitly denied. `.db-wal` and `.db-shm` are not in the allowlist, so they hit the unsupported-type rule. `.webmanifest` is also absent from the allowlist. A `.cmd` file is allowed only when its basename is exactly `run.cmd`; that file remains inert and is never executed. `.git` and other excluded development directories are rejected/excluded by directory policy; `.gitignore` is a filename exception. The Dashboard maps `folder_file_type_unsupported` to the generic text “The folder contains an unsupported file type.” The response does not identify the first rejected relative path, so when a folder has several disallowed entries the exact first entry cannot be determined from that message alone.
+- The canonical folder-package generator in `src/Api/src/folder-packages.ts` has its own narrower package extension allowlist and reports `package_file_type_forbidden`; changing folder intake alone would not make database files part of a valid release package.
+- ZIP inspection in `src/DeploymentAgent/PackageArchive.cs` independently rejects entries outside its code/static-file allowlist with `package_file_type_forbidden`. `.db`, `.sqlite`, `.sqlite3`, `.db-wal`, `.db-shm` and `.sql` are not valid release-package entries. Current ZIP checks also bound compressed archive size to 50 MiB, total expanded bytes to 32 MiB, each entry to 8 MiB, entry count to 256, and expansion ratio to 100:1 with a 4096-byte floor; paths/features/CRC are validated and links are rejected. Keep this allowlist narrow: database artifacts require a separate reviewed intake path, not a global package type exception. ZIP structural/security failures use other codes such as `zip_invalid`, `zip_features_unsupported`, `zip_path_unsafe` and `zip_link_forbidden`; do not conflate those with the folder intake's generic file-type message.
+- M7 stores uploaded ZIPs under server-generated `Uploads/<deployment-id>` paths. It records a release fingerprint over deployment identity and archive/metadata/file-manifest evidence; distinct Administrator review binds to that exact fingerprint. The Agent rechecks approval and hashes, then extracts a non-overwriting release to `Applications/<application-uuid>/releases/<version>`. Existing releases are preserved.
+- M5 `RuntimeEngine` currently sets `ProcessStartInfo.WorkingDirectory` to the selected release directory and launches the reviewed entry point from that release. `ReleaseInspector` and the package workflow inspect/hash release files. There is no persistent app workspace, application-database association, SQLite configuration contract, database backup/restore service or database lifecycle API. Database-dependent M7 deployments remain blocked by the file policies and missing runtime database support.
+- M5 supervises owned process stop/restart (restart is stop then start). M10 version selection/rollback is future work. No application database state is coordinated by the current process lifecycle.
+
+**Exact error assessment:** For the supplied file classes, `.db` and `.sql` hit explicit deny rules; `.db-wal`, `.db-shm` and `.webmanifest` hit the allowlist-miss rule; a `.cmd` other than exact `run.cmd` is rejected. Thus multiple entries can independently cause the same generic folder error. The API response omits the offending path, so this inspection cannot identify which entry failed first in a particular upload. The verified cause is the unsupported-file rule, not an unreadable-ZIP conclusion. ZIP releases containing those data entries are rejected separately by the PackageArchive allowlist.
+
+### 9.1.10. Proposed persistent workspace and compatibility boundary
+
+**Proposed, not implemented:** Keep exact code/release artifacts in their existing versioned release directories and retain their code-only approval fingerprint. Keep application database files in stable application-owned workspace/data paths outside every release. Stage candidate database artifacts in private `Temporary` storage until independently validated and explicitly selected. Store SQLite-consistent backups under the application's non-public backup area. Registry metadata stores opaque IDs, mappings, state and provenance references, never database contents or deployed-application connection secrets.
+
+```text
+<IHP_STORAGE_ROOT>/
+|-- registry/platform.db                  # Platform Registry only
+|-- Applications/<application-uuid>/
+|   |-- releases/v1/                       # approved release artifact
+|   |-- releases/v2/
+|   |-- workspace/                         # persistent app-relative data paths
+|   |   `-- database/workcenter.db         # example; preserve declared relative path
+|   |-- data/application.db                # default managed path only when applicable
+|   |-- backups/<database-id>/<backup-id>/ # SQLite-consistent backup
+|   |-- logs/
+|   `-- config/                            # access-controlled, not release content
+|-- Uploads/                               # existing package intake
+|-- Temporary/DatabaseImports/<opaque-id>/ # proposed private DB-artifact staging
+`-- Logs/
+```
+
+The release tree remains the source of executable code and package-integrity evidence. The workspace contains data only for the narrow supported path contract; it must not become a second mutable source of executable files. The conceptual alternative of mirroring `dist/`, `package.json` and the full application tree into a writable workspace could preserve more module-relative paths, but is rejected as the default: launching from that mutable copy would disconnect executed code from the approved release fingerprint, while same-identity code can mutate either tree and no approved filesystem overlay/sandbox exists. A proposed runtime mode may set a reviewed fixed workspace-root working directory while launching the entry point by its absolute path under the approved release. This is compatible only with database paths demonstrably resolved from that working directory and with the application's other working-directory expectations. Paths derived from Node `__dirname`/module location, .NET assembly/base directory, hardcoded absolute locations, arbitrary environment-variable names or external paths cannot be transparently redirected without explicit app configuration/code changes or another approved mechanism. Do not rewrite binaries/configuration, add junctions/symlinks, copy an executable tree into the writable workspace, or claim universal compatibility. Review and verify each application's actual path behavior. Current M5 instead uses the release as working directory; the proposed change requires separate authorized M5/M10-DB implementation.
+
+Application processes and Agent currently use the permitted Windows identity. Hash checks and application-scoped paths do not stop malicious code under that identity from writing files it can access, potentially including release or other user-writable locations. A writable workspace, process separation, SQLite file separation, managed-code validation and loopback binding are **not** OS isolation or a sandbox. Keep trusted-reviewed-code and exact-approval gates; do not claim protection against a malicious approved process without a separately approved identity/ACL or stronger IT-approved isolation boundary.
+
+### 9.1.11. Proposed candidate detection and SQLite sidecar handling
+
+Database candidate discovery is a separate, review-only data-artifact lane. It must not widen global folder/package extension allowlists or treat every `.db` as active SQLite data. Require an explicit manifest/owner selection mapping an opaque candidate ID to a normalized relative path and database identity. Treat extension, SQLite header/profile, file identity, size and bounded read-only validation as evidence, not proof of application use or business compatibility. Support multiple distinct candidates without merging; never select or replace by basename alone. Keep `.sql` inert and excluded. No uploaded script, application code or extension may execute for validation.
+
+An import source must be stopped/quiescent or first captured by an approved SQLite-consistent mechanism. A byte copy of an active `.db` is insufficient. In WAL mode the matching `.db-wal` may contain committed state and must remain associated with the exact database snapshot; do not separate, rename or discard it before a consistent snapshot is produced. `.db-shm` is a transient WAL index/coordination file, not authoritative database content; do not promote it as application data or copy it as a substitute for a consistent snapshot. Require a quiescent source/provider workflow that permits SQLite to rebuild transient shared-memory state. Reject ambiguous/mismatched sidecars or report a clear review-only result. See SQLite's [WAL documentation](https://www.sqlite.org/wal.html), [WAL format](https://www.sqlite.org/walformat.html) and [Online Backup API](https://www.sqlite.org/backup.html).
+
+The future validator should use an approved in-process SQLite provider opened read-only, with extension loading disabled, fixed validation operations (for example `PRAGMA integrity_check`, and `foreign_key_check` only if separately approved), bounded database/page/output/time/resource budgets and no application SQL. `integrity_check` is structural evidence, not a schema/business compatibility or safety proof. `query_only` alone is not a read-only boundary. SQLite's [PRAGMA reference](https://www.sqlite.org/pragma.html) documents integrity checks. Same-identity code may still access files available to that identity; validation is not isolation.
+
+### 9.1.12. Proposed first-deploy, update, replacement and recovery workflow
+
+1. **Review and separate intake:** Preserve the current M7 code-package path and its archive/metadata/file-manifest fingerprint. A separate authenticated data-artifact intake stages explicitly submitted candidates under private temporary storage; it cannot set arbitrary destinations, execute scripts, approve packages or deploy. Candidate validation and data provenance are recorded separately from the release code fingerprint. Exact approval/ownership requirements for data artifacts and whether distinct Administrator review is needed remain owner decisions.
+2. **First deployment:** Select NONE, MANAGED_SQLITE or EXISTING_SQLITE under M11. NONE provisions nothing. If a valid existing candidate is supplied, preserve it and its relative path; do not silently create an empty file or overwrite it. An imported file copied into platform-managed workspace likely maps to MANAGED_SQLITE with `imported-existing` provenance, but this interpretation needs owner approval. EXISTING_SQLITE remains a separately registered/authorized file; registration alone grants no create, modify, backup or deletion authority.
+3. **Upgrade default — Keep Existing Database:** Default every candidate action to KEEP. Validate/review incoming candidate metadata, but promote no incoming data artifact. Install/select the approved v2 release while retaining the same app workspace/database IDs, files and relative paths. Never delete or recreate data as a deployment side effect.
+4. **Explicit replacement:** Require an authenticated non-Viewer actor with server-checked current ownership/authority, a separate authorized replacement operation, per-database selection and fresh destructive confirmation. Stop the owned application; verify it is stopped and has no known writers. Recheck candidate/target IDs, app/path containment, current-file identity/revision and idempotency key. Create and verify a non-overwriting SQLite-consistent backup; validate candidate read-only; promote through a journaled staging/rename protocol with recovery that preserves the prior database. Never merge or overwrite the Registry/another app's file. Restart only through the separately authorized approved runtime lifecycle where it is enabled; this data operation does not authorize package approval or code deployment.
+5. **Related database groups:** Multiple databases are independent unless the application owner declares a consistency group. If related, backup/replacement must be one coordinated stop/backup/validate/promote/recovery transaction for the group. No success is reported until every member is consistent. Group declaration and atomicity semantics require approval. No cross-file merge is supported.
+6. **Failure/restart/rollback:** On validation or pre-promotion failure, retain active data and keep the package in review. On interruption, recover from a durable operation journal and preserve old and staged data until a verified outcome. Application rollback selects older approved code and leaves workspace/database unchanged. If schema compatibility is unknown or unsafe, block or require an explicit operator decision; never reverse schema changes or automatically restore a backup.
+
+### 9.1.13. Proposed API and Dashboard contracts (unimplemented)
+
+No endpoint or Dashboard behavior below is implemented. Names and payloads are design proposals requiring API/M11 review. Keep operations application-scoped and explicit; do not add a generic filesystem browser, arbitrary path input or generic proxy.
+
+| Proposed operation | Contract sketch | Required server checks |
+| --- | --- | --- |
+| Submit candidates | `POST /_platform/api/applications/{id}/database-imports`; bounded multipart streams, normalized relative paths and idempotency key; return `202`, opaque `importId`, `REVIEW_ONLY`, candidate IDs and sanitized validation states. | Active session, `application.write`, current owner/Admin policy, quotas, safe paths/sidecars; no destination path disclosure, code execution or active DB changes. |
+| Inspect import | `GET /_platform/api/applications/{id}/database-imports/{importId}`; candidate IDs, app-relative paths, sizes, type/integrity/snapshot result, status and safe diagnostics. | Recheck ownership and import-to-app association; no contents, host paths or secrets. |
+| Read database state | `GET /_platform/api/applications/{id}/databases`; mode, opaque IDs, approved relative mapping, status, safe size/limit and backup state. | M11 RBAC and current ownership; Viewer read-only; no raw file/path access. |
+| Replace selected data | `POST /_platform/api/applications/{id}/database-replacements` with `{ importId, selections: [{ databaseId, candidateId }], expectedTargetRevision, confirm: true, idempotencyKey }`; return operation ID/status. | Non-Viewer authorization/ownership, confirmation, candidate/target identity, verified prior backup, stopped runtime, lock/journal, group semantics and fail-closed recovery. Whether distinct Admin approval is additionally required is open. |
+| Create backup | `POST /_platform/api/applications/{id}/databases/{databaseId}/backups` with idempotency key and optional approved consistency-group ID; return `202` operation ID/status. | Explicit M11 authorization/ownership, fixed SQLite-consistent provider, verified app/database identity, contained non-overwriting target, writer/snapshot coordination and bounded resources. |
+| Restore backup | `POST /_platform/api/applications/{id}/databases/{databaseId}/restore` with `{ backupId, expectedTargetRevision, confirm: true, idempotencyKey }`; return operation ID/status. | Explicit authorization and destructive confirmation, backup provenance/integrity, current target identity, compatibility/downtime plan, writer exclusion and recoverable staging; never arbitrary path. |
+| Retention/deletion | `PATCH /_platform/api/applications/{id}/databases/{databaseId}/retention` to set a reviewed policy; `POST .../deletion-requests` for explicit deletion review. | Authorized M11 policy, explicit retention choice, verified identity, required confirmation/approval and audit; registration or application deletion never implies file deletion. |
+| Read operation history | `GET /_platform/api/applications/{id}/database-operations`; audit-safe IDs, times and outcomes. | Application scope and RBAC; no content/raw path. Backup/restore remain separate authorized operations, not ordinary reads. |
+
+Dashboard should show detected candidates, exact relative paths and sizes, validation state, current versus incoming data, per-file action and group warnings. On first deployment and upgrade, preselect **Keep Existing Database (Recommended)**. Replacement requires separate selection/confirmation, explains data-loss and backup status, and shows compatibility as unknown unless verified. Show NONE clearly and continue supporting database-free apps. Never provide raw SQLite downloads, contents, secret configuration, fabricated status, silent deployment or automatic SQL migration. Viewer is read-only; UI checks never replace backend enforcement. These controls remain planned/disabled until M10-DB and secure M8 acceptance are separately completed.
+
+### 9.1.14. Compatibility limits and product-owner decisions
+
+These are implementation gates, not silently chosen defaults:
+
+1. Confirm the supported path contract. Proposed MVP: reviewed working-directory-relative SQLite paths under workspace. Decide handling for module/assembly-relative paths, CWD-relative non-database assets, application config files and apps that assume release CWD. Unsupported paths stay blocked; never rewrite files automatically.
+2. Approve the relationship among `data/application.db`, app-relative workspace paths and `MANAGED_SQLITE`/`EXISTING_SQLITE`, including whether imported-and-relocated existing data is managed with provenance.
+3. Define candidate manifest rules, supported SQLite format, maximum database count/bytes/pages, WAL bundle rules, treatment of missing/mismatched sidecars and the quiescence/snapshot procedure. `.db` extension alone is insufficient.
+4. Decide whether replacement requires independent Administrator review in addition to owner authority and destructive confirmation; define self-approval and separation-of-duties rules under M11.
+5. Define multi-database consistency-group declaration, all-or-nothing replacement/backup behavior and recovery semantics.
+6. Review approved SQLite provider/API availability, read-only snapshot/backup support, resource budgets, retention, quotas, default limits and restore downtime/recovery requirements.
+7. Decide whether future runtime identity/ACL/isolation is required. Current same-user execution cannot promise isolation from a malicious app; absent an approved boundary, support remains limited to trusted reviewed code and narrowly approved data paths.
+
+No decision above authorizes Docker, elevation, Windows security changes, an external database engine, uploaded-code execution, unapproved source builds, package-allowlist expansion, Registry/application data sharing or corporate-network listening.
 
 ---
 

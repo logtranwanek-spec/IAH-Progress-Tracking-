@@ -4,6 +4,8 @@
 
 Internal Application Hosting & Deployment Platform (project code: Internal Hosting Platform / IHP). The complete, canonical requirements are in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md).
 
+**Latest assignment (2026-10-29): TASK 022 — Persistent application workspace and SQLite architecture design, documentation only.** This supersedes active implementation assignments for this task. Inspect and document actual package/folder/runtime behavior, define a safe persistent workspace and database-artifact workflow, update only the four tracking documents, and run documentation consistency/format/diff checks. Do not implement, build, test, migrate, execute applications or change milestone states. M7/M8 remain IN PROGRESS; M10-DB remains NOT STARTED. Stop after documentation and wait for explicit authorization before implementation.
+
 This roadmap translates those requirements into independently verifiable milestones. It does not claim that planned functionality already exists.
 
 **Current assigned task (2026-10-29): TASK 021 — M7 folder-upload Dashboard flow.** The default-off React candidate now registers/selects an owned application, selects and previews a folder, enforces the client payload cap, invokes the existing owner-scoped intake/package endpoints, and displays backend-confirmed outcomes. Automated full verification passed; actual-browser acceptance was not run. M7 and M8 remain IN PROGRESS; M10-DB remains NOT STARTED. Source builds and deployment automation remain disabled. Older dated assignment notes are historical when superseded; preserve their evidence and statuses.
@@ -598,7 +600,7 @@ dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.In
 
 ### M10-DB — Managed Application Database Service (future sub-milestone)
 
-**Objective:** Implement the optional **1 Platform Database + N Independent Application Databases** architecture from requirements section 9.1, with safe per-application SQLite lifecycle management independent of application releases. This adds future scope only; no provisioning, backup, restore, database Dashboard UI or new schema is claimed implemented.
+**Objective:** Implement the optional **1 Platform Database + N Independent Application Databases** architecture from requirements section 9.1, including a persistent per-application workspace that preserves approved app-relative SQLite paths while keeping mutable data separate from exact-fingerprint code releases and backups. This adds future scope only; no workspace, provisioning, import, backup, restore, database Dashboard UI or new schema is claimed implemented.
 
 **Roadmap placement:** After M10 version management/rollback and the required M8 secure Dashboard capabilities, before final M12 acceptance of this extension. Existing M1–M12 identifiers, statuses and historical completion evidence are unchanged. M11 was already prioritized/completed earlier and remains a dependency, not new work. Implementation requires a future explicit assignment; do not start this sub-milestone during the documentation task or resume it merely because other code exists.
 
@@ -612,6 +614,89 @@ dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.In
 6. Integrate a future Application Database Management Dashboard section through secured Platform API contracts: mode selection, provisioning, safe status/metadata/usage, authorized backup/restore/history, retention and deletion requests. Apply server-side M11 RBAC/current ownership; Viewer read-only and destructive authorization/confirmation. No raw file download or public path/Registry/secret exposure.
 7. Add credential-safe lifecycle/security audit events and operational documentation for backup/restore/recovery/retention, permission boundaries, limits and same-user trust. Extend existing automated/managed verification with owned SQLite-only fixtures; preserve all prior behavior and policy controls.
 
+**Implementation work packages (future plan; all NOT STARTED):** Each package below requires a separate implementation assignment. File paths are anticipated from the current repository layout and must be confirmed during that assignment. No package status is being changed by TASK 022.
+
+#### DB-W0 — Resolve product/security decisions and path compatibility contract
+
+- **Scope:** Approve workspace versus `data/application.db` semantics; define supported database path bases; catalog CWD-relative database/assets behavior; define candidate manifest, file/count/size/page limits, WAL/SHM bundle rules, import quiescence, mode mapping for imported databases, consistency groups, replacement approval and same-user trust limits.
+- **Dependencies:** Requirements section 9.1; current M5/M7 behavior; M11 role/ownership contract; product-owner/security decisions listed in PROGRESS.md.
+- **Likely files:** `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `ARCHITECTURE.md`, `DEPLOYMENT_ENGINE.md`, `PACKAGES.md` (documentation/contract only).
+- **Acceptance:** A reviewed compatibility matrix states supported/rejected path patterns and CWD assumptions; each open question has a decision owner and resolution; no unsupported path is silently remapped.
+- **Tests:** Documentation/contract validation only; later tests derive explicit compatible/incompatible fixture cases.
+- **Security:** Do not rewrite app code/config, add junctions, or imply a workspace provides OS isolation. This gate must finish before storage/runtime implementation begins.
+
+#### DB-W1 — Reviewed Registry metadata, migration and canonical storage resolver
+
+- **Scope:** Add explicit versioned metadata for modes, database IDs, app ownership, safe relative-path mapping, provenance, status, revisions, operation journal, limits and audit references. Build an application-scoped resolver that canonicalizes identity and checks containment/reparse/alias/cross-app/Registry boundaries. Keep backups/workspace outside releases/public trees.
+- **Dependencies:** DB-W0 decisions; M4 explicit migration contract; M11 ownership and authorization.
+- **Likely files:** `src/Api/prisma/schema.prisma`, reviewed additive migration directory, `src/Api/src` database modules, `src/Api/test`, migration/architecture docs.
+- **Acceptance:** Fresh and upgrade migrations work only through the reviewed explicit migration command; path resolver rejects traversal, links/reparse points, aliases and foreign targets; NONE has no file; metadata contains no DB contents/secrets; pre-existing storage is preserved.
+- **Tests:** Owned SQLite fixtures for migrations, uniqueness/ownership, safe relative mappings, traversal/reparse/alias/Registry denial, idempotent read state and fail-closed unknown identity.
+- **Security:** Never auto-migrate on API startup or run uploaded SQL. No Registry path/config is passed to applications.
+
+#### DB-W2 — Separate database candidate intake and review-only validation state
+
+- **Scope:** Add an authenticated, bounded data-artifact intake separate from ZIP/folder code package allowlists. Preserve normalized application-relative paths and multiple candidate identity; stage under private Temporary; create no active DB association and do not alter an approved code fingerprint.
+- **Dependencies:** DB-W0/DB-W1; M7 intake/session/approval contracts; M11 auth/ownership; approved candidate/WAL bundle policy.
+- **Likely files:** `src/Api/src` new database-import module/controller, `src/Api/test`, `src/Dashboard/src/api.ts` only when its secured workflow is separately in scope, package/API docs.
+- **Acceptance:** `.db`/sidecar artifacts enter only the dedicated reviewed path; path collisions/traversal and malformed/mismatched bundles reject; limits and cleanup hold; status is REVIEW_ONLY; retry is idempotent; no package fingerprint or code approval changes; no active DB is replaced.
+- **Tests:** Node HTTP tests with temporary files: multiple DBs, duplicate names/paths, malicious relative paths, unsupported format, size/count limits, `.db` alone during WAL state, matching/mismatched WAL/SHM, upload interruption and cleanup; confirm no code/script sentinel executes.
+- **Security:** Do not widen the M7 release allowlist, log file contents or expose local paths; uploads are data, never executable commands.
+
+#### DB-W3 — Approved SQLite snapshot, read-only integrity and backup provider
+
+- **Scope:** Review policy-compatible in-process SQLite API availability. Implement bounded read-only integrity checks and SQLite-consistent Online Backup/snapshot behavior only after provider and source-quiescence decisions. Keep WAL committed state associated with its database; treat SHM as transient coordination state.
+- **Dependencies:** DB-W0 policy/provider decision; DB-W1 resolver; DB-W2 candidate model.
+- **Likely files:** `src/Api/src` or approved managed helper project, API dependency/config, `src/Api/test` or published managed verifier, `DEPLOYMENT.md`/`SECURITY.md`.
+- **Acceptance:** Valid/invalid owned fixtures return accurate integrity states; the provider never opens writable candidates, loads extensions, runs package SQL or executes app code; snapshot is consistent under the specified supported writer/quiescence model; backup is new/non-overwriting/outside release and verifiable; resource budget aborts safely.
+- **Tests:** Corruption/truncation, integrity output, WAL committed data, sidecar mismatch, concurrent writer/quiescence, interruption, disk/size/time limits and backup restoration using owned disposable SQLite fixtures only.
+- **Security:** No native executable or prohibited `.exe`; no external DB engine. If approved consistent backup cannot be delivered with permitted dependencies, retain the feature blocked rather than raw-copying an active DB.
+
+#### DB-W4 — Persistent workspace materialization and M5 runtime integration
+
+- **Scope:** Materialize only authorized data at the reviewed relative path below each app workspace, preserve immutable release artifacts, and add the approved fixed workspace-root CWD mode while launching the exact fingerprinted entry point from its release. Avoid copying mutable executable trees into workspace.
+- **Dependencies:** DB-W0 compatibility matrix; DB-W1 storage resolver; DB-W2 import; DB-W3 snapshot where required; M5 runtime and M7 release approval.
+- **Likely files:** `src/DeploymentAgent/RuntimeEngine.cs`, Agent options/metadata/recovery modules, `src/DeploymentAgent/ReleaseInspector.cs`, `src/DeploymentAgent.Tests`, `src/Api/src` application mapping contract.
+- **Acceptance:** Compatible fixture resolves its DB to the identical app-relative workspace path across v1/v2/restart; approved entry point and release fingerprint are unchanged; no DB/sidecar/backup resides in releases; NONE works; module-relative/absolute/unsupported cases are explicitly blocked; host/port remain 127.0.0.1.
+- **Tests:** Published managed Agent verifier, DLL-only; owned Node and ASP.NET fixtures for CWD-relative paths, `__dirname`/assembly-relative negative cases, v1/v2 same data, release hash, restart/recovery, no data in release, loopback and shutdown.
+- **Security:** Verify exact release approval/hash before launch; workspace content is never a new entrypoint; same-user file access is not a sandbox. Do not execute uploaded scripts/builds.
+
+#### DB-W5 — Keep-default upgrade, explicit replacement and recoverable database operations
+
+- **Scope:** Keep is implicit/default and never promotes incoming DB data. Implement separately authorized selection/replacement with app stop/writer coordination, backup-before-change, target revision checks, locks, journaled staging, atomic/recoverable promotion, audit and restart coordination. Treat declared related DB groups as one operation.
+- **Dependencies:** DB-W1 metadata/journal, DB-W3 provider, DB-W4 workspace and M10 release lifecycle; owner decision on approval/consistency groups.
+- **Likely files:** API database operation modules, Agent controlled stop/status contract, SQLite metadata migration, API/Agent managed tests and operational docs.
+- **Acceptance:** Default update preserves existing DB IDs/content/path; incoming DBs do not replace unless explicit request and authority; replacement confirms exact target and verified backup; failure/interruption leaves a recoverable old or staged state; group operation does not report partial success; unrelated DBs/Registry cannot be targeted.
+- **Tests:** First deploy with existing data, v1→v2 default KEEP, explicit single/multi replacement, same-name collision, stale revision, owner/viewer/anonymous denial, concurrent requests, stop failure, backup failure, interrupted promotion/recovery, audit redaction.
+- **Security:** M11 authorization server-side and rechecked at commit; Viewer read-only; backup/restore/delete each explicitly authorized; destructive replacement separately confirmed; no auto SQL migration.
+
+#### DB-W6 — Scoped API, RBAC, audit and lifecycle metadata
+
+- **Scope:** Provide application-scoped safe reads and explicit mode/register/provision/backup/restore/retention/delete operations with ownership checks, idempotency, operation states and credential-safe audit. No arbitrary filesystem input or ordinary raw-file download.
+- **Dependencies:** DB-W1 through DB-W5; M11 API and audit contract; explicit policy for destructive and external-existing file operations.
+- **Likely files:** `src/Api/src` controllers/services/validation/authorization, API OpenAPI, `src/Api/test`, `API.md`.
+- **Acceptance:** API enforces M11 RBAC/current owner even if UI is bypassed; Viewer reads only safe metadata; provisioning cannot overwrite; EXISTING_SQLITE registration alone grants no write/delete; failure and denials audited without secrets/paths/content; external engines never connected.
+- **Tests:** Auth/session expiry, Administrator/Developer/Viewer, ownership, escalation, reference collision, audit redaction, idempotency, fail-closed provider errors, OpenAPI schema.
+- **Security:** No cross-app access, Registry alias, raw DB response, secret/path leakage, auto migration or automatic destructive cleanup.
+
+#### DB-W7 — Secured Dashboard database workflow
+
+- **Scope:** After secure M8 browser acceptance, display modes, candidate and active state, per-file paths/actions, backup status/history, usage/retention and explicit authorized lifecycle controls.
+- **Dependencies:** DB-W6 API; completed/verified M8 browser boundary; M11 permissions; M7 review and M10 release data.
+- **Likely files:** `src/Dashboard/src/app.tsx`, `api.ts`, models/components/styles and Dashboard/browser tests; `DASHBOARD.md`.
+- **Acceptance:** Database-free app works; KEEP is selected by default; replacement requires clear per-database selection/confirmation and server approval; role/owner UI mirrors but does not replace server authorization; loading/error/empty/session-expiry states work; no raw file/content/path/secret is exposed.
+- **Tests:** DOM/API contract tests plus permitted actual-browser acceptance for auth, CSRF, origin, owner/admin/viewer, replacement confirm, session expiry and accessibility. Simulation is not actual-browser evidence.
+- **Security:** Keep operations disabled if browser security acceptance or API authority is incomplete. Never use a generic API proxy or browser token storage.
+
+#### DB-W8 — End-to-end persistence, backup/recovery and operations acceptance
+
+- **Scope:** Verify the full SQLite-only lifecycle across approved release update, runtime restart, failure recovery and compatible code rollback; document limits/runbooks and audit outcomes.
+- **Dependencies:** DB-W0 through DB-W7 and M10 release/rollback acceptance; owned test fixtures.
+- **Likely files:** API/Agent/Dashboard/managed integration tests, `DEPLOYMENT.md`, `SECURITY.md`, `API.md`, `TROUBLESHOOTING.md`, four tracking records.
+- **Acceptance:** All section 9.1 acceptance rows have command/evidence; data survives v1/v2/v3 update/restart/compatible rollback; incompatible release is safely blocked; backup/restore is consistent and recoverable; tests/retention/cleanup and full regression pass; no policy violation; all failures and same-user limits documented.
+- **Tests:** Focused API/SQLite/Agent/Dashboard/integration suites, published `.NET` verifier DLLs, full `npm.cmd run verify`, documented actual-browser gate; use disposable SQLite only and do not touch the configured Registry or existing apps.
+- **Security:** No `.exe`, Docker, admin, security/network changes, external DB engines, unapproved source builds, untrusted execution or production access.
+
 **Dependencies:** M4 NestJS/Prisma/SQLite Platform API and explicit migration boundary; M11 sessions/RBAC/application ownership/audits; M5 trusted runtime/configuration; M7 verified trusted-prebuilt release contracts (source builds remain disabled); completed and security-verified M8 browser access/Dashboard operations for UI acceptance; and M10 release lifecycle/rollback coordination for data-persistence acceptance. No dependency grants permission to start unfinished milestones. M7 remains IN PROGRESS until its separate source-build/isolation acceptance is resolved.
 
 **Acceptance criteria (future evidence required):**
@@ -621,10 +706,13 @@ dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.In
 | Optional modes               | NONE deploys without a database file/association/configuration; MANAGED_SQLITE provisions a dedicated file; EXISTING_SQLITE registers only explicitly authorized, validated existing SQLite files without overwriting/initializing them. Mode changes preserve existing data and enforce ownership.                                                                                                                                 |
 | Provisioning and association | Concurrent/repeated provisioning creates or returns exactly one authorized association/file for one application, never truncates an existing database and rejects unrelated files, duplicate ownership and Registry aliases. Failed/interrupted provisioning is recoverable and reported accurately.                                                                                                                                |
 | Storage boundaries           | Reject traversal, absolute/UNC/device/stream injection, symlink/junction/reparse escapes, aliases and cross-application substitution through management APIs. Databases/sidecars/backups are outside releases/public trees; Registry access/configuration is never handed to apps. Existing paths remain compatible unless an explicitly authorized migration is verified. Document that same-identity files are not an OS sandbox. |
+| Relative-path workspace      | Preserve each supported application's declared database-relative path under its stable app workspace across releases; launch reviewed entry code from the approved release only. Verify CWD-relative support and explicitly reject module/assembly-relative, absolute or other unsupported path cases unless separately approved; do not rewrite app code/config or copy mutable executable trees.                                  |
+| Database candidate boundary  | Detect/import multiple explicitly selected SQLite candidates via a separate bounded review-only path; do not treat `.db` extension as proof, widen release allowlists, execute SQL, merge databases or include data in the code-release fingerprint. Handle DB/WAL consistently and never promote SHM as database content.                                                                                                          |
 | Lifecycle and limits         | Verify explicit initialization, safe metadata/status/integrity/usage, documented configurable storage limits, retention, authorized deletion and interrupted-operation recovery. Application deletion, mode changes and release cleanup never implicitly destroy data; EXISTING_SQLITE registration alone grants no file-deletion right. No silent empty-file replacement on corruption.                                            |
 | Backup                       | Explicitly authorized approved SQLite-consistent mechanism produces a validated snapshot under coordinated/concurrent writes, including relevant journal/WAL behavior. Fresh backups are application-scoped, non-overwriting, outside releases, safely recorded and recoverable on failure; no active-file-copy assumption.                                                                                                         |
 | Restore                      | Enforce explicit authorization/confirmation, backup provenance/integrity/compatibility and controlled downtime/writer coordination. Restore only the intended application's database, preserve a recovery path, reject unrelated/Registry/out-of-root targets and validate post-restore integrity/health before success.                                                                                                            |
 | Deployment persistence       | Write owned fixture data on v1 and verify the same database/data remains through v2/v3 deployment, restart, compatible rollback and release cleanup. Incompatible schema/release combinations fail safely; app rollback never automatically reverses schema or restores data. Uploaded SQL remains inert.                                                                                                                           |
+| Upgrade and replacement      | Verify KEEP is the default and preserves database identity/content/path on update; a selected replacement requires server authorization/confirmation, stopped writers, verified consistent non-overwriting backup, target-revision validation and recoverable promotion. Multiple declared related databases are handled as a consistency group; failures do not report partial success.                                            |
 | Authorization                | Anonymous/expired/revoked sessions, unauthorized owners, Viewers attempting writes and privilege escalation all fail closed. Backup, restore and deletion each require explicit authorization; destructive actions also require confirmation. No credentials, internal capabilities, database contents or paths leak through Gateway/browser/logs.                                                                                  |
 | Dashboard integration        | Verify real authorized mode configuration/provisioning/status/usage/backup/restore/history/retention/deletion workflows, role-aware controls and failure states under the approved M8 browser boundary. Viewer is read-only; UI never replaces server enforcement; no ordinary raw SQLite download endpoint.                                                                                                                        |
 | Audit and SQLite policy      | Verify safe actors/resource IDs/actions/times/outcomes for mode/association/lifecycle/retention/recovery/denied operations, including failures. Only SQLite performs real operations; SQL Server/PostgreSQL/MySQL remain metadata-only with no connection/authentication/migration/provisioning/connectivity test. Full applicable regression passes with no forbidden executables, elevation or security/network changes.          |
@@ -644,7 +732,7 @@ Before future execution, align actual scripts/fixtures with the implementation, 
 
 **Status:** NOT STARTED
 
-**Unresolved future design choices:** Exact safe API/schema contracts, approved backup provider capability, backup layout/default retention/limits and recovery coordination require future review and verification. Nothing in this record authorizes new utilities, runtime permissions, OS isolation, automatic migrations or untrusted/source execution. Existing M7/M8 gaps and no-.exe/loopback/SQLite-only restrictions remain unchanged.
+**Unresolved future design choices:** See PROJECT_REQUIREMENTS.md section 9.1.14 for path/CWD compatibility, default versus workspace mapping, imported mode/provenance, candidate and WAL policy, replacement approval, consistency groups, SQLite provider/limits and same-user isolation decisions. Exact safe API/schema contracts, backup layout/default retention/limits and recovery coordination require review and verification. Nothing in this record authorizes new utilities, runtime permissions, OS isolation, automatic migrations or untrusted/source execution. Existing M7/M8 gaps and no-.exe/loopback/SQLite-only restrictions remain unchanged.
 
 ### M11 — Authentication and Authorization
 
