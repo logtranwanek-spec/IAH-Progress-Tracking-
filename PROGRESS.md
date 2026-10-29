@@ -1,6 +1,41 @@
 # Project Progress
 
-## M7 authenticated folder-intake API implementation — 2026-10-29
+## TASK 020 — M7 staged-folder static analysis and canonical packages — 2026-10-29
+
+**Current status:** M1–M6 and M11 remain **COMPLETED**; M7 and M8 remain **IN PROGRESS**; M9, M10, M10-DB and M12 remain **NOT STARTED**. This task implements the backend stage after TASK 019's authenticated folder intake. It does not implement the Dashboard folder picker, source builds, application execution, deployment, rollback, or M10-DB.
+
+### Implemented API and behavior
+
+- Added `POST /_platform/api/applications/:id/folder-intakes/:uploadId/package/:version`. The caller must have an active M11 session, `application.write`, and current ownership. Processing rechecks staged upload ownership, expiry, marker/manifest, hashes, file identity, canonical paths and reparse/link boundaries; the API does not trust client package metadata, runtime, startup command, filenames, UUID, or fingerprint. A private per-upload lock bounds concurrent processing; retry receipts make a completed request idempotent and conflicting version/content requests fail closed.
+- Runtime/startup analysis reads staged files only. Supported Node packages use a constrained prebuilt ESM entry, present relative runtime files and no declared external dependencies. ASP.NET Core 8 packages require the application DLL, matching `.deps.json` and `.runtimeconfig.json`, and .NETCoreApp 8 metadata. An explicit application runtime mismatch is blocked. Source-only layouts return `BUILD_REQUIRED` and no archive is generated.
+- `run.cmd` is never run. Only exact `node <relative .js|.mjs>` or `dotnet <relative .dll>` startup text is accepted. Exact `npm.cmd run start` may be parsed only when `package.json` contains one exact direct Node/DLL startup value; the script is translated to the allowlisted runtime and npm/hooks are never invoked. Chaining, expansion, redirects, variables, nested commands, unsafe paths and unknown forms are blocked.
+- For supported prebuilt inputs, the API creates server-owned `platform.json` and minimal script-free Node `package.json` metadata as applicable. It generates a sorted, normalized, deterministic Store-method ZIP without nesting a selected parent folder. Source files are hash/size/CRC checked while read. Existing 50 MiB compressed, 32 MiB expanded, 8 MiB per-entry, 256-entry, ratio, path, type and CRC protections are preserved.
+- The generated archive goes through the existing Packages upload and Package Inspector path. Application identity and slug come from the authorized Registry record; archive hash, immutable package identity and M7 approval fingerprint are server-generated. A passing package creates the existing approval request in **PENDING** state for a distinct Administrator. No automatic approval, build, preparation, execution or deployment occurs; `deploymentReady` remains false.
+- Outcomes distinguish staged intake, runtime/startup detection, package generation, inspector result, approval status, `BUILD_REQUIRED` and `DEPLOYMENT_BLOCKED`. No temporary filesystem paths or credentials are returned.
+
+### Local files changed
+
+- API implementation: `src/Api/src/folder-packages.ts` (new), `src/Api/src/folder-intake-controllers.ts`, `src/Api/src/folder-intakes.ts`, `src/Api/src/packages.ts`, and `src/Api/src/app.ts`.
+- Focused tests: `src/Api/test/folder-intake.test.mjs`.
+- Tracking records: `AGENTS.md`, `IMPLEMENTATION_PLAN.md`, and this `PROGRESS.md`. `PROJECT_REQUIREMENTS.md` was not changed because it already specifies this workflow and its controls.
+- No schema or migration changed. Source/test changes remain local and are not included in the progress-repository commit.
+
+### Verification evidence
+
+- `node --test --test-timeout=15000 test/folder-intake.test.mjs` (from `src/Api`) — **25 passed, 0 failed, 0 skipped**. The focused upload-interruption/concurrency sequence passed **2/2**. Coverage includes Node and ASP.NET Core 8 prebuilt detection, source-only classification, safe/default and unsupported startup intent, owner/session authorization, tampering and expiry, retry/fingerprint/existing approval, generated ZIP budgets, and no-execution sentinel behavior.
+- `npm.cmd run build --workspace @ihp/api` — passed (guarded Prisma validation/client generation and API TypeScript build). The full root build phase within `npm.cmd run verify` also passed, including Dashboard build and framework-dependent .NET publish checks with `UseAppHost=false`; no `.exe` artifacts were executed.
+- `npm.cmd run check` — passed (Prettier and TypeScript checks).
+- `npm.cmd run verify` — **exit 0; 554 passed, 0 failed, 0 skipped**, with successful build/check/test/smoke. Component counts: config/readiness 33; API 109; SQLite 14; Dashboard 43; browser-boundary/DOM simulation 51; managed Foundation 27; Gateway 113; samples 82; Deployment Agent 27; routing integration 18; Packages 37. Local smoke verified health/proxy behavior and owned listener loopback/cleanup, including Gateway `127.0.0.1:5050`. The 51 automated browser protocol/DOM tests are not actual-browser acceptance evidence; actual-browser testing remains unverified and production browser management stays default-disabled.
+- The first full verification attempt stopped at Prettier on the modified multipart fixture. The fixture was formatted with the repository's Prettier entry point, `npm.cmd run check` passed, and the subsequent complete `npm.cmd run verify` passed. A flaky same-user intake test fixture was made to wait for an actual connected socket and an initial file byte before asserting reservation; focused sequence and full suite then passed. This was test synchronization, not a changed API concurrency policy.
+- No `.exe`, Docker, Administrator elevation, Windows security/firewall change, uploaded source build/install/lifecycle hook, uploaded application-code execution, external database engine, corporate network, production system or existing deployed application was used or modified. No schema or migration file changed; the standard verification suite applied and checked controlled migrations only against its owned disposable SQLite databases, not a configured or production Registry.
+
+### Remaining work and next task
+
+- The backend folder-to-pending-review path is implemented for the supported prebuilt inputs above. The Dashboard folder picker/review UX and actual deployment flow remain unimplemented. Existing browser acceptance is still not run.
+- Approved isolation for source builds is still unavailable. Source-only packages remain `BUILD_REQUIRED`; administrator review does not authorize a build or execution. This is an outstanding M7 criterion, so M7 must stay **IN PROGRESS**. M8 remains **IN PROGRESS**; M10-DB stays **NOT STARTED**.
+- **Exact next recommended task:** separately authorize the M8 Dashboard folder-picker/review flow against the two owner-scoped API endpoints, preserving default-off browser management and no auto-deployment. Resolve approved source-build isolation in a separate decision before considering M7 complete. No next milestone was started here.
+
+## Historical TASK 019 — M7 authenticated folder-intake API implementation — 2026-10-29
 
 **Scope:** Implemented only the first backend component of the simplified M7 folder workflow: authenticated, owner-scoped streaming intake into private temporary review storage. The Dashboard folder picker, package generation, package validation, approval handoff and deployment remain unimplemented. No source builds, uploaded-code execution, approval or deployment were enabled. M7 and M8 remain **IN PROGRESS**; M1–M6/M11 remain **COMPLETED**; M9/M10/M10-DB/M12 remain **NOT STARTED**. The separate M7 trusted-prebuilt/source-build restrictions and M10-DB requirements are unchanged.
 
