@@ -538,7 +538,9 @@ Do not execute arbitrary uploaded scripts merely because they are present in an 
 
 Source builds and runtime execution must require an approved deployment policy.
 
-## 5.4. Simplified folder intake for M7 (proposed; not implemented)
+## 5.4. Simplified folder intake for M7 (target workflow; backend intake partially implemented)
+
+The current implementation provides only the authenticated, owner-scoped API intake boundary at `POST /_platform/api/applications/:id/folder-intakes`. It streams files to private review staging and reports `STAGED_REVIEW_ONLY`; it does not provide Dashboard folder selection, canonical package generation, package inspection, approval submission or deployment readiness. The requirements below remain the target for the complete workflow.
 
 The target ordinary-user workflow is: enter an application name, select its folder, review detected runtime/startup and upload size, and submit for review. The browser must not ask the user to create deployment ZIPs/manifests, enter an application UUID, release/version token or calculate fingerprints. The server owns application identity, slug, unique package/release identifier, build/version tokens, manifest generation, archive validation and fingerprinting from validated Registry state. M11 identity, role, ownership and authorization checks still apply.
 

@@ -1,5 +1,38 @@
 # Project Progress
 
+## M7 authenticated folder-intake API implementation — 2026-10-29
+
+**Scope:** Implemented only the first backend component of the simplified M7 folder workflow: authenticated, owner-scoped streaming intake into private temporary review storage. The Dashboard folder picker, package generation, package validation, approval handoff and deployment remain unimplemented. No source builds, uploaded-code execution, approval or deployment were enabled. M7 and M8 remain **IN PROGRESS**; M1–M6/M11 remain **COMPLETED**; M9/M10/M10-DB/M12 remain **NOT STARTED**. The separate M7 trusted-prebuilt/source-build restrictions and M10-DB requirements are unchanged.
+
+### Endpoint and behavior
+
+- `POST /_platform/api/applications/:id/folder-intakes` accepts `multipart/form-data` file parts. The request requires an active M11 user session, `application.write`, and application ownership; unauthenticated, Viewer, and non-owner requests fail closed. No generic upload/proxy route was introduced.
+- Files stream into `IHP_STORAGE_ROOT/Temporary/FolderIntakes/<owner-id>/<application-id>/<upload-id>`, with server-generated upload IDs and opaque blob names plus a server-owned path/hash/size manifest. No client path is used as a filesystem path before validation. Staging is private and remains separate from releases, the Registry database, and public Gateway assets.
+- Actual file-content bytes are counted while streaming and capped at **52,428,800 bytes inclusive**. Multipart framing has a separate 1 MiB allowance. A request deadline, bounded active uploads, staged upload count/bytes, per-user and total quotas, and a 24-hour retention cleanup bound resource use. Invalid/interrupted submissions clean only their owned staging directory.
+- Relative paths are checked for rooted/absolute, parent/drive/UNC/ADS/device/control/format cases, malformed names, excessive depth/entry count, duplicate and case/NFC collisions, and unsupported types. Development/dependency and secret/key files are excluded or rejected by a fixed policy. Symlink/reparse paths are rejected. `run.cmd` can be retained as inert text; there is no code path to execute it or any uploaded file.
+- Accepted response is HTTP 202 with opaque `uploadId`, accepted file count and bytes, `status: STAGED_REVIEW_ONLY`, `packageValidation: NOT_RUN`, `deploymentReady: false`, and sanitized validation codes. It does not return storage paths or content. It is not package validation, approval, or deployment readiness. Existing authenticated ZIP upload behavior and all ZIP extraction/approval limits remain unchanged.
+
+### Implementation files (local only)
+
+- Added `src/Api/src/folder-intakes.ts`, `src/Api/src/folder-intake-controllers.ts` and `src/Api/test/folder-intake.test.mjs`.
+- Updated `src/Api/src/app.ts`, `src/Api/src/http.ts`, `src/Api/src/validation.ts`, `src/Api/package.json`, and `src/Api/package-lock.json`; pinned Busboy is installed with dependency lifecycle scripts disabled. No database schema or migration changed.
+- Updated the four official Markdown records to distinguish the implemented API boundary from the unfinished complete folder workflow. Source and test files remain local and are not part of progress-repository delivery.
+
+### Verification evidence
+
+- `npm.cmd --workspace @ihp/api run build` — passed (guarded Prisma generation and TypeScript build).
+- `node --test src/Api/test/folder-intake.test.mjs` — **16 passed, 0 failed, 0 skipped**. Coverage includes nested/empty folders, below/exact/above-cap payloads, hostile paths and Windows device names, duplicates/case collisions, unsupported/development/secret files, ownership/session/role denial, inert `run.cmd`, interruption cleanup, bounded concurrency, malformed multipart, and reparse escape rejection.
+- `npm.cmd --workspace @ihp/api test` — **100 API tests passed** and **14 SQLite database tests passed**, exit 0. Existing ZIP upload validation/approval regression remained in the API run.
+- First `npm.cmd run verify` attempt — **failed at `npm run check`** because Prettier reported `PROGRESS.md` formatting; build had passed, but tests and smoke were not reached in that attempt. This is recorded as a failed attempt, not a pass. After formatting, the required full gate was rerun successfully.
+- Final `npm.cmd run verify` — **exit 0: 545 passed, 0 failed, 0 skipped**, including the full build/publish/no-`.exe` scan, formatting and lint checks, Node/API/SQLite/Dashboard/browser-boundary tests, managed .NET verifiers, package and routing integrations, and owned local smoke. Component counts: foundation/readiness 33; API 100; SQLite 14; Dashboard 43; browser-boundary/DOM simulation 51; managed Foundation 27; Gateway 113; samples 82; Deployment Agent 27; routing integration 18; package verification 37. Smoke confirmed all owned listeners on loopback, dashboard/API/Gateway health and cleanup/port release. The 51 browser-boundary checks are automated protocol/DOM simulations, not actual-browser acceptance; actual-browser acceptance remains not run.
+- No browser was launched and no browser acceptance is claimed. No .exe, Docker, elevation, security-policy changes, network deployment, database-engine other than SQLite, upload execution, or existing application modification was used.
+
+### Remaining work and handoff
+
+- This is review-only staging, not a complete folder workflow. There is no Dashboard folder picker, generated canonical package/archive, strict existing package-inspector invocation for staged files, package fingerprint/approval request, or retrieval UI. Do not expose or package staged content via another route without a separate authorized implementation step.
+- The API does not make same-user process/filesystem separation a sandbox. No untrusted application code is executed. Source-build/isolation acceptance remains outstanding; M7 stays IN PROGRESS. M8 actual-browser acceptance remains outstanding; M10-DB stays NOT STARTED.
+- **Exact next task:** after this API component’s final verification and documentation delivery, separately assign canonical server-side packaging/inspection integration from safe staged files, preserving the existing ZIP inspector and distinct Administrator exact-fingerprint approval. Keep source builds disabled and do not start another milestone without authorization.
+
 ## Proposed M7 folder-intake workflow and feasibility (documentation-only) - 2026-10-29
 
 **Assignment:** Analysis and planning only, from the user's attached request. Re-read AGENTS.md, PROJECT_REQUIREMENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md; reviewed current M7 requirements/API upload contracts, Dashboard package flow and RuntimeEngine's child environment. Changed only the four authorized tracking documents. No source, tests, schema/migration, database, app, ZIP, build, listener or milestone implementation was changed, run or tested. No .exe, Docker, Administrator or security settings were used.
@@ -36,7 +69,6 @@ Top-level statuses are unchanged: **M1-M6/M11 COMPLETED; M7/M8 IN PROGRESS; M9/M
 **Verification actually run:** focused Markdown cross-document consistency assertions passed; confirmed the proposed 50-MiB folder and ZIP ceilings, unchanged 32-MiB/8-MiB/256-entry/ratio rules, run.cmd static-only language, source-build blocker and milestone statuses. git diff --check passed. No app tests/builds/full verification ran because the task forbids implementation/build/test work. Historical 529 PASS is not a result for this task.
 
 **Exact next implementation task:** only after a separate implementation assignment, implement the M7 owner-bound streamed folder-intake API and server-side path/size/count/quarantine/cleanup checks first; exercise safe/unsafe path and no-execution run.cmd fixtures; then integrate server-generated archives with the unchanged inspector and exact Administrator review before the Dashboard folder picker. Keep source builds disabled and M7 IN PROGRESS.
-
 
 ## Proposed M7 folder-upload simplification (documentation-only) - 2026-10-29
 
@@ -77,7 +109,6 @@ Managed application database provisioning/configuration remains outside this wor
 
 **Exact next task:** after a separate implementation assignment, start the M7 folder-intake API contract and streamed owner-bound temporary-file receiver. Validate server-side path normalization, actual byte/count/depth budgets, quarantine and cleanup with managed fixtures; static-script inspection must use a no-execution sentinel. Then integrate canonical package generation with the unchanged inspector and exact approval flow, followed by Dashboard UX. Keep source builds disabled and this workstream NOT STARTED until that assignment begins.
 
-
 ## My Work Center mwc/v2 isolated review package - 2026-10-29
 
 **Completed assigned packaging preparation:** operator confirmed **My Work Center / mwc / v2** and explicitly chose **shared-localhost access, documented for package review**. Prepared an isolated Node-compatible export without modifying original application files or the original ZIP. A replacement ZIP passed the existing IHP managed package inspector. It is a **trusted-prebuilt review candidate only**, not an approved/running deployment or evidence of runtime/browser acceptance. No application code was executed, no database was opened/initialized/migrated and no approval/deployment occurred. M1-M6/M11 remain COMPLETED; M7/M8 IN PROGRESS; M9/M10/M10-DB/M12 NOT STARTED. Production browser management remains default-disabled; 53 actual-browser cases remain NOT RUN.
@@ -115,7 +146,6 @@ In an **already running, explicitly approved Dashboard environment** at http://l
 
 **Next safe action:** operator may submit this exact candidate for distinct-Administrator source/fingerprint review, including shared-localhost exposure, captured source drift, disabled features and external database prerequisites. Do not approve/prepare/execute automatically. If the operator wants the three later source edits included, request an explicitly frozen source snapshot and regenerate/reinspect; do not silently merge moving inputs. Before eventual execution, separately authorize application SQLite initialization/association/configuration outside releases and runtime/real-browser verification. No such initialization, database lifecycle service or application execution is authorized by this packaging task. M7/M8 and M10-DB statuses stay unchanged; do not start another milestone.
 
-
 ## My Work Center export identity confirmed - 2026-10-29
 
 Operator supplied exact Registry identity: **name My Work Center**, **slug mwc**, **release v2**. Export paths must therefore be **/mwc** and **/mwc/health**. Saved these confirmed/derived fields to local C:/Users/logtran/IhpWorkCenterReview-odHZXy/export-metadata.draft.json and updated local EXPORT_PLAN.md. The draft is explicitly NOT UPLOADABLE; no entry point, build identifier or contract verification is invented. No application build/execution/database initialization/approval/deployment occurred and no new ZIP was created. Original project and archive remain unchanged. The source incompatibilities and first zip_invalid cause recorded below remain valid.
@@ -123,7 +153,6 @@ Operator supplied exact Registry identity: **name My Work Center**, **slug mwc**
 Outstanding access-model clarification: existing My Work Center application APIs have no application login, and M11 management sessions do not protect /mwc application routes. Asked whether the intended application requires its own sign-in or explicitly reviewed shared-localhost data access. No model is silently selected or enabled. External-to-release SQLite initialization remains a separate unauthorized operation; missing configuration must fail closed. Export/build preparation authorization remains in effect and is not permission for application execution, database provisioning or M10-DB implementation.
 
 Focused local metadata consistency and git diff --check passed. No application tests/builds were run; previous 529 PASS is historical. Only PROGRESS.md is changed in tracked files; local review metadata/plan remain outside progress Git. All milestone statuses, M7 restrictions and default-disabled browser management remain unchanged. **Next task:** resolve the application access model, then implement the isolated /mwc v2 Node-compatible export with honest fail-closed database behavior; inspect a real resulting ZIP before claiming package acceptance. Do not re-request the already supplied name/slug/version or export-preparation authorization.
-
 
 ## My Work Center ZIP diagnosis and isolated export preparation ? 2026-10-29
 
@@ -156,7 +185,6 @@ Owned inspection copy under that review root was removed after verifying its can
 Await the requested **exact existing Registry application name, slug and new release version**, plus confirmation of a fail-closed export pending separately authorized external-to-release application SQLite initialization. Resolve the application access policy before enabling any data API. Then complete only the isolated compatibility export, validate the newly generated ZIP using existing published PackageInspector.dll in isolated storage, record actual bytes/expanded size/files/SHA and inspector result. Do not execute/approve/deploy the application without separate authorization. The original project/ZIP and M7/M8 statuses stay unchanged.
 
 After a real replacement package passes validation and the approved Dashboard environment is already available: open the existing My Work Center application, find **Packages & releases**, enter **Release version** matching platform.json, select the file using **Prebuilt ZIP**, and choose **Submit for review**. Current code uploads, inspects and creates the approval request together; there is no additional invented submit step. Expected success text: **Package validated and submitted for review. No deployment has started.** Package/deployment state must be **PENDING_APPROVAL**, approval **PENDING**, buildStatus **READY**. Distinct-Administrator review is required. Do not approve, prepare, execute/start or deploy automatically. These are source-verified instructions for a future valid package, not a claim that this upload has occurred.
-
 
 ## Dashboard compiled-assets rebuild — 2026-10-28
 
