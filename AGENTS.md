@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## TASK 027 handoff — ZIP wrapper-folder validation — 2026-10-30
+## TASK 028 handoff — M7 source-build isolation assessment — 2026-10-30
+
+This was a read-only implementation and policy assessment. M7 remains IN PROGRESS; do not redefine its source-build acceptance criterion or enable source builds. The current restricted prebuilt subset is automated-test verified, but same-user process execution is not a sandbox. A template allowlist alone cannot contain npm lifecycle/build code or .NET MSBuild/restore behavior. Model C requires an explicitly approved company isolation boundary, which is not currently available. SQLite upload candidates remain review-only; persistent application workspaces and DB runtime configuration are M10-DB future work. Exact capability/model matrices, owner decisions and IT/Security gates are recorded in PROJECT_REQUIREMENTS.md and PROGRESS.md. Recommended next task: TASK 029, obtain a product-owner decision on whether source builds remain mandatory and, if yes, request IT/Security evaluation of a company-managed isolated build boundary. Do not implement before the decision/approval; preserve all current security gates and milestone statuses.
+
+## Historical TASK 027 handoff — ZIP wrapper-folder validation — 2026-10-30
 
 `PackageArchive.SplitIntake` now validates forbidden path segments in original normalized ZIP paths before stripping an optional common wrapper, including explicit directory entries, and then validates package-relative paths/file types. Safe wrapper folders continue to work. `npm.cmd run test:packages` passed 40/40; `npm.cmd run verify` exited 0 with 577 passing checks, zero failures/skips, and owned smoke cleanup. M1–M6/M11 remain COMPLETED, M7/M8 IN PROGRESS and M9/M10/M10-DB/M12 NOT STARTED. M7's approved source-build/isolation dependency and M8 actual-browser acceptance remain open. Exact evidence and local source changes are recorded in PROGRESS.md. Recommended next task: TASK 028, assess the remaining M7 source-build/isolation acceptance under company policy; keep source builds disabled unless an approved boundary is available.
 
@@ -308,6 +312,9 @@ Do not commit any source code or other project files into this progress reposito
 - Source builds remain disabled unless an explicitly reviewed safe build boundary is established; no uploaded scripts/npm installs/shell/build commands are authorized. Same-user processes are not a sandbox.
 - Only exact-fingerprint, distinct-Administrator-reviewed trusted prebuilt releases may enter the controlled Agent workflow. Recheck approval, current user authority and hashes before promotion/start; preserve M5 ownership/loopback and M6 validation.
 - If safe source builds/execution cannot be implemented, record the exact limitation and leave M7 IN PROGRESS or BLOCKED as appropriate; do not weaken acceptance or invent verification. Update/push only the four records and verify origin/main.
+- A build template or fixed command list is not itself a security boundary. Before enabling any source build, require an explicitly approved isolated build identity/service with reviewed filesystem, process, network/dependency, resource, secret, artifact-provenance, log-retention and cleanup controls. Do not run `npm install`, lifecycle scripts, `npm build`, `dotnet restore`, `dotnet build`, uploaded manifests or uploaded code during assessment. Source build remains disabled until a separate authorized implementation task validates the approved boundary.
+- Distinguish review-only intake from preparation and execution. Exact-fingerprint Administrator approval is necessary but does not prove code safe. Trusted-prebuilt runtime execution remains default-disabled and gated independently in both API and Agent. Same-user process/job isolation is not a sandbox.
+- SQLite intake candidates remain separate review artifacts and are not runtime databases. Do not attach, provision, migrate, replace, back up, restore or inject application DB paths under M7; M10-DB remains NOT STARTED until separately authorized.
 
 ## M7 folder-intake and startup-script rules
 

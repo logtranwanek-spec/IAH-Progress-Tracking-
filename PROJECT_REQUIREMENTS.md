@@ -1,7 +1,46 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 027 — ZIP wrapper-folder validation — 2026-10-30
+## Current TASK 028 — M7 source-build isolation assessment — 2026-10-30
+
+**Assessment only; this record does not change M7 requirements or authorize implementation.** Current status remains M7 IN PROGRESS. The verified product path is restricted to authenticated upload/intake, static inspection, exact-fingerprint Administrator review and trusted-prebuilt preparation/runtime under explicit opt-in controls. Source builds are disabled. M7 cannot meet its existing source-build acceptance criterion in the current environment because uploaded source, package hooks, dependency installers and build definitions cannot be safely executed under the same ordinary Windows identity.
+
+### Current M7 capability matrix
+
+| Capability | Current disposition | Evidence and boundary |
+| --- | --- | --- |
+| Authenticated ZIP and Folder intake | Implemented and automated-test verified | M11 session, permission and ownership checks; bounded staging and sanitized validation. Intake is review-only. |
+| SQLite artifact detection and separation | Implemented and automated-test verified | SQLite candidates and sidecars are privately staged apart from code; bounded read-only review occurs. No attachment, replacement or runtime path configuration is implemented. |
+| Package validation, fingerprint and approval | Implemented and automated-test verified | Strict manifest/archive checks, immutable hashes and distinct Administrator approval of the exact package; validation and approval do not establish that code is safe. |
+| Node.js and ASP.NET Core prebuilt deployments | Implemented and managed-fixture verified | Supported reviewed prebuilt formats are prepared without overwrite and exercised through the existing Agent/Gateway workflow under explicit trusted-package opt-in. This is not verification of arbitrary application compatibility. |
+| Source-only upload/build | Intentionally disabled; acceptance unmet | Source-only folder analysis reports BUILD_REQUIRED. No npm install/build, package hook, uploaded shell command, dotnet restore/build, or uploaded source execution is performed. |
+| Browser deployment workflow | Candidate exists; actual-browser acceptance not verified | The signed boundary/DOM tests are simulations. The browser scenario matrix remains 53 NOT RUN; private production browser management remains default-disabled. |
+| Persistent application SQLite workspace | Not implemented; M10-DB NOT STARTED | Candidate data is staged for review. Agent working directory is the selected release directory; no persistent per-app database association or runtime path injection exists. |
+
+### Deployment model assessment
+
+| Model | Security and compatibility | Complexity and permissions | Feasibility | Acceptance evidence and remaining risk |
+| --- | --- | --- | --- | --- |
+| **A — Prebuilt applications only** | Avoids build-time execution, but a launched application still runs as the same ordinary Windows user and is not sandboxed. Compatibility is limited to the reviewed Node ESM and framework-dependent ASP.NET Core 8 package contracts. | Lowest additional complexity. Existing M11 upload/ownership authorization, distinct Administrator fingerprint approval, and separate API plus Agent `IHP_TRUSTED_PACKAGE_EXECUTION=1` opt-ins apply. No elevation or OS security changes are part of the current flow. | **Feasible as the current restricted operating mode and already automated-test verified.** | Verify strict prebuilt intake, exact fingerprints, separate Administrator review, default-off execution, loopback health/routing and owned cleanup. Does not satisfy unchanged M7 source-build acceptance by itself; review/approval cannot eliminate malicious runtime behavior under the same user. |
+| **B — Restricted approved build templates** | A fixed template or command allowlist does not contain submitted source. npm lifecycle hooks/build scripts, dependencies, .NET MSBuild project targets/tasks and restore-time dependencies can execute code or use the user's filesystem/network. Compatibility would be limited to named Node/.NET templates; custom toolchains/native dependencies remain unsupported. | High review and maintenance burden for toolchains, dependencies, templates, output validation and logs. It still needs the same approved process/filesystem/network boundary as Model C; that permission is not available. | **Not safe or acceptable under the current constraints.** Do not enable it as a workaround. | Would need the same independently approved isolation and boundary tests as Model C, plus template/dependency allowlist and reproducible output evidence. Without containment it risks arbitrary same-user execution and does not meet source-build security requirements. |
+| **C — Company-approved isolated source build** | Can contain build-time code only if the approved boundary actually separates identity/filesystem and controls processes, network access, resources, secrets and output provenance. It does not expand runtime compatibility: outputs must still pass the existing Node/.NET package contracts. | Highest operational complexity; requires an approved build service or other managed isolation and ownership for patching, dependencies, quotas, artifact attestation, logs and cleanup. IT/Security must confirm provisioned permissions and that implementation needs no unapproved elevation or system-policy changes. | **Not currently available or authorized.** It is the viable candidate if source builds remain mandatory, subject to written IT/Security approval and a separate implementation assignment. | Require written boundary approval, positive and negative isolation tests, resource/network policy evidence, dependency provenance, secret absence, output validation/attestation, cleanup and bounded logs. Build containment does not sandbox the later runtime; trusted-prebuilt review and runtime opt-ins remain necessary. |
+
+### Decisions and approvals still required
+
+- Product owner: retain source-build templates/build logs as mandatory M7 acceptance (current requirement), or initiate a formal requirements change to a prebuilt-only scope. Do not treat Model A as silently satisfying the existing criterion.
+- Product owner: if builds remain required, select whether to request a company-managed isolated build service or leave M7's source-build portion blocked. The present task does not approve or provision one.
+- IT/Security: before any build implementation, approve the boundary, execution identity, filesystem separation, process/child-process controls, network/dependency-source policy, resource limits, secret handling, artifact provenance/signing, retention and incident/cleanup ownership. Confirm required permissions and that the design needs no unauthorized Administrator or Windows security changes.
+- Product owner and IT/Security: resolve the application-data path contract and compatibility gates in section 9.1 before an SQLite-dependent app can be supported. Database attachment, persistent workspace, runtime path injection, migrations, backup/restore and replacement require the separate M10-DB assignment and approval; they are not part of current M7 behavior.
+
+### M7 and SQLite-dependent deployment boundary
+
+M7's verified upload/review/prebuilt subset is distinct from a fully completed deployment milestone. Package intake can report review and approval state; package preparation is non-overwriting; actual trusted runtime start is a separate opt-in, exact-approval and Agent gate. Source-only packages remain BUILD_REQUIRED and are never converted to packages by running uploaded code. M7 remains **IN PROGRESS** until its existing acceptance criteria are verified or changed through an explicit authorized requirements decision.
+
+The current SQLite workflow can identify, stage and inspect uploaded database candidates separately from code, but it does not associate a candidate with a deployed application or place it into a persistent app workspace. Package generation excludes database artifacts. Runtime launch uses the release directory as working directory and does not inject an application database path. Therefore a database-dependent application cannot rely on the documented M10-DB target workflow today. M10-DB remains **NOT STARTED**; no database was opened or changed for this assessment.
+
+No application, ZIP, database, source, schema or security policy was changed for TASK 028. Prior TASK 027 verification remains the latest execution evidence: package suite 40/40 and full suite 577/577 passed. This read-only assessment adds no test or runtime evidence.
+
+## Historical TASK 027 — ZIP wrapper-folder validation — 2026-10-30
 
 ZIP intake may normalize one safe common wrapper directory, but validation must inspect every normalized original archive path before removing that wrapper, including explicit directory entries. Then validate the resulting package-relative file path and file type. Prohibited segments such as `.git`, `.svn`, `.hg` and `node_modules` remain prohibited at archive root, as a wrapper, and at every nested level. Wrapper normalization must not bypass traversal, duplicate-path, link, archive-integrity, entry-count, compressed/expanded-size, compression-ratio, SQLite candidate separation, fingerprint or approval controls. Safe wrapper folders remain supported.
 

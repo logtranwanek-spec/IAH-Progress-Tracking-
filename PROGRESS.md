@@ -1,6 +1,67 @@
 # Project Progress
 
-## TASK 027 — ZIP wrapper-folder validation and full regression — 2026-10-30
+## TASK 028 — M7 source-build isolation and deployment scope assessment — 2026-10-30
+
+### Scope and milestone status
+
+- Read-only assessment and decision preparation. No source code, uploaded application, database, schema, migration, operating-system security setting or deployed application was changed or executed. No source build or application build/test suite was run.
+- **Statuses preserved:** M1–M6 and M11 COMPLETED; M7 and M8 IN PROGRESS; M9, M10, M10-DB and M12 NOT STARTED. M7's existing source-build acceptance remains unmet. M8 actual-browser acceptance remains 53 NOT RUN and private production browser management remains default-disabled.
+
+### M7 capability matrix
+
+| Capability                         | Status and verified boundary                                                                                                                                                                                                                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ZIP/Folder intake                  | Implemented and automated-test verified with authenticated M11 session, permission/ownership checks, bounded storage and sanitized failures. Intake is review-only.                                                                                                                                          |
+| SQLite candidate separation        | Implemented and automated-test verified: candidate DB and WAL/SHM files are staged separately from application code and receive bounded read-only review. They are not attached to a running app.                                                                                                            |
+| Package inspection and fingerprint | Implemented and automated-test verified for supported strict prebuilt format; archive/type/path/integrity/size checks and immutable fingerprint are preserved. Static validation does not prove source/application code safe.                                                                                |
+| Administrator approval             | Implemented and automated-test verified: distinct Administrator reviews the exact package fingerprint; requester/reviewer separation, current authority, ownership and hash checks are revalidated. Approval alone does not start a process.                                                                 |
+| Node and ASP.NET Core deployment   | Supported prebuilt package preparation is verified by managed disposable fixtures; selected Node ESM and framework-dependent ASP.NET Core 8 releases can run through the existing Agent/M5/M6 loopback flow only under independent trusted-execution opt-ins. This is not a general compatibility guarantee. |
+| Source builds                      | Not implemented and disabled by policy. Source-only folder intake reports BUILD_REQUIRED. No package lifecycle hooks, uploaded build scripts, npm install/build, dotnet restore/build or arbitrary command executes. This is an unmet M7 criterion.                                                          |
+| Browser management                 | Candidate/protocol/DOM behavior has automated simulation coverage, but no actual browser acceptance is claimed. The 53-scenario real-browser matrix remains NOT RUN.                                                                                                                                         |
+| Application database use           | Not implemented: SQLite candidate intake does not provide persistent app workspace, database association, runtime path configuration, attachment, migration, backup or restore. M10-DB remains NOT STARTED.                                                                                                  |
+
+### Source-build risk and deployment models
+
+Model A — **prebuilt applications only** — is the recommended restricted operating mode now. It avoids build-time script/dependency execution and matches the already verified package format. Trusted application runtime code still executes when the separate API and Agent opt-ins are enabled, under the same Windows user. Job/process/environment controls and code review are not a sandbox. This model does not meet the current M7 source-build acceptance criterion.
+
+Model A acceptance evidence is the existing automated verification of strict ZIP/Folder validation, exact package hashes, distinct Administrator approval, default-off execution, controlled Node/.NET runtime startup, loopback health/routing and cleanup. Residual risk remains that a trusted reviewed application can still be malicious at runtime; this model is not appropriate for untrusted code.
+
+Model B — **restricted approved build templates** — is not safe under the current boundary. Allowing only named templates or commands does not make uploaded source inert: npm lifecycle hooks/build scripts and dependency packages can execute code; .NET restore/build evaluates project targets/tasks and dependencies. Those activities can access same-user files, start children and use available network resources. A template allowlist without process/filesystem/network containment is insufficient. Model B must remain disabled unless it runs inside a separately approved isolation boundary.
+
+Model B acceptance would require a separately approved boundary meeting Model C controls, reviewed immutable template/toolchain/dependency inputs, and positive/negative tests proving rejected commands, hooks, network access, filesystem access, resource overruns and unsafe output are blocked. That evidence does not exist; template-only execution would retain arbitrary same-user code-execution risk.
+
+Model B compatibility would be limited to explicitly supported Node and ASP.NET Core build templates and their approved output formats; custom build tools and native dependencies remain unsupported. It also needs the same IT/Security-provisioned permissions and boundary as Model C, which are not available here.
+
+Model C — **company-approved isolated source build** — is the candidate if source builds remain mandatory. The environment would need an approved identity/storage boundary, process and child-process controls, network/dependency-source policy, resource budgets, no platform secrets, artifact provenance/output validation, bounded logs/retention and cleanup ownership. No such boundary is available or approved in this workspace; provisioning one might require permissions or policy changes that are outside this task. It cannot be assumed or implemented here.
+
+Model C remains limited to the package runtime formats already supported by IHP; isolation does not make an unsupported runtime, package layout or native dependency compatible. Acceptance would require written boundary approval plus positive/negative tests and audit evidence for identity/filesystem/process/network/resource limits, dependency provenance, secret exclusion, output integrity/attestation, logs and cleanup. Runtime still needs the existing trusted-prebuilt authorization because build isolation does not sandbox later app execution.
+
+Model C acceptance requires written IT/Security approval plus tests and audit evidence for identity and filesystem separation, process/network/resource controls, dependency provenance, secret exclusion, artifact integrity/attestation, bounded logs and cleanup. A successful isolated build would not sandbox later runtime execution, so the existing trusted-prebuilt M11/Administrator/opt-in controls remain required.
+
+### Current M7 completion decision
+
+- Current trusted-prebuilt subset is implemented and automated-test verified, including package workflow and selected Node/.NET real-process fixtures. The verification remains scoped to disposable test packages and does not make all uploaded application code trusted.
+- M7 acceptance cannot currently be fully satisfied because source-build templates and build-output evidence remain required by the existing plan and no approved isolation boundary is available.
+- M7 remains **IN PROGRESS**. This task does not redefine acceptance or request that the owner accept the gap away. A formal product-owner requirements decision is required before any prebuilt-only re-scope.
+- IT/Security approval is required before pursuing a source-build service/boundary. It must cover execution identity, filesystem, process, network/dependencies, resource controls, secrets, artifact provenance, logs/retention, cleanup and permission requirements.
+
+### SQLite deployment dependency
+
+The target sequence (upload original code and SQLite; inspect/separate; approve; establish persistent application workspace; associate/use the approved DB; preserve it across release upgrades) is not implemented end-to-end. Current intake stages and inspects candidate DB files separately; canonical code packages exclude them. The Agent's working directory is the release directory and no app DB path is injected. There is no app DB association or lifecycle/backup/restore/migration support. A DB-dependent deployment therefore needs M10-DB and separately authorized M5/runtime path-contract work, plus owner decisions about supported app-relative versus working-directory-relative DB paths. M10-DB remains NOT STARTED. No My Work Center database was accessed or modified.
+
+### Verification and next task
+
+- TASK 028 performed static code and documentation review only. Application builds/tests and runtime execution were intentionally not run; no code changed.
+- Modified documentation only: `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `AGENTS.md` and `PROGRESS.md`. No source or test file changed.
+- Documentation formatting: the first `node node_modules/prettier/bin/prettier.cjs --check PROJECT_REQUIREMENTS.md AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md` reported only PROGRESS.md formatting. `node node_modules/prettier/bin/prettier.cjs --write PROGRESS.md` corrected it; the final check exited 0 with all four documents formatted.
+- Documentation consistency/whitespace: `git diff --check` exited 0. A read-only PowerShell comparison of the status tokens in current IMPLEMENTATION_PLAN.md against pre-task HEAD exited 0; all 14 milestone/sub-workstream status records were unchanged. The tracked change list contains only the four authorized Markdown files.
+- Latest actual automated evidence remains TASK 027: `npm.cmd run test:packages` passed 40/40; `npm.cmd run verify` exited 0 with 577 passed, 0 failed, 0 skipped, and owned smoke cleanup passed. Those results were not rerun or expanded by TASK 028.
+- **Exact next recommended task — TASK 029:** Obtain the product-owner decision on whether source builds remain mandatory. If yes, request written IT/Security evaluation of a company-managed isolation boundary; if no, initiate a formal requirements/acceptance change. Keep source builds disabled and M7 IN PROGRESS until the decision, authorization and verified acceptance are complete.
+- Resume by reading this record, M7 in IMPLEMENTATION_PLAN.md, sections 5 and 9.1 of PROJECT_REQUIREMENTS.md, PACKAGES.md and DEPLOYMENT_ENGINE.md. Do not run uploaded build commands or access application databases.
+
+---
+
+## Historical TASK 027 — ZIP wrapper-folder validation and full regression — 2026-10-30
 
 ### Result and milestone status
 
