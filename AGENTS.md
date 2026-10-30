@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## TASK 026 handoff — M6 Dynamic Routing regression diagnosis — 2026-10-30
+## TASK 027 handoff — ZIP wrapper-folder validation — 2026-10-30
+
+`PackageArchive.SplitIntake` now validates forbidden path segments in original normalized ZIP paths before stripping an optional common wrapper, including explicit directory entries, and then validates package-relative paths/file types. Safe wrapper folders continue to work. `npm.cmd run test:packages` passed 40/40; `npm.cmd run verify` exited 0 with 577 passing checks, zero failures/skips, and owned smoke cleanup. M1–M6/M11 remain COMPLETED, M7/M8 IN PROGRESS and M9/M10/M10-DB/M12 NOT STARTED. M7's approved source-build/isolation dependency and M8 actual-browser acceptance remain open. Exact evidence and local source changes are recorded in PROGRESS.md. Recommended next task: TASK 028, assess the remaining M7 source-build/isolation acceptance under company policy; keep source builds disabled unless an approved boundary is available.
+
+## Historical TASK 026 handoff — M6 Dynamic Routing regression diagnosis — 2026-10-30
 
 The historical TASK 026 routing failures were not reproduced after confirming the Gateway, API-test and runtime-test ports had no listeners. `npm.cmd run test:routing` passed, including 114 Gateway checks and 19 real SQLite/API/Agent/Gateway integration checks. No production routing code or M6 status was changed. The integration verifier now checks component health identity, emits bounded timestamp/process/startup-phase diagnostics, and exercises three additional runtime stop/start cycles while checking that route intent persists and the effective route withdraws/restores. The former 15-second readiness/withdrawal deadline was not increased.
 
@@ -51,6 +55,10 @@ The latest user authorizes only raising the compressed ZIP cap to 50 MiB (52,428
 ## Permanent ZIP size rule
 
 - Compressed ZIP uploads are limited to **52,428,800 bytes (50 MiB), inclusive**; Dashboard label is **Maximum ZIP size: 50 MB**. Keep client/API/Gateway/inspector/SQLite constraints consistent and test below/exactly/one-byte-above boundaries. Do not increase the independent 32 MiB expanded-total, 8 MiB per-file, 256-entry or 100:1 ratio budgets, weaken any ZIP validation/approval/fingerprint check, widen ordinary proxy/JSON limits or enable source execution. API uploads remain streamed with bounded concurrency; review archive-sized allocations/copies when changing limits. No automatic migration of configured data.
+
+## Permanent ZIP wrapper-validation rule
+
+- Before removing an optional common wrapper folder, validate every original normalized ZIP entry path for prohibited segments, including explicit directory entries. Validate package-relative paths and file types again after normalization. A wrapper must never hide `.git`, `.svn`, `.hg`, `node_modules`, or any other prohibited segment at any depth. Continue accepting safe single-wrapper ZIPs and preserve strict path, duplicate, link, integrity, entry, size, expansion, SQLite-candidate, fingerprint and approval checks.
 
 ## Current workflow-configuration assignment — 2026-10-28
 

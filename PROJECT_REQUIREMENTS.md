@@ -1,7 +1,13 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 026 — M6 Dynamic Routing regression follow-up — 2026-10-30
+## Current TASK 027 — ZIP wrapper-folder validation — 2026-10-30
+
+ZIP intake may normalize one safe common wrapper directory, but validation must inspect every normalized original archive path before removing that wrapper, including explicit directory entries. Then validate the resulting package-relative file path and file type. Prohibited segments such as `.git`, `.svn`, `.hg` and `node_modules` remain prohibited at archive root, as a wrapper, and at every nested level. Wrapper normalization must not bypass traversal, duplicate-path, link, archive-integrity, entry-count, compressed/expanded-size, compression-ratio, SQLite candidate separation, fingerprint or approval controls. Safe wrapper folders remain supported.
+
+TASK 027 fixed the common-wrapper bypass in `PackageArchive.SplitIntake` and added regression coverage. `npm.cmd run test:packages` passed 40/40; `npm.cmd run verify` exited 0 with 577 passing checks, zero failures/skips, and owned smoke cleanup. No milestone status changed. See PROGRESS.md for exact scope and evidence. M1–M6/M11 remain COMPLETED; M7/M8 remain IN PROGRESS; M9/M10/M10-DB/M12 remain NOT STARTED.
+
+## Historical TASK 026 — M6 Dynamic Routing regression follow-up — 2026-10-30
 
 When verifying runtime-driven route withdrawal/restoration, test the actual projected effective route through the unchanged Gateway while separately confirming persisted route intent. Readiness must verify the expected component identity and status, not only an HTTP success code. On timeout, report bounded timestamps, process identity, safe startup phase/status, last probe category and the API effective-route snapshot; do not include credentials, raw component logs, response bodies or exception text. Preserve the existing deadline unless captured measurements justify a change.
 
@@ -549,7 +555,7 @@ The platform must validate the package and launch it using the appropriate runti
 
 ### Upload Security
 
-The maximum compressed ZIP upload is **50 MiB (52,428,800 bytes), inclusive**, consistently enforced by the Dashboard, authenticated Platform API, Gateway browser-upload boundary and package inspector/storage constraint. The Dashboard displays **"Maximum ZIP size: 50 MB"**; that label uses the same binary 50 MiB limit, not 50,000,000 bytes. Validate size before reading/uploading the file; reject even one byte above the cap with a clear size error/HTTP 413 at server ingress. Archives below/at the cap still require all normal integrity, structure, ownership, authorization, fingerprint and Administrator approval checks.
+The maximum compressed ZIP upload is **50 MiB (52,428,800 bytes), inclusive**, consistently enforced by the Dashboard, authenticated Platform API, Gateway browser-upload boundary and package inspector/storage constraint. The Dashboard displays **"Maximum ZIP size: 50 MB"**; that label uses the same binary 50 MiB limit, not 50,000,000 bytes. Validate size before reading/uploading the file; reject even one byte above the cap with a clear size error/HTTP 413 at server ingress. Archives below/at the cap still require all normal integrity, structure, ownership, authorization, fingerprint and Administrator approval checks. If one safe common wrapper folder is stripped, validate forbidden segments against the original normalized ZIP paths first (including directory entries), then validate normalized package-relative paths and file types. Wrapper normalization never permits a prohibited directory at any depth; safe wrappers remain accepted.
 
 This compressed-size change does **not** raise extraction limits: retain **32 MiB expanded total, 8 MiB per expanded file, 256 entries and maximum 100:1 expansion ratio with the existing 4-KiB allowance**. Keep ZIP Slip/path/link checks, strict CRC/structure/type validation, compression-bomb protection, bounded upload concurrency/deadlines and owned temporary cleanup. Only the explicitly allowlisted browser ZIP operation receives the larger request budget; ordinary application proxy and JSON request limits remain unchanged. The native API streams to owned storage; avoid redundant archive-sized memory copies at the signed browser boundary. Source builds/unreviewed execution remain disabled.
 

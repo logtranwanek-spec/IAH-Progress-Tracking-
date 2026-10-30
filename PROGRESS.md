@@ -1,5 +1,40 @@
 # Project Progress
 
+## TASK 027 — ZIP wrapper-folder validation and full regression — 2026-10-30
+
+### Result and milestone status
+
+- Reproduced the known defect through the package test suite: a common wrapper such as `node_modules/` was removed before the forbidden-directory segment check, allowing its contents to evade that check. Validation now checks original normalized archive entries before wrapper removal, including explicit directory entries, then checks normalized package-relative paths and file types.
+- Safe common wrapper intake remains supported. No ZIP allowlist, traversal/link/duplicate/integrity protection, archive/expansion/count limits, SQLite candidate staging, fingerprint, Administrator approval, M11 authorization/ownership or deployment rule was weakened.
+- **Milestones unchanged:** M1–M6/M11 COMPLETED; M7/M8 IN PROGRESS; M9/M10/M10-DB/M12 NOT STARTED. M7 source-build isolation remains unavailable; M8 actual-browser acceptance remains NOT RUN (53 scenarios) and production browser management remains disabled by default.
+
+### Changes made
+
+- `src/DeploymentAgent/PackageArchive.cs`: separated the forbidden-segment check into `IntakePathSegmentsAllowed`; inspect normalized original file paths before removing a wrapper and inspect explicit ZIP directory entries as well. Continue checking the normalized path after wrapper removal through the existing intake file-type allowlist. Rejection details remain bounded to 20.
+- `tests/Packages.Tests/Program.cs`: added managed regression checks for `node_modules` and `.git` as root wrapper paths, beneath an allowed wrapper, at deeper nested levels, and as explicit directory entries. Existing safe-wrapper and SQLite separation assertions remain in place.
+- Documentation: updated this task's state and permanent wrapper-validation rule in PROJECT_REQUIREMENTS.md and AGENTS.md, added the M7 follow-up/evidence in IMPLEMENTATION_PLAN.md, and preserved the TASK 026 failure record as historical context.
+
+### Verification evidence
+
+| Command                     | Actual result                                                                                                                                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm.cmd run test:packages` | **PASS, exit 0:** 40 passed, 0 failed. Includes wrapper regression, safe-wrapper/SQLite separation, existing archive/security checks and real authenticated API/Agent package integration.            |
+| `npm.cmd run verify`        | **PASS, exit 0:** 577 passed, 0 failed, 0 skipped. Build, formatting/type checks and all suites passed; owned smoke verified loopback components, public health, safe Dashboard behavior and cleanup. |
+
+Full-suite counts: Node readiness/config 33; API/auth/routing/intake 120; SQLite 14; Dashboard 47; signed browser-boundary protocol/DOM 54; managed Foundation 27; Gateway HTTP/WebSocket/dynamic routing 114; samples 82; Deployment Agent 27; routing integration 19; Packages 40. The 54 browser-boundary checks are not actual-browser acceptance evidence.
+
+All .NET projects were published with `UseAppHost=false`, the output scans reported no `.exe` artifacts, and managed verification ran through `dotnet <published DLL>`. Tests used owned disposable SQLite and loopback-only fixtures. No application source was executed, no My Work Center files were modified, no database migration/external-engine operation/Docker/Admin/security change/corporate listener occurred, and smoke cleanup released its ports and removed temporary storage.
+
+### Remaining issues and next task
+
+- M7 remains IN PROGRESS because approved source-build isolation is unavailable; untrusted source builds and arbitrary uploaded-code execution remain disabled.
+- M8 remains IN PROGRESS because actual-browser security acceptance remains NOT RUN (53 scenarios); private production browser management remains default-disabled.
+- No TASK 027 failure remains in the package or full regression gates. No milestone status changed and no later milestone started.
+- **Exact next recommended task — TASK 028:** Assess the remaining M7 source-build/isolation acceptance under company policy. Keep source builds disabled unless an approved isolation boundary is available, then record the precise gate and safe next step.
+- **Commands to resume:** Read AGENTS.md, this TASK 027 record, M7 in IMPLEMENTATION_PLAN.md, and ZIP/upload/package sections of PROJECT_REQUIREMENTS.md. Inspect repository and port/process state before work. For package regression use `npm.cmd run test:packages`; use `npm.cmd run verify` for a full regression when code changes justify it.
+
+---
+
 ## TASK 026 — M6 Dynamic Routing integration failure diagnosis — 2026-10-30
 
 ### Result and milestone status
