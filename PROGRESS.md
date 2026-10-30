@@ -1,6 +1,43 @@
 # Project Progress
 
-## TASK 025 — Detailed upload validation errors — 2026-10-30
+## TASK 026 — M6 Dynamic Routing integration failure diagnosis — 2026-10-30
+
+### Result and milestone status
+
+- The two reported M6 failures were **not reproduced**. The historical failure output did not contain timestamps, process identity, API snapshot state or startup phases, so its exact original cause cannot now be established. Do not attribute it to a production routing defect or to a specific environmental cause without evidence.
+- Before running tests, read-only process/port inspection found no listeners on Gateway 5050, candidate API ports 5200–5239 or runtime test ports 6100–6999. Three existing `node.exe` processes were classified as unrelated hosts; no process was stopped. Post-run inspection confirmed the required test ports were released.
+- **M1–M6 and M11 remain COMPLETED. M7 and M8 remain IN PROGRESS. M9, M10, M10-DB and M12 remain NOT STARTED.** No milestone status changed. M7's source-build/isolation dependency and M8's actual-browser acceptance gap remain unchanged.
+
+### Changes made
+
+- `tests/Platform.Integration.Tests/Program.cs`: readiness now requires the expected API/Gateway health identity, not merely any HTTP success. Readiness and route-withdrawal failures report a UTC timestamp, elapsed time, fixed last-probe category, child PID/start time, allowlisted API startup phases, and a bounded effective-route snapshot. Health bodies are capped at 4 KiB; raw child output, response contents and exception text are not included in diagnostics.
+- The 15-second fixture deadline was retained; no arbitrary delay or production route behavior was changed. Added three consecutive runtime stop/start cycles verifying that each stop withdraws the effective Gateway route, stored route intent remains, and the route is available after the runtime returns healthy. The Gateway PID/start identity remains unchanged.
+- `tests/Platform.Integration.Tests/Child.cs`: startup diagnostics retain only allowlisted phase/code/elapsed fields. Raw output remains private to existing secret-absence assertions and is not placed in failure messages.
+- No Gateway, Platform API, Deployment Agent, upload-policy, M11 authorization, package-approval, migration, application or database code was changed for TASK 026.
+
+### Verification evidence
+
+| Command                                                        | Actual result                                                                                                                                                                                                                                                                                                                                                                   |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Initial `npm.cmd run test:routing` before test-harness changes | **PASS, exit 0:** Gateway 114/114; integration 18/18. Includes route withdrawal and restart.                                                                                                                                                                                                                                                                                    |
+| First `npm.cmd run verify`                                     | **FAILED, exit 1** later in Packages.Tests. Its M6 routing integration passed 18/18; package suite reported 38 passed/1 failed.                                                                                                                                                                                                                                                 |
+| `npm.cmd run test:routing` after test-harness changes          | **PASS, exit 0:** Gateway 114/114; integration 19/19, including the three added cycles and API/Gateway identity checks.                                                                                                                                                                                                                                                         |
+| Final `npm.cmd run verify` after changes                       | **FAILED, exit 1:** 575 passed, 1 failed. Build, formatting/type checks, readiness/foundation 33/33, API 120/120, SQLite 14/14, Dashboard 47/47, signed browser-boundary 54/54, managed Foundation 27/27, Gateway 114/114, Samples 82/82, Deployment Agent 27/27 and routing integration 19/19 passed. Packages.Tests reported 38 passed/1 failed. Final smoke was not reached. |
+
+Focused-run API readiness took approximately 1.6 seconds; API startup phase evidence reported initialization around 1.05 seconds. In the full run, the initial API readiness took approximately 3.8 seconds (initialization 2.60 seconds; listen 3.00 seconds; ready phase 3.04 seconds), and API restart readiness took approximately 2.8 seconds. The M6 integration run completed its route-withdrawal assertion and all three extra cycles. This measured evidence does not establish why the earlier timeout occurred; no readiness deadline increase was made.
+
+The remaining full-suite failure is separate and reproducible: `Packages.Tests` fails `ZIP intake remains subject to package ZIP protections and regular release inspection still rejects database files` at `tests/Packages.Tests/Program.cs:102` with `Expected rejection.` The `node_modules/module.js` ZIP is rooted under one common wrapper folder. `PackageArchive.SplitIntake` strips that wrapper before `IntakeFileTypeAllowed` checks path segments, so the prohibited `node_modules/` segment is not rejected. TASK 026 left upload validation and package behavior untouched. This failure must not be waived or described as an environment issue.
+
+All .NET projects were published with `UseAppHost=false` and verified by invoking the managed DLLs through `dotnet`; no `.exe` was run. Tests used owned disposable SQLite and loopback-only fixtures. No Docker, Administrator privilege, security/firewall change, corporate listener, production access, My Work Center change or uploaded application execution occurred. Automated browser-boundary results are not real-browser acceptance; M8 still has 53 browser scenarios NOT RUN and production browser management remains default-disabled.
+
+### Next task
+
+- **Exact next recommended task — TASK 027:** Correct ZIP wrapper-folder validation so a prohibited directory such as `node_modules/` remains rejected after wrapper normalization. Add focused cases for forbidden wrapper names, verify safe wrapper folders still work, preserve all existing file/ZIP budgets and approval controls, then run `npm.cmd run test:packages` and `npm.cmd run verify`. Do not change milestone statuses based on this work.
+- **Commands to resume:** Read `AGENTS.md`, this section, the M7 upload section of `IMPLEMENTATION_PLAN.md`, and the ZIP/package validation requirements. Inspect repository state and owned ports. Start with `npm.cmd run test:packages`; after focused verification passes, run `npm.cmd run verify`.
+
+---
+
+## Historical TASK 025 — Detailed upload validation errors — 2026-10-30
 
 ### Current status
 

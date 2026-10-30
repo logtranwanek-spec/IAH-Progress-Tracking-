@@ -1,7 +1,13 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 025 — Detailed upload validation errors — 2026-10-30
+## Current TASK 026 — M6 Dynamic Routing regression follow-up — 2026-10-30
+
+When verifying runtime-driven route withdrawal/restoration, test the actual projected effective route through the unchanged Gateway while separately confirming persisted route intent. Readiness must verify the expected component identity and status, not only an HTTP success code. On timeout, report bounded timestamps, process identity, safe startup phase/status, last probe category and the API effective-route snapshot; do not include credentials, raw component logs, response bodies or exception text. Preserve the existing deadline unless captured measurements justify a change.
+
+TASK 026 reproduced neither historical failure. Focused routing verification passed with 114 Gateway checks and 19 API/Agent/Gateway integration checks, including three additional runtime stop/start cycles. No production route behavior or milestone status changed. `npm.cmd run verify` remains failed on a separate existing Packages.Tests ZIP wrapper-folder validation case; do not treat the complete suite as passing. See the latest TASK 026 evidence in PROGRESS.md. M6 remains COMPLETED; M7/M8 remain IN PROGRESS and M10-DB remains NOT STARTED.
+
+## TASK 025 historical assignment — Detailed upload validation errors — 2026-10-30
 
 For authenticated Folder and ZIP upload failures, return a consistent, sanitized validation response. Include a stable validation code and safe human-readable summary. When a specific rejected archive/folder entry can be identified, report at most 20 entries, each with a fixed reason and a normalized relative path only when it passes the safe-path and sensitive-name checks. Omit unsafe or sensitive paths; never include absolute server paths, file contents, credentials, raw exceptions, or information from another application. Set a truncation indicator when additional rejected entries are omitted. Include only allowlisted, applicable limits such as the 52,428,800-byte inclusive upload cap, 256-entry count, 32 MiB expanded total, and 8 MiB per-file budget. Malformed archives or aggregate failures may have no individual path when it cannot be safely identified.
 

@@ -1,6 +1,12 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 025 — Detailed upload validation errors — 2026-10-30
+## TASK 026 handoff — M6 Dynamic Routing regression diagnosis — 2026-10-30
+
+The historical TASK 026 routing failures were not reproduced after confirming the Gateway, API-test and runtime-test ports had no listeners. `npm.cmd run test:routing` passed, including 114 Gateway checks and 19 real SQLite/API/Agent/Gateway integration checks. No production routing code or M6 status was changed. The integration verifier now checks component health identity, emits bounded timestamp/process/startup-phase diagnostics, and exercises three additional runtime stop/start cycles while checking that route intent persists and the effective route withdraws/restores. The former 15-second readiness/withdrawal deadline was not increased.
+
+The full `npm.cmd run verify` remains failed at a separate Packages.Tests case: wrapper-folder normalization allows the forbidden `node_modules/` wrapper segment to be removed before file-type validation. Do not weaken upload validation. Keep M1–M6/M11 COMPLETED, M7/M8 IN PROGRESS and M9/M10/M10-DB/M12 NOT STARTED. Exact results and the verified package-test failure are in PROGRESS.md. Recommended next task: TASK 027, correct and regress wrapper-folder ZIP validation, then rerun `npm.cmd run test:packages` and `npm.cmd run verify`.
+
+## TASK 025 historical assignment — Detailed upload validation errors
 
 Implement bounded, sanitized rejected-file reporting for authenticated Folder and ZIP uploads. Preserve M11 authentication, ownership, role, Origin/Host/CSRF/replay checks; preserve every file allowlist and upload/archive budget; do not modify Gateway application routing, enable source builds, execute uploaded code, or change deployment behavior. Add focused upload/Dashboard tests and run `npm.cmd run verify`. Record a failed full-suite gate accurately; do not report it as passing. M7/M8 remain IN PROGRESS and M10-DB remains NOT STARTED. Update the four tracking documents and deliver only those four documents to the progress repository.
 
