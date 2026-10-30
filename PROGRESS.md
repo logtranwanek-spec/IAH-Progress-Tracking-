@@ -1,6 +1,53 @@
 # Project Progress
 
-## TASK 024 — Unified application and SQLite upload intake — IN PROGRESS
+## TASK 025 — Detailed upload validation errors — 2026-10-30
+
+### Current status
+
+- **Task scope:** Implementation and focused upload verification are complete. The full project verification command was executed but **FAILED** in the published M6 routing integration suite; do not describe the full regression as passing.
+- **Milestones unchanged:** M1–M6 and M11 COMPLETED; M7 and M8 IN PROGRESS; M9, M10, M10-DB and M12 NOT STARTED. M7 source builds remain disabled. M8 actual-browser acceptance remains NOT RUN (53 scenarios); production browser management remains disabled by default. No later milestone started.
+- **Last completed task:** TASK 024 unified Folder/ZIP intake with separate private SQLite candidate staging (569 checks and smoke had passed at that earlier checkpoint). TASK 025 adds structured rejection details without changing the upload policies.
+
+### Implemented
+
+- API validation problems now include fixed sanitized summaries, stable validation codes, applicable allowlisted limits, and up to 20 rejected-file records. A path is included only when it is a safe normalized relative path; unsafe or sensitive paths are withheld. Responses never include absolute server paths, file contents, credentials, raw exception text or cross-application details.
+- Folder intake records multiple unsupported/excluded/unsafe entries with fixed reasons and a truncation signal. ZIP splitting and package inspection carry bounded entry/type/integrity/path rejection details through the API. Aggregate malformed-archive and size/count failures retain safe summary and applicable limits even when an individual path cannot be identified.
+- The signed Gateway browser boundary revalidates upstream problem size, codes, reasons, paths and limits before returning the fixed structured fields. Dashboard errors render the summary, safe rejected paths/reasons, an omitted-details notice, applicable limits and retry/remediation guidance.
+- Diagnosed and fixed a transient upload-capacity race: on an interrupted Folder request the staging directory was removed before the request's `finally` released the in-memory slot. A retry could therefore receive `429 folder_intake_capacity_exceeded` with no staged upload. Temporary counter tracing confirmed the next reservation observed one active upload/marker before the prior request released it. Failed-upload cleanup and active-slot release now share the reservation lock, so later reservations wait until cleanup and release finish. No upload limit was changed.
+- Existing M11 authorization, application ownership checks, browser Origin/Host/CSRF/replay protections, archive allowlists, size/entry/expansion limits, package fingerprint and Administrator approval checks remain enforced. No application was executed, and no DB migration, Gateway route, source-build or deployment policy changed.
+
+### Files modified for TASK 025
+
+- API: `src/Api/src/validation.ts`, `src/Api/src/http.ts`, `src/Api/src/folder-intakes.ts`, `src/Api/src/package-files.ts`, `src/Api/package.json`.
+- ZIP inspector/Gateway: `src/DeploymentAgent/PackageArchive.cs`, `src/PackageInspector/Program.cs`, `src/Gateway/BrowserBoundary.cs`.
+- Dashboard: `src/Dashboard/src/api.ts`, `src/Dashboard/src/browser-session.ts`, `src/Dashboard/src/app.tsx`, `src/Dashboard/src/style.css`.
+- Tests: `src/Api/test/folder-intake.test.mjs`, `src/Dashboard/test/dashboard.test.mjs`, `src/Dashboard/test/browser.test.mjs`, `src/Dashboard/test/native-harness.mjs`.
+- Official records updated for delivery: `PROJECT_REQUIREMENTS.md`, `AGENTS.md`, `IMPLEMENTATION_PLAN.md` and `PROGRESS.md`. Source, tests, local artifacts and logs are excluded from the progress-repository commit.
+
+### Verification evidence
+
+| Command                                                                                  | Actual result                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm.cmd --workspace @ihp/api run build`                                                 | PASS; guarded Prisma WASM validation/generation reported 20 models; TypeScript build exited 0.                                                                                                                                                                                                                                                                             |
+| `node --test --test-force-exit --test-timeout=60000 src/Api/test/folder-intake.test.mjs` | PASS, 36/36; includes Folder/ZIP validation details, size and entry boundaries, unauthorized/cross-application rejection, SQLite candidate regression, interrupted cleanup and same-user concurrency.                                                                                                                                                                      |
+| `npm.cmd run verify`                                                                     | **FAILED, exit 1.** Build and `npm.cmd run check` passed. Node foundation 33/33; API 120/120; SQLite migration/database 14/14; Dashboard 47/47; signed browser-boundary 54/54; Foundation managed DLL 27/27; Gateway managed DLL 114/114; sample managed DLL 82/82; Deployment Agent managed DLL 27/27. The published routing integration reported 12 passed and 6 failed. |
+| `npm.cmd run test:routing`                                                               | **FAILED, exit 1.** Gateway 114/114 passed; the published integration scenario then timed out waiting for API readiness.                                                                                                                                                                                                                                                   |
+
+The first full-suite integration failure was `stopped runtime withdraws its effective route while intent persists and resumes safely`, timing out while waiting for the route to disappear after the fixture runtime stopped. Subsequent dependent checks timed out or reported HTTP 409, and the final fixture socket assertion failed. The underlying M6 integration cause has not been isolated. In the separate `test:routing` run, API readiness timed out before that scenario began. Package verification and final smoke were **not reached** in `npm.cmd run verify`; they are not counted as passing. No actual browser was launched; the 54 browser-boundary checks are automated protocol/DOM tests, not actual-browser acceptance evidence.
+
+All .NET projects in the verification build were published with `UseAppHost=false`; managed verifiers were invoked by `dotnet <published DLL>` and their publish roots passed no-`.exe` scans. No `.exe`, Docker, Administrator privilege, firewall/security-setting change, corporate listener or production system was used.
+
+### Remaining issues and next task
+
+- M7 remains IN PROGRESS because approved source-build isolation/templates are unavailable; Task 025 does not satisfy that criterion.
+- M8 remains IN PROGRESS: actual-browser acceptance is still 53 NOT RUN, so private production browser operations remain default-disabled.
+- Full regression is currently blocked by unresolved published M6 routing integration failures. No Gateway application-routing changes were made under Task 025.
+- **Exact next recommended task — TASK 026:** Diagnose the published M6 routing integration failures (stopped-runtime route withdrawal and the separate API-readiness timeout), add actionable fixture diagnostics and correct the verified cause within an explicitly assigned scope; then rerun `npm.cmd run test:routing` and `npm.cmd run verify`. Preserve all milestone statuses unless their own acceptance evidence changes.
+- **Commands to resume:** `Get-Content AGENTS.md`, `Get-Content PROGRESS.md`, read M6/M7 and relevant requirements, inspect current repository state, then run `npm.cmd run test:routing` only after confirming owned fixture processes/ports are clear. Do not terminate unrelated processes. Once routing passes, run `npm.cmd run verify`.
+
+---
+
+## TASK 024 — Unified application and SQLite upload intake — COMPLETED (task scope; M7 remains IN PROGRESS)
 
 **Authorization:** Authenticated folder and ZIP intake may accept application files plus existing SQLite candidates, separate candidate bytes from code packages, perform bounded read-only inspection, and show owner-scoped results. No deployment/application execution, replacement, restore, provisioning, migration, runtime configuration/path injection, Gateway routing, or My Work Center modification is authorized. M7 remains IN PROGRESS; M10-DB remains NOT STARTED.
 
@@ -40,9 +87,9 @@ The API now accepts one authenticated ZIP multipart field (`archive`) at `POST /
 - An intermediate signed browser-protocol test failed because its assertion searched compressed ZIP bytes for the raw SQLite header. The test was corrected to check the ZIP local-file signature and the full suite then passed. An earlier formatting gate was corrected by formatting the touched files and rerunning the full gate.
 - The operator confirmed the manual acceptance fixture stopped and cleanup completed before final verification. No fixture was killed by the Agent. The intermediate 5050/DLL lock was thereby removed.
 
-**Remaining gaps and status:** API failures for unsupported file types provide sanitized reason codes, but neither the API nor Dashboard yet returns/displays a per-file list of rejected relative paths and reasons. Actual browser acceptance was not performed; the 53 signed HTTP/WebCrypto/DOM checks are automated protocol tests, not actual-browser evidence. Production private browser management remains default-disabled. Database candidates remain review-only: no attachment, replacement, provisioning, backup/restore, migration or runtime configuration was implemented. No My Work Center files or database were accessed or modified for this task. M7 remains **IN PROGRESS**, M8 remains **IN PROGRESS**, and M10-DB remains **NOT STARTED**.
+**Task 024 handoff snapshot (superseded by TASK 025):** At the end of 2026-10-29, API failures had only sanitized reason codes and did not yet report individual rejected paths/reasons. TASK 025 above implements and focused-tests that missing feature. Other recorded limitations remain: actual browser acceptance was not performed; the 53 signed HTTP/WebCrypto/DOM checks are automated protocol tests, not actual-browser evidence; production private browser management remains default-disabled; database candidates remain review-only with no attachment, replacement, provisioning, backup/restore, migration or runtime configuration. No My Work Center files or database were accessed or modified for TASK 024. M7 remains **IN PROGRESS**, M8 remains **IN PROGRESS**, and M10-DB remains **NOT STARTED**.
 
-**Exact next recommended task:** Add owner-scoped, sanitized per-file unsupported-item results for both folder and ZIP rejection, render those names/reasons in the default-off Dashboard candidate, and add focused authorization/path-redaction tests. Keep all rejection behavior fail-closed; do not expose secrets or server paths. Actual-browser acceptance and M7's approved source-build/isolation requirement remain separate unfinished gates. Do not start M9, M10, M10-DB, M12, or another milestone.
+**Exact next recommended task at the TASK 024 handoff (superseded by TASK 025):** Add owner-scoped, sanitized per-file unsupported-item results for both folder and ZIP rejection, render those names/reasons in the default-off Dashboard candidate, and add focused authorization/path-redaction tests. Keep all rejection behavior fail-closed; do not expose secrets or server paths. Actual-browser acceptance and M7's approved source-build/isolation requirement remain separate unfinished gates. Do not start M9, M10, M10-DB, M12, or another milestone.
 
 ## TASK 023 — My Work Center SQLite compatibility investigation — 2026-10-29
 

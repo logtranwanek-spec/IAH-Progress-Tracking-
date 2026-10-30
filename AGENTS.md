@@ -1,6 +1,17 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 024 — Unified application and SQLite upload intake
+## Current TASK 025 — Detailed upload validation errors — 2026-10-30
+
+Implement bounded, sanitized rejected-file reporting for authenticated Folder and ZIP uploads. Preserve M11 authentication, ownership, role, Origin/Host/CSRF/replay checks; preserve every file allowlist and upload/archive budget; do not modify Gateway application routing, enable source builds, execute uploaded code, or change deployment behavior. Add focused upload/Dashboard tests and run `npm.cmd run verify`. Record a failed full-suite gate accurately; do not report it as passing. M7/M8 remain IN PROGRESS and M10-DB remains NOT STARTED. Update the four tracking documents and deliver only those four documents to the progress repository.
+
+## Permanent upload validation reporting rules
+
+- Return only stable validation codes and fixed human-readable messages/reasons. For an identifiable rejected Folder/ZIP entry, include a normalized relative path only after safe-path and sensitive-name checks; omit unsafe paths and all absolute server paths.
+- Bound details to 20 entries and 256 UTF-8 bytes per path, set a truncation indicator when needed, and expose only allowlisted applicable limit fields. Do not return raw exception text, file contents, credentials, database data or other applications' validation details.
+- Perform existing M11 session, role, application ownership and authorization checks before exposing per-file details. The signed Gateway boundary and Dashboard must independently sanitize the structured details before forwarding/rendering them.
+- Aggregate/malformed archive errors may have no individual path when the rejected entry cannot be safely identified. Preserve fail-closed validation and all current archive/type/size/entry/expansion/approval/execution policies.
+
+## TASK 024 historical scope — Unified application and SQLite upload intake
 
 The latest assignment authorizes the secure upload/intake foundation for folders and ZIPs containing application files plus existing SQLite database artifacts. Preserve M11 authentication/authorization and exact Administrator package approval. Detect and privately stage `.db`, `.sqlite`, `.sqlite3`, and matching `-wal`/`-shm` artifacts separately from code; perform bounded read-only inspection only. Keep SQL inert, preserve the existing size/entry/ZIP limits, and never execute application code. This does not authorize deployment, database replacement/restore/provisioning, migrations, runtime environment injection or working-directory changes, Gateway routing changes, My Work Center modification, or unrelated M10-DB lifecycle work. Keep M7 IN PROGRESS and M10-DB NOT STARTED. Run focused and full verification using the approved Node/managed-DLL workflow; record actual results and push only the four tracking Markdown files.
 
@@ -12,7 +23,7 @@ The latest assignment authorizes the secure upload/intake foundation for folders
 - Perform read-only SQLite header/integrity inspection only with extension loading disabled, query-only/trusted-schema protections, bounded workers/resources/deadlines and a candidate cap. Sidecar sets and all candidates remain review-required; do not claim snapshot consistency from `quick_check`.
 - SQL is inert and can be accepted only under the exact reviewed `drizzle/` relative path. Never execute SQL, migrations, package hooks, application code or uploaded commands. Keep `run.cmd` as inert reviewed text under existing M7 rules.
 - Preserve the 50 MiB inclusive compressed ZIP/file-payload cap and existing entry, expansion, per-file, ratio, path, link, reserved-path, quota, timeout, cleanup and upload security constraints. Do not widen extraction limits, global file types, source builds or process execution.
-- Dashboard results may show only authenticated backend-confirmed paths/statuses and safe validation reasons. Never expose raw DB contents, server filesystem paths, logs with sensitive filenames, credentials, or fabricated attachment/deployment status. Track the current missing per-file unsupported-path list accurately.
+- Dashboard results may show only authenticated backend-confirmed paths/statuses and safe validation reasons. Never expose raw DB contents, server filesystem paths, logs with sensitive filenames, credentials, or fabricated attachment/deployment status. Apply the permanent upload validation reporting bounds below to every displayed rejected-file list.
 - Intake does not authorize database attachment, provisioning, replacement, backup, restore, migrations, runtime DB configuration, or M10-DB work. Keep M10-DB NOT STARTED, M7/M8 IN PROGRESS, and private production browser operations default-disabled until their separate acceptance criteria pass.
 
 ## Current TASK 023 — My Work Center SQLite compatibility investigation — 2026-10-29
