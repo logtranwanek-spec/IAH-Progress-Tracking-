@@ -1,5 +1,41 @@
 # Project Progress
 
+## Current TASK 033 — Non-executing Build Job Metadata API — 2026-11-02
+
+### Scope and implementation
+
+- Implemented the separately authorized M7 Category A metadata-only slice. M7 remains **IN PROGRESS**; source builds remain disabled; all IT/Security decisions **D00–D29 remain PENDING**. No worker was provisioned, contacted or connected. No uploaded source, dependency install, build command, application process or `.exe` was run.
+- Added SQLite `BuildJob` and append-only `BuildJobEvent` models plus additive migration `202611020006_build_jobs`. Existing migration files were not edited. Database constraints and triggers bound states to `REQUESTED`, `VALIDATED`, `REJECTED_VALIDATION`, `BLOCKED_WORKER_UNAPPROVED` and `CANCELLED`; protect immutable request identity; require audited legal transitions; bound history to five events; and reject event/job deletion or event mutation.
+- Added authenticated application-scoped API routes: `POST`/`GET /_platform/api/applications/:id/build-jobs`, `GET .../:jobId`, and `POST .../:jobId/cancel`. Creation/cancellation require M11 `application.write`; listing/details require `application.read`. Anonymous, Viewer mutation, foreign application and foreign job access fail closed. Creation uses the existing staged folder intake; it does not add a generic upload endpoint.
+- Request fields are limited to the staged snapshot upload ID, SHA-256, target release label, framework, fixed template ID and idempotency key. The idempotency key is hashed at rest. The target version is intent metadata only and creates no Release, Deployment, Package or artifact. No command, executable, filesystem path, environment, dependency URL or credential field is accepted.
+- Static profiles are `node-source-v1`, `aspnetcore8-source-v1` and `react-static-v1`. Only bounded metadata is read for shape classification; no project evaluation/build command runs. The source fingerprint covers validated application/inert-source file metadata and hashes and excludes SQLite candidate/sidecar artifacts. Missing/expired/tampered snapshots, mismatched fingerprints, incompatible runtimes and unsupported source shapes receive fixed rejection codes.
+- Valid requests end in `BLOCKED_WORKER_UNAPPROVED`. The production `UnapprovedBuildWorker` is only a constant status boundary; it has no endpoint, network client, credentials or process launcher. The `SIMULATED` adapter exists only inside the isolated test file and cannot produce an artifact or deployable state. No production success/run/queue status exists.
+- Snapshot limitation: the stored snapshot ID/digest cannot be changed in a Build Job row and the staged intake is hash-verified when a new request is created. Staged files still use the existing retention and same-user filesystem boundary; this does not provide OS isolation or immutable physical storage. Any future approved worker must revalidate the snapshot and establish an approved per-job copy/boundary before use.
+
+### Files changed
+
+- API: `src/Api/prisma/schema.prisma`, additive `src/Api/prisma/migrations/202611020006_build_jobs/migration.sql`, `src/Api/src/build-jobs.ts`, `src/Api/src/build-job-controllers.ts`, `src/Api/src/build-worker.ts`, `src/Api/src/app.ts`, `src/Api/src/folder-intakes.ts`, `src/Api/test/build-jobs.test.mjs`, `src/Api/package.json`.
+- Verification command routing: root `package.json` and `tools/tasks.mjs` add `npm.cmd run test:build-jobs`.
+- Official tracking documents: `AGENTS.md`, `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, and this file.
+
+### Verification evidence
+
+- `npm.cmd run build --workspace @ihp/api` — passed. Prisma WASM schema validation passed; in-process client generation reported no native artifacts/processes/downloads; TypeScript compilation passed.
+- `npm.cmd run test:build-jobs` — **10 passed, 0 failed, 0 skipped**. Coverage includes M11 ownership/roles and unauthorized calls, Node/ASP.NET Core/React-static classification, missing and tampered snapshots, fingerprint mismatch, fixed-template/field rejection, sequential and concurrent idempotency, SQLite transition/immutability triggers, cancellation, safe audit/API/log data, no outbound fetch/process path, absence of package/deployment/Agent side effects, and SQLite persistence across API restart. Fixtures used a disposable SQLite Registry and loopback ephemeral API port; test cleanup removed the owned temporary directory.
+- Integration verification initially stopped at Prettier because this progress entry needed formatting. Subsequent full-suite attempts exposed stale schema/migration-count assertions in the existing database and Deployment Agent verifiers; those assertions were updated for the two additive Build Job tables and sixth migration. These were verifier expectation failures, not migration or runtime failures.
+- Final `npm.cmd run verify` — **exit 0: 587 passed, 0 failed, 0 skipped**. Suite counts: readiness/foundation 33; API 130; SQLite/database 14; Dashboard 47; browser-protocol/DOM simulation 54; managed Foundation 27; Gateway 114; samples 82; Deployment Agent 27; Platform routing integration 19; Packages 40. The 54 browser-protocol/DOM checks are not actual-browser acceptance; M8's 53 actual-browser scenarios remain NOT RUN.
+- Full verification smoke passed controlled migration on disposable storage, API/Gateway/Dashboard health and built Dashboard checks, and literal loopback listener checks (Gateway `127.0.0.1:5050`; API and Dashboard on ephemeral loopback ports). Owned processes and ports stopped and temporary storage was removed. All .NET publish roots used `UseAppHost=false` and passed no-`.exe` artifact scans.
+- Additional `npm.cmd run test:gateway` — **114 passed, 0 failed, 0 skipped**.
+- Focused checks are not evidence of actual source builds or worker isolation. No test marks a Build Job as a successful build.
+
+### Status, blockers and next task
+
+- M1–M6 and M11 remain **COMPLETED**; M7 and M8 remain **IN PROGRESS**; M9, M10, M10-DB and M12 remain **NOT STARTED**. TASK 033 metadata-only work does not complete M7. M8's 53 actual-browser cases remain NOT RUN and private production browser management remains default-disabled.
+- Remaining M7 blocker: written approvals/provisioning for the isolated builder and remaining D00–D29 evidence are absent. Source Build remains disabled; prebuilt/package approval controls are unchanged.
+- **Next recommended task — TASK 034:** the product owner obtains and records written D00–D29 decisions from authorized IT/Security reviewers; if approvals are granted, record the provisioned service owner, permitted toolchain/network/dependency controls and isolation evidence before proposing a separate bounded worker-integration assignment. Do not connect or execute until then.
+
+---
+
 ## TASK 032 continuation — Product-owner-reported build executable policy — 2026-11-02
 
 ### Reported policy and decision status
@@ -40,15 +76,15 @@
 
 No scenario was attempted. Status counts are **0 PASS, 0 FAIL, 0 scenario BLOCKED, 53 NOT RUN**. The browser capability/readiness prerequisite is BLOCKED; because no scenario action occurred, each case remains NOT RUN rather than being relabeled BLOCKED.
 
-| Scenario IDs | Count | Status | Evidence / limitation |
-| --- | ---: | --- | --- |
-| T01–T05 | 5 | NOT RUN | No approved actual-browser control/session. |
-| A01–A09 | 9 | NOT RUN | No approved actual-browser control/session. |
-| S01–S10 | 10 | NOT RUN | No approved actual-browser control/session. |
-| R01–R09 | 9 | NOT RUN | No approved actual-browser control/session. |
-| D01–D15 | 15 | NOT RUN | No approved actual-browser control/session. |
-| U01–U05 | 5 | NOT RUN | No approved actual-browser control/session. |
-| **Total** | **53** | **NOT RUN** | **Execution prerequisite BLOCKED; no browser evidence collected.** |
+| Scenario IDs |  Count | Status      | Evidence / limitation                                              |
+| ------------ | -----: | ----------- | ------------------------------------------------------------------ |
+| T01–T05      |      5 | NOT RUN     | No approved actual-browser control/session.                        |
+| A01–A09      |      9 | NOT RUN     | No approved actual-browser control/session.                        |
+| S01–S10      |     10 | NOT RUN     | No approved actual-browser control/session.                        |
+| R01–R09      |      9 | NOT RUN     | No approved actual-browser control/session.                        |
+| D01–D15      |     15 | NOT RUN     | No approved actual-browser control/session.                        |
+| U01–U05      |      5 | NOT RUN     | No approved actual-browser control/session.                        |
+| **Total**    | **53** | **NOT RUN** | **Execution prerequisite BLOCKED; no browser evidence collected.** |
 
 ### Verification, status, and handoff
 

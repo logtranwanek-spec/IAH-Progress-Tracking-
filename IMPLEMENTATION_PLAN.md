@@ -4,7 +4,7 @@
 
 Internal Application Hosting & Deployment Platform (project code: Internal Hosting Platform / IHP). The complete, canonical requirements are in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md).
 
-**Latest assignment (2026-11-02): TASK 032 continuation — product-owner-reported build executable policy and safe implementation roadmap.** The report clarifies that approved Node.js/.NET tool executables and fixed build commands may run on a dedicated isolated Windows worker, while uploaded/generated `.exe` files must never be launched. This is not written IT/Security approval. All D00–D29 remain PENDING; M7 remains IN PROGRESS and Source Build disabled. Document the policy distinction, remaining evidence, and a non-executing Build Job API foundation as future TASK 033. No application implementation, build, worker provisioning/connectivity or uploaded-source command is authorized in this task.
+**Latest assignment (2026-11-02): TASK 033 — Non-executing Build Job metadata API.** The authorized Category A subset is implemented and verified. `npm.cmd run verify` passed with 587 checks, 0 failures and 0 skips, including the new SQLite/M11 Build Job tests; DLL publish checks and owned loopback smoke passed. M7 remains IN PROGRESS; source builds are disabled, no worker is provisioned/connected, and all D00–D29 remain PENDING. Valid API requests stop at `BLOCKED_WORKER_UNAPPROVED`; no uploaded source executes and no artifact is created. Preserve these gates and do not begin another milestone.
 
 **Historical assignment (2026-11-02): TASK 032 — M8 real-browser acceptance.** The existing PROGRESS.md matrix has 53 scenarios; the approved operator procedure remains available. No approved browser-control capability was exposed, no fixture was started and no browser scenario ran: 0 PASS, 0 FAIL, 0 scenario BLOCKED, 53 NOT RUN. M8 stays IN PROGRESS/default-disabled. This preceding task does not change current M7/source-build approval status.
 
@@ -416,25 +416,25 @@ dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests
 
 **Milestone status:** IN PROGRESS. Product-owner decision is confirmed: source build and deployment remain mandatory alongside prebuilt deployment. Approved source-build isolation remains unavailable, so source builds stay disabled and the source-build acceptance criteria remain unmet. TASK 025 upload-reporting and TASK 027 ZIP-validation work do not satisfy or change those criteria.
 
-#### TASK 033 — Non-executing Build Job Metadata API (proposed; NOT STARTED)
+#### TASK 033 — Non-executing Build Job Metadata API (metadata-only scope COMPLETED)
 
 **Objective:** implement and verify the safe Category A foundation only while D00–D29 remain PENDING. This is an M7 subtask and cannot complete M7 or authorize a worker.
 
-**Scope:** additive SQLite build-request metadata and append-only state/audit events; a strict authenticated request contract containing application/release references, an opaque immutable source-snapshot ID plus SHA-256, fixed template ID and idempotency key; bounded static Node.js/ASP.NET Core/React-profile classification; M11 role/ownership authorization; pre-approval states limited to REQUESTED, VALIDATED, REJECTED_VALIDATION, BLOCKED_WORKER_UNAPPROVED and CANCELLED; bounded sanitized status; a production no-worker adapter that cannot make network calls; and a test-only adapter whose synthetic result is always SIMULATED and non-deployable. Reject arbitrary paths, commands/arguments, executable names, environment variables, dependency URLs and credentials. Do not implement Dashboard UI or worker connectivity.
+**Scope delivered:** additive SQLite `BuildJob`/append-only event schema and migration; authenticated application-scoped create/list/detail/cancel API; source snapshot ID and validated source fingerprint; target release label (intent only); fixed Node.js, ASP.NET Core 8 and React-static metadata templates; idempotency key hashing; M11 authorization; restricted states `REQUESTED`, `VALIDATED`, `REJECTED_VALIDATION`, `BLOCKED_WORKER_UNAPPROVED` and `CANCELLED`; bounded sanitized views; an inert production status boundary with no endpoint/network/process capability; and a test-only `SIMULATED` adapter that cannot create a deployable artifact. Arbitrary paths, commands/arguments, executable names, environment variables, dependency URLs and credentials are rejected. No Dashboard UI or worker connectivity was added.
 
-**Dependencies:** existing M4 SQLite API/registry and M11 authentication/authorization; an existing secure source-snapshot reference only. D00–D29 approval is not required for this metadata-only slice, but worker integration, source execution and the complete build lifecycle remain gated on written approval and actual provisioning. If current authorized intake cannot provide a valid immutable snapshot reference, fail closed; do not add a generic upload endpoint.
+**Dependencies:** existing M4 SQLite API/registry, M11 authentication/authorization and existing private staged folder intake. New requests verify the staged reference and source digest; missing, tampered or expired snapshots fail closed. The stored ID/hash are immutable, while the existing same-user staging filesystem is not an OS sandbox and retains its current expiry. D00–D29 approval is not required for this metadata-only slice, but worker integration, source execution and the complete build lifecycle remain gated on written approval and actual provisioning. No generic upload endpoint was added.
 
 **Acceptance criteria:**
 
 - Additive migration is tested only against owned disposable SQLite data; existing migration files/checksums are unchanged.
 - Developers create/read requests only for owned applications under M11; Administrators get only existing authorized scope; Viewers cannot mutate; cross-application and unauthenticated access fail closed.
-- Snapshot identity/digest is verified and immutable; stale/tampered references, invalid template IDs, idempotency conflicts and illegal transitions are rejected.
-- The contract has no command/executable field; the production path has no worker endpoint/configuration; tests prove no process starts and no network request is attempted.
-- Without approved worker configuration, accepted requests remain BLOCKED_WORKER_UNAPPROVED; no queue/run/success/artifact/deploy state can be created. Test-only results remain SIMULATED and cannot enter package approval/deployment.
+- Snapshot identity/digest is verified against the staged intake and stored immutably; missing/tampered references, invalid template IDs, idempotency conflicts and illegal transitions are rejected.
+- The contract has no command/executable field; the production path has no worker endpoint/configuration/process launcher; tests verify no outbound network request or build process path is present.
+- Without approved worker configuration, valid requests remain BLOCKED_WORKER_UNAPPROVED; no queue/run/success/artifact/deploy state can be created. Test-only results remain SIMULATED and cannot enter package approval/deployment.
 - State/audit history is append-only, bounded and secret-safe; responses expose no credentials, database values, source content, absolute paths or raw exceptions.
 - Tests cover schema, static framework detection, authorization/ownership/roles, idempotency, transition graph, snapshot tampering, no-worker failure, absence of process/network activity, audit redaction and separation from exact-artifact approval. Execute focused auth tests, a new `npm.cmd run test:build-jobs` target, then `npm.cmd run verify`; record exact results and retain existing no-`.exe`/published-DLL rules.
 
-**Status:** NOT STARTED. This is a recommendation only; no implementation began in TASK 032.
+**Status:** COMPLETED for the metadata-only TASK 033 scope after focused and full verification passed. This does not change M7, approve a worker, or satisfy any source-build execution, output validation, exact-artifact approval or deployment acceptance criterion.
 
 TASK 033 is a separately scoped, pre-approval metadata-only subset. It does not complete Phase 2, permit queue/dispatch/worker lifecycle transitions, or pass the Phase 1 approval/provisioning gate below. The existing phase dependencies remain authoritative for every operational build capability.
 
