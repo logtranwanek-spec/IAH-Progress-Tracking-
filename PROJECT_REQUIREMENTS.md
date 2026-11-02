@@ -1,7 +1,58 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 028 — M7 source-build isolation assessment — 2026-10-30
+## Current TASK 029 — Mandatory source-build architecture — 2026-11-02
+
+### Product decision and current implementation boundary
+
+The product owner has confirmed that **source build and deployment are mandatory** for the current product scope, alongside prebuilt application deployment. Do not remove, waive or redefine M7's source-build acceptance criteria. M7 remains **IN PROGRESS**. This decision establishes the required future capability; it does not authorize build execution or infrastructure provisioning. Source builds remain disabled until a company-approved isolated builder is written-approved, provisioned and verified. The current Platform host must not execute uploaded source, npm lifecycle/build code, dependency installers, .NET restore/build behavior or arbitrary uploaded commands.
+
+### Required source-build workflow
+
+1. An authenticated user uploads source through the existing application-scoped, bounded intake. Intake is inert and cannot trigger execution.
+2. IHP validates the upload, ownership, supported file structure, limits and security policy; it identifies a supported framework statically.
+3. An authorized user submits a distinct build request. Server policy binds it to the immutable source snapshot, application, supported fixed template and approved toolchain. An upload or review/approval of uploaded files alone is not build authorization.
+4. IHP transfers only the approved source snapshot and minimal build metadata to the company-approved isolated builder through an explicitly approved authenticated channel. The builder cannot access the Platform Registry, production/runtime credentials, unrelated application workspaces or arbitrary platform files.
+5. The builder retrieves dependencies only from approved, controlled sources, applies the approved Node.js or ASP.NET Core build template, and records bounded sanitized logs and build status.
+6. The builder returns output into a quarantine/artifact intake boundary with source hash, template/toolchain versions, dependency provenance, build identity and a tamper-evident artifact fingerprint/attestation.
+7. IHP independently validates output paths, types, size/count budgets, required runtime files, secrets, links/reparse points, unsupported/native content and package metadata. Unsafe, incomplete, untraceable or over-budget output fails closed.
+8. A distinct authorized Administrator reviews the exact immutable deployable artifact fingerprint. Source upload review, build request approval and successful build do not substitute for this artifact approval.
+9. Only after artifact approval and existing deployment authorization may IHP pass the artifact to the existing Deployment Agent. Build completion never automatically deploys.
+10. The Gateway route is registered through the existing dynamic-routing workflow only after runtime health verification. Runtime execution retains all existing trusted-prebuilt and M11 controls; build isolation is not runtime isolation.
+
+### Isolation and operational requirements
+
+Any approved builder must provide a real OS/service isolation boundary, not merely a template allowlist or a child process running as the Platform user. At minimum, IT/Security must approve and evidence:
+
+- **Execution identity:** dedicated non-interactive build identity separate from Platform API, Deployment Agent, operators and runtime identities; least privilege, no reusable credentials and no access to user profiles or production secrets.
+- **Filesystem:** per-job ephemeral workspace and clean toolchain image; no access to Platform source/configuration, Registry, deployed application data, user home directories or unrelated jobs; safe input/output transfer; teardown after success, failure or timeout.
+- **Processes:** containment of child processes, no escape to host or other jobs, approved executable/toolchain surface and limits on process count/handles. Job Objects or environment filtering alone do not establish the required boundary.
+- **Network/dependencies:** deny general inbound and outbound access. Permit only explicitly approved dependency mirrors/artifact endpoints and the minimum authenticated job/artifact channel; no access to corporate services or production networks by default. Record dependency identities/hashes and resolve policy for unavailable dependencies.
+- **Resources:** enforceable CPU, memory, disk, process-count and wall-clock budgets, concurrency quotas, cancellation and cleanup on exhaustion.
+- **Secrets:** inject no Platform Registry, deployment, database, signing or runtime secrets into build jobs. Use narrowly scoped, short-lived service credentials only if IT/Security approves and prove that build output/logs cannot retain them.
+- **Integrity/provenance:** immutable source snapshot/hash; pinned and identified templates/toolchains; dependency inventory/provenance; validated output; service-generated artifact hash and signed/tamper-evident provenance protected from the build process.
+- **Logs/audit:** bounded, sanitized logs that exclude credentials, tokens, environment values and unsafe raw tool output; authenticated records for requester, authorization, source hash, template/toolchain, job lifecycle, artifact fingerprint, reviewer and deployment linkage; defined retention and access.
+- **Operations:** IT/Security-approved ownership for patching, image refresh, dependency mirrors, monitoring, incident response, quotas, retention, workspace destruction, service availability and recovery. Required privileges and network flows must be explicitly approved; no Administrator rights or Windows policy/firewall changes may be assumed on the current platform host.
+
+The builder must not share the Platform host's ordinary Windows identity or writable filesystem. If the selected service cannot prove the above boundary, source-build execution stays disabled and M7 remains IN PROGRESS. Build containment does not sandbox the deployed application; existing runtime controls and residual same-user limitations remain.
+
+### Isolated-builder options and recommendation
+
+| Option | Security and compatibility | Operational complexity, permissions and cost | Maintainability and integration |
+| --- | --- | --- | --- |
+| **A. Dedicated IT-managed Windows build worker (recommended target)** | Can provide Windows identity/VM or equivalent isolation and parity with the Windows hosting environment; can support approved Node.js and .NET toolchains. Security depends on ephemeral per-job isolation, blocked lateral access, strict egress and verified cleanup; a persistent shared worker without job isolation is insufficient. | High setup/operations cost: IT must provision and patch the isolated worker/image, identity, quotas, dependency mirrors and service channel. No new rights are assumed for IHP operators. | Best fit for Windows runtime/output compatibility and company-controlled dependency/artifact handling. IHP should integrate through a narrow authenticated job/artifact contract, not filesystem sharing. Requires IT ownership and availability commitments. |
+| **B. Approved remote isolated build service** | May offer strong managed isolation, ephemeral jobs and provenance, but only if its tenant/data boundary, Windows/.NET/Node support, egress, secrets and artifact controls meet this requirement. External hosting or an unapproved vendor must not be assumed safe or authorized. | Potentially lower infrastructure maintenance but requires security/procurement review, service cost, data-transfer approval, identity/network integration and possible licensing. | Can simplify patching and scaling; introduces service availability, vendor/contract dependency, region/data-retention questions and integration/API versioning. No service or connection is currently approved or available. |
+| **C. Other company-approved isolated infrastructure** | Could be an existing company build platform or ephemeral isolated VM service. Accept only if it demonstrates the full identity/filesystem/process/network/resource/secrets/provenance boundary; a normal CI runner or separate process is not automatically sufficient. | Unknown until IT identifies the service. May reuse existing contracts and support, but requires capability assessment, permissions and potentially platform engineering effort. | Could be the lowest-maintenance choice if already approved and compatible. Availability, toolchain parity, dependency controls and IHP integration are currently unknown. |
+
+**Recommendation:** ask IT/Security to evaluate Option A as the target because Windows toolchain/runtime parity and company-controlled dependency sources fit the current host environment without assuming an external service. The worker should be an IT-managed isolated host or VM with per-job disposable workspaces/instances, not a shared same-user process on the Platform host. If the company already operates Option B or C and it passes every required control with better support, cost or isolation, prefer that approved service instead. This is a design recommendation only: no infrastructure, connection, credentials, budget or permission is approved by this document.
+
+### Approval gates and rollout rule
+
+Before implementation, obtain written product/platform-owner and IT/Security decisions for the selected service, threat model, isolation evidence, execution identity, host/service ownership, data classification and retention, dependency sources, exact network flows, artifact format/provenance, operational support, incident response, cost and required permissions. Confirm that implementation does not require Docker, Administrator privileges, Windows security-policy changes or corporate-network listeners on IHP components. Any separate builder communication must use only an expressly approved authenticated channel; the current services stay loopback-only and Gateway stays at 127.0.0.1:5050.
+
+Implementation must proceed through the gated phases in IMPLEMENTATION_PLAN.md: architecture approval; request/job lifecycle; isolated-builder integration; fixed Node templates; fixed ASP.NET Core templates; dependency/output validation; exact-artifact Administrator approval; existing deployment integration; monitoring/audit; and security/acceptance testing. The phases are future work until the written approval gate is satisfied. SQLite remains the only database for real operations; build service metadata and job records, if implemented, must follow approved SQLite-only storage. This decision adds no application database handling, M10-DB capability or schema authorization.
+
+## Historical TASK 028 — M7 source-build isolation assessment — 2026-10-30
 
 **Assessment only; this record does not change M7 requirements or authorize implementation.** Current status remains M7 IN PROGRESS. The verified product path is restricted to authenticated upload/intake, static inspection, exact-fingerprint Administrator review and trusted-prebuilt preparation/runtime under explicit opt-in controls. Source builds are disabled. M7 cannot meet its existing source-build acceptance criterion in the current environment because uploaded source, package hooks, dependency installers and build definitions cannot be safely executed under the same ordinary Windows identity.
 

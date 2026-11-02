@@ -1,5 +1,45 @@
 # Project Progress
 
+## TASK 029 — Mandatory source-build architecture and approval roadmap — 2026-11-02
+
+### Product decision and status
+
+- The product owner confirmed **source build and deployment are mandatory** alongside prebuilt deployment. This confirms the existing M7 scope; no acceptance criterion was removed, weakened or redefined.
+- **Milestones unchanged:** M1–M6 and M11 COMPLETED; M7 and M8 IN PROGRESS; M9, M10, M10-DB and M12 NOT STARTED. M7 source builds remain disabled because no company-approved isolated builder is available or written-approved. M8's 53 actual-browser scenarios remain NOT RUN and private production browser management remains default-disabled.
+- TASK 029 was documentation and architecture planning only. No source or test code, application, package, database, schema, migration, operating-system policy, network setting or infrastructure was changed, provisioned, connected or executed. No uploaded source or build command ran.
+
+### Required workflow and security architecture
+
+Documented the mandatory path: authenticated source intake remains inert; static package/framework validation identifies a supported fixed template; a separate authorized build request binds an immutable source hash to that template/toolchain; only an approved isolated builder receives the minimum source and metadata; it uses approved dependency sources and bounded resources; IHP validates output and provenance in quarantine; a distinct Administrator approves the exact artifact fingerprint; existing deployment authorization and Agent controls then deploy it; Gateway routing follows runtime health. Neither upload nor a completed build automatically executes, approves or deploys anything.
+
+The required boundary includes a dedicated identity, OS-enforced filesystem and process/child-process separation, restricted network/dependency access, enforceable CPU/memory/disk/time/concurrency budgets, no Platform/runtime secrets, ephemeral workspaces and cleanup, immutable source/toolchain/dependency records, output fingerprints/attestation, bounded sanitized logs, audit/retention, incident ownership and operational support. A same-user process, environment filtering, template allowlist or Job Objects alone is insufficient. The design does not override company executable policy: IT/Security must explicitly confirm which build tools may run on the separate approved builder. If no compliant execution environment is approved, builds remain disabled and M7 remains open.
+
+### Options and recommendation
+
+- Compared **A: dedicated IT-managed Windows worker**, **B: approved remote isolated build service**, and **C: other company-approved infrastructure** for security, Windows/Node/.NET compatibility, permissions, cost/complexity, maintainability and IHP integration.
+- Recommended asking IT/Security to assess Option A first because it can provide Windows toolchain parity and company-controlled dependencies. It must be a managed isolated host/VM or equivalent with per-job disposable workspaces, not a shared process on the Platform host. Prefer B/C if an existing approved service meets every control with stronger support or lower total risk/cost.
+- No service, network flow, credential, endpoint, budget, identity or permission is assumed to exist or be approved. No infrastructure was contacted or provisioned. The outstanding gate is written IT/Security and service-owner approval covering the threat model, identity, filesystem/process boundary, network and dependency sources, resources, secrets, provenance, logs, cleanup, operations, retention, permitted tool execution and exact integration channels.
+
+### Future implementation phases
+
+IMPLEMENTATION_PLAN.md now defines ten gated phases: (1) architecture/security approval, (2) build-request API and lifecycle, (3) isolated-builder integration, (4) fixed Node.js templates, (5) fixed ASP.NET Core templates, (6) dependency and artifact validation, (7) distinct Administrator approval, (8) existing deployment integration, (9) build status/logging/audit, and (10) security/acceptance testing. Phase 1 is blocked pending written authorization; all implementation phases remain NOT STARTED. These phases do not authorize M10-DB, M9, new listener exposure, unrestricted commands, execution on the current host, or changes to existing trusted-prebuilt/runtime controls.
+
+### Files and verification
+
+- Updated only `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `AGENTS.md` and this progress record. No source code, test code, build output or local application artifact was modified.
+- Application builds/tests were not run because this assignment is documentation-only. TASK 029 adds no new runtime/test evidence. Latest prior automated evidence remains TASK 027: `npm.cmd run test:packages` 40/40 and `npm.cmd run verify` exit 0 with 577 passed, zero failed/skipped, plus owned smoke cleanup. Do not interpret that historical result as verification of a builder.
+- `node node_modules/prettier/bin/prettier.cjs --check PROJECT_REQUIREMENTS.md IMPLEMENTATION_PLAN.md AGENTS.md PROGRESS.md` initially identified formatting in the new IMPLEMENTATION_PLAN.md table. `node node_modules/prettier/bin/prettier.cjs --write IMPLEMENTATION_PLAN.md` corrected it; the final check exited 0 with all four files formatted.
+- `git diff --check` exited 0. A read-only PowerShell comparison of milestone status records in pre-task `HEAD:IMPLEMENTATION_PLAN.md` against the updated plan passed: M1–M6/M11 COMPLETED, M7/M8 IN PROGRESS and M9/M10/M10-DB/M12 NOT STARTED remain unchanged. A documentation consistency check confirmed the mandatory source-build decision is present in all four tracking files. `git diff --name-only` lists only the four authorized Markdown files.
+
+### Remaining blockers and next task
+
+- M7 cannot complete until the approved isolated builder exists, its controls are evidenced, and supported source templates/build outputs pass the original acceptance criteria. M7's mandatory source-build scope is now settled; a prebuilt-only substitution is not proposed.
+- If company policy forbids required tool execution even on an isolated builder, no workaround is permitted. Obtain an explicit company policy interpretation or report the product/security conflict while keeping source builds disabled.
+- M8, M10-DB and all other statuses are unchanged. No later milestone started.
+- **Exact next recommended task — TASK 030:** submit the Option A boundary and full control matrix to IT/Security and the service owner for a written feasibility/approval decision. Record the approved host/service, accountable operator, allowed build tools, dependency mirrors, data/retention rules and authenticated network flows. Do not implement or connect a builder until that decision is approved.
+
+---
+
 ## TASK 028 — M7 source-build isolation and deployment scope assessment — 2026-10-30
 
 ### Scope and milestone status
