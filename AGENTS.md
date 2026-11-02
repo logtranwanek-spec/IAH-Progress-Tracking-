@@ -1,6 +1,18 @@
 # Repository Instructions for Codex and Development Agents
 
-## TASK 032 handoff — M8 real-browser acceptance — 2026-11-02
+## Current TASK 032 continuation — Product-owner-reported build executable policy — 2026-11-02
+
+The product owner reports that approved Node.js/.NET SDK tools, `node.exe`, `dotnet.exe`, fixed build commands, restricted service accounts, isolated environments, secure worker communication, approved dependency sources, monitoring and resource restrictions are allowed on a dedicated Windows Build Worker. The report also prohibits launching user-uploaded or user-generated `.exe` files. This is a product-owner-reported clarification, not written IT/Security approval. Do not change D00–D29 from PENDING or start worker integration/source execution. The IHP development host keeps its current no-`.exe` execution restriction. Recommended TASK 033 is the separately authorized, non-executing Build Job metadata/API foundation specified in IMPLEMENTATION_PLAN.md; it must not connect to a worker, spawn processes, run tools or produce a simulated successful artifact.
+
+## Permanent build executable and pre-approval rules
+
+- Distinguish approved platform/build-tool executables from uploaded or source-generated executables. The product-owner report permits approved toolchain executables only on a separately approved, provisioned, isolated worker; it does not authorize executing them on this IHP host or by this Agent.
+- IHP must never launch user-uploaded or user-generated `.exe` artifacts, regardless of extension, package approval, source build or release state. Extension checks alone are not execution control: eventual launch code must use a fixed allowlist of approved runtime executables and fixed argument templates, reject user-selected executable paths/commands, and rely on the approved worker/runtime boundary and artifact validation.
+- .NET application deployment remains framework-dependent: publish with `UseAppHost=false` and launch only with `dotnet <application>.dll`. Node applications use the approved Node.js runtime and a validated entrypoint. These rules do not authorize arbitrary runtime commands or uploaded `.exe` launch.
+- A separately assigned metadata-only Build Job API foundation may be implemented while D00–D29 remain pending only if it stores and validates metadata in SQLite, uses M11 authorization, and cannot connect to infrastructure, start a process, run source or represent a fake result as a real build. This narrow allowance is not worker integration, source-build execution, milestone completion or an approval waiver.
+- Actual tool inventory/version/hash, service identity, OS/filesystem/process isolation, worker connectivity, dependency endpoints, resource values, retention and operational controls remain gated on written approval and provisioning. Preserve the Phase 1 exit gate and keep Source Build disabled until all applicable approvals and boundary verification pass.
+
+## Historical TASK 032 handoff — M8 real-browser acceptance — 2026-11-02
 
 M8 remains IN PROGRESS. The existing acceptance matrix has 53 actual-browser scenarios; none was executed in this task because no approved local browser-control capability is exposed and no operator supplied an already-open approved browser session. The disposable fixture was not started, port 5050 had no listener, and no browser executable/driver was launched or installed. Keep every scenario NOT RUN, private production browser management default-disabled, M7 IN PROGRESS/source builds disabled, and all D00–D29 decisions PENDING. Continue from the exact procedures and matrix in PROGRESS.md and BROWSER_AUTHENTICATION.md. Do not treat HTTP/WebCrypto protocol tests, DOM simulations, fixture readiness, or static review as real-browser acceptance.
 

@@ -1,13 +1,70 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 032 — M8 real-browser acceptance — 2026-11-02
+## Current TASK 032 continuation — Product-owner-reported build executable policy — 2026-11-02
+
+### Reported policy clarification and scope
+
+The product owner reports that a dedicated Windows Build Worker, approved Node.js and .NET SDK tools (including approved `node.exe` and `dotnet.exe`), approved build commands, restricted service accounts, isolated environments, secure IHP-to-worker communication, approved dependency repositories, security monitoring and resource restrictions are allowed. The report prohibits launching `.exe` files uploaded by users or generated from uploaded source. This is a **product-owner-reported policy clarification only**; it is not traceable written approval from IT/Security or the decision authority in the register below. No service, toolchain, worker identity, network flow, quota or isolation mechanism is selected, provisioned, tested or authorized by this report. No decision status is changed.
+
+The executable distinction applies only inside the future separately approved worker boundary. It does not relax the current IHP-host/Agent no-`.exe` restriction or authorize the Agent to execute build tools. A future worker may invoke only specifically approved, pinned and verified platform/build-tool binaries within its approved boundary. IHP must never launch user-uploaded or user-generated `.exe` artifacts, including artifacts produced by an approved source build. File extensions alone are not a sufficient execution control: eventual launch paths must be fixed to allowlisted platform runtimes and fixed argument templates, with package path/content validation and the approved OS boundary; no user-supplied executable path, command or argument list is permitted.
+
+For deployed applications, retain framework-dependent .NET deployment (`UseAppHost=false`; launch with `dotnet <application>.dll`) and approved Node.js runtime execution of validated application entrypoints. Do not execute an uploaded `.exe`, a generated apphost, or an arbitrary executable as an application. Exact worker tool versions, hashes, update/provenance rules and the commands that may run remain undecided until written approval.
+
+### D00–D29 impact assessment
+
+The report is recorded as contextual input, not as the register's required written evidence. Each affected decision below remains **PENDING**; the listed approval role is the existing required approver. No entry is APPROVED.
+
+| Decision | What the product-owner report clarifies | Remaining written evidence and approver | Status |
+| --- | --- | --- | --- |
+| D00 | A dedicated Windows Build Worker is an allowed option, not a selected service. | Written architecture/service selection, scope and data classification — IT Architecture and Security. | PENDING |
+| D01 | A dedicated worker is allowed; no accountable service owner or support model is identified. | Service record and ownership, on-call, patching and lifecycle commitment — IT service owner and Security. | PENDING |
+| D02 | Dedicated restricted service accounts are allowed. | Exact non-interactive least-privilege identity, separation and credential lifecycle — IAM owner and Security. | PENDING |
+| D03 | An isolated build environment is allowed in principle. | Selected enforceable OS boundary, configuration, per-job reset and escape-test plan/results — Security Architecture and Endpoint owner. | PENDING |
+| D04 | The report permits isolation but does not specify filesystem controls. | Per-job storage/ACL design and positive/negative isolation evidence — Security and data owner. | PENDING |
+| D05 | Approved SDK/runtime executables and approved commands may run within the worker boundary; arbitrary unapproved programs are prohibited. | Exact binary/tool/command inventory, provenance, process/child containment and adversarial tests — Security and endpoint owner. | PENDING |
+| D06 | Secure communication between IHP and a worker is allowed. | Signed flow, endpoint, route, ports, protocol, certificates/service authentication and allow/deny test plan — Network Security and service owner. | PENDING |
+| D07 | Approved dependency repositories are allowed. | Named authenticated sources/mirrors, pinning/provenance policy and unavailable/tampered-source behavior — Security, package-source owner and Procurement as applicable. | PENDING |
+| D08 | Resource restrictions are allowed. | Enforced per-job/aggregate CPU values and overload evidence — IT Capacity owner and Security. | PENDING |
+| D09 | Resource restrictions are allowed. | Enforced memory values and exhaustion/containment evidence — IT Capacity owner and Security. | PENDING |
+| D10 | Resource restrictions are allowed. | Input/workspace/cache/log/output disk quotas and full-disk/cleanup evidence — IT Storage owner and Security. | PENDING |
+| D11 | Resource restrictions are allowed. | Approved wall-clock timeout and descendant-termination evidence — Security and service owner. | PENDING |
+| D12 | Resource restrictions are allowed. | Per-user/app/service concurrency and queue limits with load/authorization criteria — IT Capacity owner and Security. | PENDING |
+| D22 | Security monitoring is allowed. | Approved telemetry, alerts, access, retention, support/SLO and operational runbook — service owner and Security. | PENDING |
+| D23 | The report distinguishes approved worker tool executables from user-uploaded/generated `.exe` files; it says the former are permitted on the worker and the latter must never be launched. | Written policy-scope statement and applicable policy citation — IT/Security Policy owner and Endpoint Security. | PENDING |
+| D24 | Approved Node.js/.NET SDK tools, `node.exe` and `dotnet.exe` are permitted in principle on the worker. | Exact binaries, versions, hashes, provenance, execution scope and update policy — IT/Security and Endpoint Security. | PENDING |
+| D25 | Approved build commands may run under a restricted service account in isolation. | Written execution authorization naming identity, commands, untrusted child-code scope and containment — Security, IAM and Endpoint Security. | PENDING |
+| D26 | Access to approved dependency repositories is permitted in principle. | Named sources, exact egress/route/authentication and provenance decision — Network Security and Security. | PENDING |
+| D27 | The report does not determine whether a formal exception or separate policy is required. | Written exception decision or applicable policy citation — IT/Security Policy owner. | PENDING |
+| D28 | Resource restrictions and security monitoring are allowed in principle. | Approved adversarial test plan, capacity/cost values and acceptance authority — Security and service owner. | PENDING |
+
+D03–D05 and D06–D07/D26 receive only the general capability clarification stated above; the required designs and evidence are still outstanding. D13–D21 and D29 are not clarified by the report and remain PENDING under their existing evidence requirements. In particular, distinct Administrator approval of the exact immutable artifact fingerprint and existing M11 deployment authorization remain mandatory. All **D00–D29 remain PENDING**; no approval is inferred from the product-owner report.
+
+### Future Build Job and worker contract — not implemented
+
+The target path is: authenticated application-scoped request → static source-snapshot/framework validation → fixed approved template → isolated worker job → bounded result transfer → artifact validation/fingerprint → private quarantine → distinct Administrator approval of the exact fingerprint → existing deployment authorization/Agent. No upload automatically starts a build, approves an artifact or deploys it.
+
+- **Request contract:** accept only an application/release reference, opaque immutable source-snapshot identifier and SHA-256, fixed template identifier, and idempotency key. Do not accept filesystem paths, shell text, arbitrary commands/arguments, user-selected executables, environment variables, dependency URLs, credentials or arbitrary worker addresses. Verify snapshot ownership, digest and immutability server-side. If current intake cannot supply an immutable snapshot reference, fail closed; do not add a generic upload path as a shortcut.
+- **Framework detection and templates:** detect Node.js, ASP.NET Core/.NET and the separately required React static-output profile by bounded static inspection only. Do not evaluate project code, run package hooks, resolve/build project graphs, invoke MSBuild or infer that source is deployable. Use fixed template IDs; approved toolchain versions and exact commands remain pending D24/D25. Static detection is not permission to build.
+- **Safe pre-approval metadata state:** a separately authorized first implementation may persist only request/audit metadata and transition through `REQUESTED`, `VALIDATED`, `REJECTED_VALIDATION`, `BLOCKED_WORKER_UNAPPROVED` or `CANCELLED`. Before written approvals and verified provisioning, it must not queue, dispatch, run, return a successful artifact or report a successful build. An unconfigured production adapter must fail closed without network access. A fake adapter may be used only in tests and must label synthetic results `SIMULATED`; it must not persist production `SUCCEEDED` or produce deployable artifacts.
+- **Gated worker lifecycle:** after applicable approvals and service provisioning, the full lifecycle is `REQUESTED → VALIDATED → QUEUED → DISPATCHED → RUNNING → BUILD_SUCCEEDED_QUARANTINED → PENDING_ADMIN_REVIEW → APPROVED | REJECTED`; `FAILED`, `CANCELLED` and `TIMED_OUT` are terminal failure/cancellation outcomes. Build completion, artifact approval and deployment remain separate states; approval never deploys automatically. Retries, timeouts and cleanup are bounded by approved values. Worker authentication must use a narrowly scoped service identity, per-job authorization, replay/idempotency protection and authenticated result binding. The exact communication/authentication design remains pending D02/D06; API-initiated HTTPS/mTLS is only a proposal, not approved configuration.
+- **Artifact and approval contract:** verify output paths/types/count/size, required runtime files, secrets, links/reparse points, provenance and source/template/toolchain/dependency binding; never launch uploaded/generated `.exe` files regardless of name or extension. Fingerprint immutable output bytes. Quarantine results until a distinct authorized Administrator reviews the exact fingerprint; requester self-approval remains prohibited. Approval is not deployment.
+- **Status, failure and audit:** expose only application-authorized, bounded status and sanitized logs; never include credentials, source contents, absolute worker paths, raw environments or unsanitized exceptions. Persist requester, application, source digest, template/toolchain identifiers, state transitions, output digest, reviewer and deployment reference without secrets. Apply approved timeout/resource limits and verify cleanup for all terminal paths; numeric limits and retention remain pending.
+- **Worker and database boundary:** no direct worker access to the Platform Registry or application database. IHP continues to use SQLite for real Registry/job metadata. All IHP listeners remain loopback; no worker network connection is made before D00–D29 approvals and explicit implementation authorization.
+
+### Safe work while approvals are pending
+
+**Category A — non-executing foundation (requires its own bounded implementation authorization):** SQLite build-job metadata schema; strict request DTO validation and authorization; immutable snapshot/digest references; bounded static framework classification; explicit pre-approval state machine; audit/status APIs; production adapter that returns worker-unapproved without network access; test-only fake adapter; tests for M11 roles/ownership, immutability, idempotency, invalid transitions, secret/path redaction, fail-closed no-worker behavior and absence of process/network execution. This work cannot satisfy source-build acceptance or change M7 status.
+
+**Category B — approval-gated:** worker provisioning/connection; worker credentials/certificates; network/route configuration; dependency retrieval; running Node/npm/.NET SDK commands on uploaded source; build templates that execute source/dependencies; process/OS isolation; generated artifacts, artifact-approval integration, deployment of source-built results, or any build-success status. Do not implement or enable these until applicable D00–D29 written approvals, actual service provisioning and boundary verification are complete.
+
+## Historical TASK 032 — M8 real-browser acceptance — 2026-11-02
 
 M8 acceptance remains subject to the exact real-browser scenarios and safety procedures recorded in the current M8 matrix in PROGRESS.md and the browser checklist in BROWSER_AUTHENTICATION.md. The matrix contains 53 scenarios across transport/profile, authentication/session, request security, roles/ownership, Dashboard/deployment data, and usability/accessibility. A scenario may be accepted only from sanitized evidence collected in an approved real browser; automated HTTP/WebCrypto protocol checks, DOM simulation, fixture readiness, or source inspection are not browser acceptance.
 
 For TASK 032, no approved browser-control capability was exposed in the Agent session and no already-open browser session/readiness confirmation was provided. The disposable fixture was not started; a read-only check found no listener on Gateway port 5050. Therefore no browser scenario ran: 0 PASS, 0 FAIL, 0 scenario BLOCKED, 53 NOT RUN. The execution capability is BLOCKED; unattempted scenarios remain NOT RUN. Keep M8 IN PROGRESS and private production browser management disabled by default. This status does not change M7, Source Build, or the separate TASK 031 D00–D29 approval register; all those decisions remain PENDING and Source Build remains disabled.
 
-## Current TASK 031 — IT/Security approval review and decision tracking — 2026-11-02
+## Historical TASK 031 — IT/Security approval review and decision tracking — 2026-11-02
 
 ### Human-readable technical review summary
 

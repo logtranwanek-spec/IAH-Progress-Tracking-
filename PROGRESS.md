@@ -1,6 +1,33 @@
 # Project Progress
 
-## TASK 032 — M8 real-browser acceptance — 2026-11-02
+## TASK 032 continuation — Product-owner-reported build executable policy — 2026-11-02
+
+### Reported policy and decision status
+
+- The product owner reports that a dedicated Windows Build Worker, approved Node.js/.NET SDK tools including `node.exe`/`dotnet.exe`, approved build commands, restricted service accounts, isolated environments, secure IHP-to-worker communication, approved dependency repositories, security monitoring and resource restrictions are allowed. The report prohibits launching user-uploaded and source-generated `.exe` files.
+- This is recorded as **product-owner-reported policy clarification only**. No traceable written IT/Security approval or policy citation was supplied. No contact/submission was made by the Agent. No worker was provisioned or connected, no ports/configuration were changed, and no toolchain/source command was executed.
+- The executable distinction applies only on a separately approved, provisioned and verified worker. The present IHP-host/Agent no-`.exe` restriction is unchanged. IHP must never launch uploaded/generated `.exe` files. .NET remains framework-dependent with `UseAppHost=false` and `dotnet <application>.dll`; Node uses only the approved runtime and validated entrypoint. Extension checks alone are insufficient; future execution must use fixed runtime executable allowlists/argument templates, artifact validation and the approved OS boundary.
+- The D00–D29 review found partial general capability clarification for D00–D12, D22–D26 and D28 as detailed in PROJECT_REQUIREMENTS.md. It does not supply the required written evidence: exact service/owner, identity, isolation design, filesystem/process boundary, endpoint/protocol, repositories, tool versions/hashes, numeric limits, monitoring policy, exception decision, acceptance evidence and operations remain open. D27's exception/policy question is unanswered; D13–D21 are not clarified; D29's exact-fingerprint Administrator approval and separate deployment authorization remain mandatory.
+- All **30 decisions D00–D29 remain PENDING**. Product owner still requires both prebuilt and source-build deployment. M7 remains IN PROGRESS; Source Build remains disabled.
+
+### Build Worker specification and safe boundary
+
+- Documented a target contract based on application/release identity, immutable source snapshot ID and SHA-256, fixed template ID and idempotency key. Arbitrary executable/command/path/argument, environment, credential and dependency URL inputs are excluded.
+- Specified bounded static framework detection for Node.js, ASP.NET Core/.NET and the React static-output profile without running project code, package hooks, dependency resolution/builds or MSBuild.
+- Defined the safe pre-approval metadata states as REQUESTED, VALIDATED, REJECTED_VALIDATION, BLOCKED_WORKER_UNAPPROVED and CANCELLED. No queue, dispatch, running, successful build, deployable result or production mock success is allowed before approvals and verified provisioning.
+- Specified the later gated flow: approved worker identity/communication, bounded execution and cleanup, output/provenance validation, private quarantine, exact-artifact distinct Administrator review, existing deployment authorization, sanitized status and audit. The worker may not access the Platform Registry or application database.
+- Defined Category A as a separately authorized SQLite metadata/API/state-machine/static-validation/M11/audit foundation with a production no-worker adapter and test-only SIMULATED adapter. Category B remains worker provisioning/connection, dependency access, tool invocation, source execution, generated artifacts and source-built deployment, gated on applicable written approvals plus actual infrastructure verification.
+- Added proposed TASK 033 with objective, scope, dependencies, acceptance/security tests and verification commands. **TASK 033 is NOT STARTED**; no implementation is included in this task.
+
+### Verification and handoff
+
+- Documentation-only: no source, test, schema, migration, application, database or infrastructure files changed; no build, application test, uploaded project, worker or executable was run.
+- D00–D29 consistency review: 30/30 remain PENDING. Milestones are unchanged: M1–M6/M11 COMPLETED; M7/M8 IN PROGRESS; M9/M10/M10-DB/M12 NOT STARTED. The preceding TASK 032 M8 browser record is preserved as history with 53 scenarios NOT RUN; this task did not perform browser acceptance.
+- Documentation verification: `git diff --check` and targeted PowerShell consistency checks for decision IDs/statuses, milestone statuses, task scope and changed paths. No application formatter/build/test command was run.
+- Only the four official tracking documents were changed. No credentials, internal endpoints, source, build outputs, database files, logs or screenshots were added.
+- **Exact next task: TASK 033 — Non-executing Build Job Metadata API.** Begin only under a separate explicit implementation assignment. Implement the documented Category A foundation and test-only SIMULATED adapter; do not connect/provision a worker or invoke build tools. Keep M7 IN PROGRESS, Source Build disabled and D00–D29 PENDING until written approvals and verified provisioning satisfy the execution gate.
+
+## Historical TASK 032 — M8 real-browser acceptance — 2026-11-02
 
 ### Outcome and safety boundary
 
@@ -29,7 +56,7 @@ No scenario was attempted. Status counts are **0 PASS, 0 FAIL, 0 scenario BLOCKE
 - Full-regression result for TASK 032: **NOT RUN**. Previously recorded automated-suite results remain historical and are not counted as browser acceptance.
 - No defect was observed because no browser scenario ran. No source/application code or test code changed. M7 remains IN PROGRESS; M8 remains IN PROGRESS; M9/M10/M10-DB/M12 remain NOT STARTED. Production browser management remains default-disabled. All M7 package approval controls and Source Build restrictions are unchanged.
 - Files changed: only the four authorized tracking documents. No screenshots, fixture data, databases, logs, credentials, source code, or build artifacts were created for this task.
-- **Exact next task: TASK 033 — operator-assisted T01–T05.** The operator should start a fresh disposable fixture using the existing masked-password PowerShell block in “Disposable setup and exact operator commands,” keep it in the foreground, open an already-running approved browser to the documented Dashboard URL, confirm readiness, and report sanitized results one scenario at a time. Do not request passwords, cookies, tokens, signatures, nonces, raw request dumps, or sensitive screenshots. Continue with remaining cases only after prerequisite results are evaluated. Keep all unperformed cases NOT RUN and M8 IN PROGRESS.
+- **Historical next-task recommendation at that time: operator-assisted M8 T01–T05.** The operator may start a fresh disposable fixture using the existing masked-password PowerShell block in “Disposable setup and exact operator commands,” keep it in the foreground, open an already-running approved browser to the documented Dashboard URL, confirm readiness, and report sanitized results one scenario at a time. Do not request passwords, cookies, tokens, signatures, nonces, raw request dumps, or sensitive screenshots. This earlier recommendation is preserved as history; it does not replace the current TASK 033 recommendation above.
 
 ## TASK 031 — IT/Security approval review summary and decision tracking — 2026-11-02
 
