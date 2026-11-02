@@ -1,8 +1,8 @@
 # Repository Instructions for Codex and Development Agents
 
-## TASK 030 handoff — IT/Security approval package for source builds — 2026-11-02
+## TASK 031 handoff — Approval review and decision tracking — 2026-11-02
 
-This assignment prepares documentation for review only. The product owner confirmed prebuilt and source-build deployments are both mandatory. M7 remains IN PROGRESS; source builds remain disabled. The proposed IT-managed isolated Windows builder is not provisioned, connected or approved. The architecture, Mermaid data-flow diagram, control matrix, threat model, proposed templates and approval checklist are in PROJECT_REQUIREMENTS.md; the gated ten-phase roadmap is in IMPLEMENTATION_PLAN.md. Every infrastructure/control approval remains PENDING unless later backed by written evidence. Do not contact IT/Security, transmit the package, provision or test a service, create listeners, execute uploaded code, or run uploaded npm/.NET restore/build commands as part of this task. Recommended TASK 031: obtain an authorized human review and written IT/Security/service-owner decisions, then update the status from evidence before any implementation is assigned.
+The product owner confirmed prebuilt and source-build deployments are both mandatory. M7 remains IN PROGRESS; source builds remain disabled. TASK 031 consolidates the TASK 030 package into a human-readable summary and evidence-based decision register. The preferred IT-managed isolated Windows worker remains a proposal only; no approval or infrastructure capability is assumed. The product owner handles all IT/Security communication. Do not contact reviewers, submit requests, provision/connect/test a service, open ports, change Windows security, execute uploaded code/builds, or modify application behavior. All register statuses remain PENDING until traceable written evidence from an authorized reviewer is supplied. Recommended TASK 032: record the human-provided decisions and evidence; if any are NEEDS_CLARIFICATION or REJECTED, preserve the disabled state and follow the documented outcome process.
 
 ## Permanent approval-package rules
 
@@ -11,6 +11,12 @@ This assignment prepares documentation for review only. The product owner confir
 - Source uploads remain inert. Do not run uploaded source, package hooks, `npm.cmd` install/build, `dotnet restore/build/publish` against uploaded projects, or arbitrary uploaded commands on the current host. No build command is authorized by preparing an approval package.
 - Exact Node.js/.NET tool versions, quotas, retention periods, service ownership, malware scanner and allowed network paths are TBD until the accountable IT/Security/service owner approves them. Do not invent company selections or numeric limits.
 - Resolve the standing no-`.exe` restriction explicitly with IT/Security for the separate worker; `.NET UseAppHost=false` controls published apphost output but does not by itself prove the SDK/toolchain can operate without executable files.
+- Treat the TASK 031 register as the current evidence record. Status values may be changed only to APPROVED, REJECTED or NEEDS_CLARIFICATION when the product owner supplies traceable written evidence from an authorized reviewer; retain evidence references and dates, never infer approval from oral status, proposed diagrams or tool availability.
+- No source-build implementation begins until every applicable decision is APPROVED and the approved infrastructure is actually provisioned and verified. A clarification, rejection or missing evidence keeps source builds disabled and M7 IN PROGRESS; never silently substitute prebuilt-only scope.
+
+## Historical TASK 030 handoff — IT/Security approval package for source builds — 2026-11-02
+
+TASK 030 documented a proposed worker architecture, trust boundaries, communication design, 22-control matrix, Node/.NET template proposals, 11-threat model and 14-item approval checklist. It did not contact reviewers or provision infrastructure. All approvals remained pending and source builds stayed disabled. TASK 031 adds the human-readable summary and decision register; the product owner handles communication.
 
 ## Historical TASK 029 handoff — Mandatory M7 source-build architecture — 2026-11-02
 

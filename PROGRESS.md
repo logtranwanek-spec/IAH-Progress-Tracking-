@@ -1,6 +1,35 @@
 # Project Progress
 
-## TASK 030 — IT/Security approval package for isolated source builds — 2026-11-02
+## TASK 031 — IT/Security approval review summary and decision tracking — 2026-11-02
+
+### Decision and current state
+
+- Product owner continues to require both prebuilt and source-build deployment. M7 remains **IN PROGRESS**; source builds remain disabled. M1–M6/M11 remain COMPLETED; M8 remains IN PROGRESS; M9/M10/M10-DB/M12 remain NOT STARTED.
+- TASK 031 prepares the TASK 030 package for human review and makes its evidence/status process explicit. The product owner will contact the responsible teams. No request was sent, no IT/Security communication occurred, and no approval is claimed.
+- The proposed IT-managed isolated Windows worker is still a preference, not a selected/provisioned service. No network route, endpoint, port, certificate, identity, dependency mirror, toolchain permission, exception, quota, retention or service owner has been approved.
+
+### Changes to the review package
+
+- Added a concise 10-part internal review summary covering the business objective, architecture, isolation rationale, existing restrictions, required infrastructure/controls, network/toolchain requirements, ownership and expected decisions. Mandatory requirements are distinguished from optional provider/protocol choices.
+- Added five explicit no-`.exe` policy questions covering scope on the separate worker, Node/.NET SDK executables, source-controlled build commands under a dedicated identity, approved dependency access, and whether a separate policy/exception is required. `UseAppHost=false` is explicitly not treated as permission to run the SDK/toolchain.
+- Added authoritative decision register **D00–D29** (30 decisions): the 22 controls map to D01–D22; D00 records architecture/service selection; D23–D27 track the five policy questions; D28 tracks security acceptance/capacity/cost; D29 tracks exact-artifact Administrator approval and deployment handoff. Each record has a proposed solution, responsible role/approver, status, required written evidence, dependencies and implementation impact. All **30 statuses are PENDING**.
+- Mapped the existing 14-item approval checklist to the decision IDs. The 22 control definitions and 11 threat categories are retained without weakening; no approved control, service or team is invented.
+- Documented behavior for APPROVED, NEEDS_CLARIFICATION and REJECTED outcomes. Implementation requires written decisions for all applicable items plus actual service provisioning and verification. Clarifications/rejections keep source builds disabled; rejection escalates the product/company-policy conflict to the product owner, with no silent Prebuilt Only substitution.
+- Updated IMPLEMENTATION_PLAN.md with TASK 031 and the Phase 1 exit gate. Updated AGENTS.md to prohibit reviewer contact and require evidence-backed register changes. M7 and all other milestone statuses are unchanged.
+
+### Verification, blockers and next task
+
+- Only the four authorized tracking documents were changed. No application code, tests, database, infrastructure, network/security settings or deployed applications were modified. No uploaded code or build command was executed.
+- No application builds or suites were run because this is documentation-only. The latest prior application evidence remains TASK 027: 40 package checks and 577 full checks passed; those results are not evidence for any builder control.
+- `node node_modules/prettier/bin/prettier.cjs --check PROJECT_REQUIREMENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md AGENTS.md` passed. `git diff --check` passed.
+- Decision consistency checks passed: register contains D00–D29 in order (30 decisions), with all 30 statuses PENDING and no status outside the allowed vocabulary; existing matrix has 22 controls all PENDING, threat model has 11 threats all PENDING, and the checklist has 14 decisions. The five no-`.exe` questions and all three outcome procedures are present.
+- A read-only comparison of milestone status records in pre-task `HEAD:IMPLEMENTATION_PLAN.md` and the updated plan passed: M1–M6/M11 COMPLETED; M7/M8 IN PROGRESS; M9/M10/M10-DB/M12 NOT STARTED. `git diff --name-only` lists only the four authorized Markdown files. No application build/test suite was run.
+- **Current blockers:** all D00–D29 entries remain PENDING; no written reviewer evidence or provisioned/evidenced isolation boundary exists. M7 remains IN PROGRESS and source execution remains disabled.
+- **Exact next recommended task — TASK 032:** record the written decisions and evidence that the product owner obtains from authorized reviewers. If any item is NEEDS_CLARIFICATION, capture the unanswered question and wait; if any is REJECTED, record the reason and escalate the scope/policy conflict. Only if all applicable items are APPROVED and the service is provisioned should a bounded implementation task be proposed.
+
+---
+
+## Historical TASK 030 — IT/Security approval package for isolated source builds — 2026-11-02
 
 ### Scope, decision and status
 
