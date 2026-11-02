@@ -1,6 +1,34 @@
 # Project Progress
 
-## TASK 029 — Mandatory source-build architecture and approval roadmap — 2026-11-02
+## TASK 030 — IT/Security approval package for isolated source builds — 2026-11-02
+
+### Scope, decision and status
+
+- Prepared the requested technical approval package for the future IT/Security reviewers and build-service owner. This is documentation-only; no approval request was sent and no IT/Security communication occurred.
+- Product owner has confirmed both prebuilt deployment and source-build deployment are mandatory. **M7 remains IN PROGRESS** and source builds remain disabled pending written IT/Security approval and a provisioned/evidenced isolation boundary. M1–M6/M11 remain COMPLETED; M8 remains IN PROGRESS; M9/M10/M10-DB/M12 remain NOT STARTED. All current milestone statuses are preserved.
+- No source or test code, applications, packages, databases, schemas, migrations, system/network settings or infrastructure were changed or executed. No worker/service was provisioned or contacted. No uploaded source, npm command, .NET restore/build, or build executable was run.
+
+### Approval package contents
+
+- Added a Mermaid system diagram covering the loopback-only IHP Gateway/API, SQLite Registry and job metadata, private source staging, proposed authenticated API-initiated worker communication, isolated per-job execution, approved dependency mirrors, output validation/quarantine, distinct Administrator approval, existing Deployment Agent and health-gated Gateway routing. Trust boundaries and absent direct builder access to Registry/runtime/secrets are explicit.
+- Added a proposed communication design: IHP initiates authenticated HTTPS requests to a separately managed worker endpoint; status is polled; source and artifact transfer are bounded and hash/attestation checked; no worker callback or new IHP listener is proposed. Candidate TCP 443 and mTLS are marked PENDING; any worker endpoint, firewall/network route, identity or dependency endpoint requires approval.
+- Added a 22-control IT/Security matrix covering ownership, identity, OS/filesystem/process isolation, network/dependencies, CPU/memory/disk/time/concurrency, secrets, source/artifact/log retention, audit, malware scanning, incidents, cleanup, backups and monitoring. Every row is PENDING; owners are role proposals, not assigned names.
+- Added proposed Node.js and ASP.NET Core templates without selecting unapproved versions or running commands, and recorded the existing React build requirement as a separate static-output profile needing a validated serving contract. Node lockfile/mirror/lifecycle policy and existing runtime format are specified. .NET 8 patch/toolchain selection is pending; `UseAppHost=false` is required, with an explicit note that it does not by itself satisfy the no-`.exe` policy for the SDK/toolchain.
+- Added an 11-threat matrix and evidence requirements for malicious scripts, supply chain, filesystem access, exfiltration, secret theft, exhaustion, child escape, artifact tampering, replay, cross-app access and cleanup failure. No control is claimed as implemented or verified.
+- Added the 14-decision approval checklist. Current blockers include no approved host/service or owner, tool/version permission, identity, isolation evidence, network/port/certificate, dependency mirror, limits, retention, scanner, incident, backup or operational policy.
+- IMPLEMENTATION_PLAN.md records TASK 030 as approval preparation only and preserves the TASK 029 ten-phase implementation roadmap, with Phase 1 still gated. AGENTS.md now prohibits interpreting proposals as approvals and explicitly calls for review of the no-`.exe` constraint.
+
+### Verification and next task
+
+- Only `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `PROGRESS.md` and `AGENTS.md` are authorized for this task. Application builds/tests are not applicable and were not run. Prior TASK 027 evidence (40 package checks; 577 full checks) remains historical and is not evidence for an isolated builder.
+- `node node_modules/prettier/bin/prettier.cjs --check PROJECT_REQUIREMENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md AGENTS.md` passed. `git diff --check` passed.
+- Documentation consistency checks passed: Mermaid flowchart and separate trust boundaries are present; the builder endpoint is outside the IHP host boundary; all required no-Docker/no-Administrator/no-security-change/loopback/no-.exe constraints are retained; all 22 control rows and all 11 threat rows are PENDING; all 14 approval decisions are listed. The source-build decision and approval gate are consistent across the four records.
+- A read-only comparison of milestone status records in pre-task `HEAD:IMPLEMENTATION_PLAN.md` and the updated plan passed. M1–M6/M11 remain COMPLETED; M7/M8 remain IN PROGRESS; M9/M10/M10-DB/M12 remain NOT STARTED. `git diff --name-only` lists only the four authorized Markdown files. No application build/test suite or uploaded project command was run.
+- **Exact next recommended task — TASK 031:** obtain an authorized human review and written decisions for all PENDING checklist items. Identify the approved host/service, accountable owner, permitted toolchain execution under the no-`.exe` policy, identity, isolation mechanism, approved network/port/certificates, dependency mirrors, resource/retention policy and operations. Update the approval matrix only from supplied written evidence. Do not implement, connect or execute source builds before that approval.
+
+---
+
+## Historical TASK 029 — Mandatory source-build architecture and approval roadmap — 2026-11-02
 
 ### Product decision and status
 

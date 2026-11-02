@@ -1,7 +1,157 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 029 — Mandatory source-build architecture — 2026-11-02
+## Current TASK 030 — IT/Security approval package for isolated source builds — 2026-11-02
+
+### Purpose, decision and approval state
+
+This is a technical approval package for the IT/Security reviewers and future build-service owner. It is **proposed architecture only**. The product-owner decision is final for the current scope: both prebuilt deployment and source-build deployment are mandatory. M7 remains **IN PROGRESS**, and source build remains disabled. No IT/Security approval, service availability, budget, identity, endpoint, network path, tool permission, retention period or infrastructure capability is asserted. All approval items below are **PENDING** until written evidence is recorded by an authorized owner. This document does not request that the Agent contact reviewers or provision, connect to or test infrastructure.
+
+### Proposed components and trust boundaries
+
+1. **IHP Platform API:** remains on its existing loopback listener, validates authenticated user permission, application ownership, upload, framework/template and build request. It persists job metadata in the approved SQLite Platform Registry and stages the immutable source input in current private IHP storage; actual source retention duration is pending approval.
+2. **Authenticated build-request workflow:** separate from upload. It binds an authorized requester, application, immutable source snapshot/hash, fixed template/toolchain identifiers, limits and idempotent job ID. No caller-supplied shell command or build command is accepted.
+3. **Build job queue/lifecycle:** SQLite-backed proposed states are `QUEUED`, `SUBMITTED`, `RUNNING`, `SUCCEEDED`, `FAILED`, `CANCELLED`, `TIMED_OUT` and `REJECTED`. State transitions, retry, cancel, timeout and audit behavior must be enforced server-side. Upload alone never queues or starts a job.
+4. **Isolated Windows build worker/service:** separate IT-managed host/VM or demonstrably equivalent OS/service boundary, with a dedicated non-interactive identity and clean per-job execution boundary. A second process or ordinary user on the IHP host does not qualify.
+5. **Approved dependency sources:** company-approved mirrors/caches with defined package/version/hash provenance. General Internet/corporate service access is denied to untrusted build code; exact endpoints and fail behavior require IT/Security approval.
+6. **Temporary per-job workspace:** ephemeral input, toolchain and output staging isolated from the worker host, other jobs, IHP Registry, runtime data and user profiles. Cleanup on all terminal paths is mandatory.
+7. **Build artifact quarantine:** worker results are not executable or deployable immediately. IHP imports them to private quarantine and treats all returned files and metadata as untrusted.
+8. **Integrity/provenance validation:** verify source digest, job identity, template/toolchain, dependency inventory, service attestation, artifact digest, paths, file types, limits, required runtime files, secrets and link/reparse safety before a review request exists.
+9. **Administrator approval:** a distinct authorized Administrator reviews and approves/rejects the exact immutable artifact fingerprint. Source upload review or build completion is not artifact approval.
+10. **Existing Deployment Agent:** receives only validated, exactly approved artifacts and operates under existing M7/M11/trusted-prebuilt gates. No new arbitrary command or deployment bypass is introduced.
+11. **Existing Gateway:** stays at `127.0.0.1:5050`. It exposes no builder endpoint; it registers the existing application route only after runtime health verification.
+
+```mermaid
+flowchart LR
+  subgraph IHP["IHP host trust boundary — existing listeners remain loopback-only"]
+    User["Authorized user"] -->|"same-origin management"| Gateway["Gateway 127.0.0.1:5050"]
+    Gateway -->|"loopback API request"| API["Platform API"]
+    API -->|"M11 authorization / job state"| Registry[("Platform Registry — SQLite")]
+    API -->|"enqueue / update lifecycle"| Queue[("Build job queue — SQLite metadata")]
+    API -->|"immutable source snapshot"| Source["Private source staging"]
+    Source -->|"authorized immutable input"| API
+    API --> Validator["Integrity, provenance and package validator"]
+    Validator -->|"validated output only"| Quarantine[("Private artifact quarantine")]
+    Quarantine -->|"review exact fingerprint"| Admin["Distinct Administrator"]
+    Admin -->|"approve/reject exact artifact"| API
+    API -->|"approved artifact + deployment authorization"| Agent["Existing Deployment Agent"]
+    Agent -->|"loopback runtime process"| App["Approved application runtime"]
+    Gateway -->|"route after health verification"| App
+  end
+
+  subgraph BUILDER["Separate IT-managed worker trust boundary — NOT provisioned or approved"]
+    WorkerSvc["IT-managed build service endpoint — proposed"]
+    Job["Dedicated per-job identity"] --> Sandbox["Ephemeral OS-isolated workspace"]
+    WorkerSvc -->|"dispatch authorized job"| Job
+    Toolchain["Pinned approved Node.js / .NET toolchains"] --> Sandbox
+    Sandbox -->|"restricted dependency fetch"| Mirror["Company-approved dependency mirror — PENDING"]
+    Sandbox -->|"output, logs and provenance"| WorkerSvc
+  end
+
+  API -->|"outbound authenticated job submission; PENDING approval"| WorkerSvc
+  WorkerSvc -->|"status / artifact / attestation response to API request"| API
+```
+
+**Trust-boundary notes:** The diagram is a design, not a deployed topology. IHP listeners and application runtimes remain bound to loopback. The candidate integration has the IHP API initiate outbound HTTPS requests to a separately managed worker endpoint; status is polled by the API and result data is returned through authenticated API responses. There is no worker callback or new IHP listener. The worker's internal endpoint, firewall/route, certificates and source/destination allowlists are not approved. Build sandbox egress is limited to named dependency services only if approved. The build sandbox receives no direct credentials, Registry access, deployment-agent access, runtime access or access to unrelated application workspaces. No connection or listener has been created.
+
+This design does not authorize Docker, Administrator privileges for ordinary IHP operation, Windows security/firewall changes, or a corporate-network listener on the IHP host. Any new network route, service endpoint, certificate or firewall requirement must be approved and arranged by the responsible IT owner; the IHP agent must not enable it. If the design requires an unapproved system change or cannot preserve the loopback-only IHP listeners, it is blocked.
+
+### Proposed network and communication protocol
+
+| Flow | Proposed initiator and data | Proposed protection | Approval/state |
+| --- | --- | --- | --- |
+| IHP API to worker service | IHP initiates an outbound job submission containing the immutable source snapshot and minimal application/template metadata. | HTTPS using the company-approved TLS baseline with mutual TLS, service identity allowlist, authenticated/authorized job envelope, per-job identifier, source hash, timestamp/expiry, nonce and idempotency key. TCP 443 is a candidate only; exact protocol, port, certificates and routes are TBD. | **PENDING IT/Security/network/service-owner approval.** IHP adds no listener. |
+| Status and logs | IHP API initiates bounded status/log polling for a known job ID. | Same mTLS/authenticated channel; validate job/app ownership and monotonic state transitions; redact secrets; cap response size and polling frequency. No unsolicited callback accepted. | **PENDING.** |
+| Artifact return | Worker service returns a bounded artifact and signed/tamper-evident provenance bound to job ID and source digest; IHP independently hashes and validates before quarantine. | Authenticated response, content-length/stream quotas, cryptographic digest and approved attestation verification; reject replay, stale job, mismatch or unexpected files. | **PENDING.** |
+| Dependency retrieval | Isolated build sandbox requests packages only from company-approved mirrors/caches. | Egress deny-by-default, TLS/service authentication as approved, package/version/hash inventory, immutable or policy-controlled mirror content. No direct general Internet or corporate service access. | **PENDING; no mirror is assumed available.** |
+
+The preferred retry behavior is safe query/retry for transport and status operations using the same idempotency key. A timeout with uncertain execution must be reconciled by querying the original job; it must not silently create a second build. A new build attempt gets a new explicit authorized request and job ID. Cancellation, worker loss, malformed response and repeated failures must end in a bounded terminal state, quarantine partial outputs, preserve audit evidence and trigger cleanup. Integrity mismatch, expired/replayed nonce, wrong application/job identity, stale state, bad attestation or digest mismatch fails closed. This protocol remains unimplemented and unapproved.
+
+### Proposed IT/Security control matrix
+
+Responsible parties below are role proposals, not confirmed assignments. Approval/evidence fields identify what must be supplied; no team acceptance is implied. All current-state entries are **PENDING**.
+
+| Control | Proposed control | Security objective | Proposed responsible team | Required approval | Required verification evidence | Current status |
+| --- | --- | --- | --- | --- | --- | --- |
+| Build worker ownership | Name an accountable service owner and support/on-call team; define lifecycle and availability responsibilities. | Prevent unmanaged or orphaned build infrastructure. | IT Infrastructure / future Build Service Owner | IT service owner and Security | Service record, owner, support model, escalation and lifecycle plan. | **PENDING** |
+| Dedicated execution identity | Unique non-interactive least-privilege identity per isolated service/job; no Platform user, operator, runtime or shared administrator identity. | Limit credential and host compromise impact. | IAM / IT Infrastructure | IAM owner and Security | Identity configuration, privilege review, credential rotation and cross-job identity tests. | **PENDING** |
+| Operating-system isolation | IT-managed isolated VM/host or equivalent enforceable service boundary; disposable job isolation and reset to trusted image. | Contain malicious build-time code from host and other jobs. | IT Infrastructure / Build Service Owner | Security architecture and endpoint/platform owners | Boundary diagram, configuration evidence, escape tests and clean-image reset evidence. | **PENDING** |
+| Filesystem separation | Per-job ephemeral workspace; deny access to IHP files, Registry, user profiles, deployment/runtime data and other jobs. | Prevent theft, tampering and cross-tenant data access. | Build Service Owner | Security and data owner | Positive/negative ACL/mount tests, traversal/link tests, cross-job access tests and cleanup proof. | **PENDING** |
+| Process and child-process controls | Contain descendants, handles and process trees inside the job boundary; define executable/toolchain policy. | Prevent child escape, persistence and host execution. | Build Service Owner / Endpoint Security | Security and endpoint owner | Escape/persistence tests, process-limit tests and approved tool inventory. | **PENDING** |
+| Network access | Deny general ingress/egress; allow only approved API-to-service channel and named mirror endpoints; no production access. | Prevent exfiltration, lateral movement and command-and-control. | Network/IT Infrastructure | Network Security and service owner | Flow diagram, firewall/proxy rule review, allow/deny egress tests and no-listener evidence on IHP. | **PENDING** |
+| Dependency downloads and mirrors | Use company-approved, authenticated package mirrors; pin versions and record hashes; fail closed when unavailable. | Reduce supply-chain exposure and uncontrolled network access. | Package/Build Service Owner | Security, procurement/licensing and package-source owners | Mirror inventory, signature/hash/provenance policy, tamper/unavailable-source tests. | **PENDING** |
+| CPU limits | Enforced per-job CPU quota and aggregate worker capacity; exact values selected by service owner. | Resist compute exhaustion and preserve service capacity. | Build Service Owner | IT capacity owner and Security | Configured quota evidence and overload/termination tests. | **PENDING** |
+| Memory limits | Enforced per-job and aggregate memory ceilings with deterministic failure behavior. | Prevent resource exhaustion and cross-job impact. | Build Service Owner | IT capacity owner and Security | Quota configuration, stress test, OOM containment and cleanup evidence. | **PENDING** |
+| Disk quotas | Separate bounded input, workspace, cache, logs and output quotas; prevent host-volume exhaustion. | Contain disk exhaustion and cross-job writes. | Build Service Owner / Storage Operations | IT storage owner and Security | Quota configuration, full-disk tests, cache limits and cleanup evidence. | **PENDING** |
+| Build timeout | Enforced wall-clock deadline with cancellation and termination of all descendants. | Bound malicious or hung work and worker occupancy. | Build Service Owner | Security and service owner | Timeout tests for parent/child processes and terminal audit status. | **PENDING** |
+| Concurrent build limits | Enforce per-application, per-user and service-wide job caps/queue limits; exact quotas TBD. | Prevent queue abuse and resource contention. | IHP Platform Owner / Build Service Owner | Product owner, IT capacity owner and Security | Concurrency/queue tests, authorization tests and load limit evidence. | **PENDING** |
+| Secret isolation | Inject no Platform, Registry, deployment, signing, database, user-profile or runtime secrets. Any service credential must be short-lived, scoped and separately approved. | Prevent build-time secret theft or persistence. | IAM / IHP Platform Owner | Security, IAM and secret owners | Secret inventory, environment inspection, canary-secret tests and output/log scans. | **PENDING** |
+| Source retention | Retain source only as required for the authorized job; define expiry/deletion and legal/data-classification handling. No duration is selected. | Limit exposure of proprietary or personal source data. | IHP Data Owner / Build Service Owner | Data owner, Privacy/Legal as applicable, Security | Retention configuration, deletion evidence, backup/cache review and audit. | **PENDING** |
+| Artifact retention | Keep only validated output in private quarantine/release storage; define rejected/approved artifact retention and deletion. | Preserve review integrity while minimizing stale artifacts. | IHP Platform Owner / Storage Operations | Data owner, Security and service owner | Storage ACLs, hash/provenance checks, expiry/deletion and restore tests. | **PENDING** |
+| Build log retention | Bound, sanitize and restrict logs; define retention, access and export policy. | Support audit without disclosing credentials or source secrets. | Build Service Owner / IHP Operations | Security, data owner and service owner | Secret-canary tests, log access controls, size caps and retention/deletion evidence. | **PENDING** |
+| Audit logging | Record requester, authorization, source/artifact hashes, template/toolchain, job transitions, reviewer, approval and deployment link. | Provide non-repudiable traceability and detect misuse. | IHP Platform Owner / Security Operations | Security and audit/compliance owner | Tamper-protection design, event completeness tests, access review and retention evidence. | **PENDING** |
+| Malware scanning | Run source intake and returned artifacts through an IT-approved scanner before build/review; quarantine findings and fail closed if the approved scan service is unavailable. Scanning is defense-in-depth, not proof of safety. | Detect known malicious content before execution/review. | Endpoint Security / Build Service Owner | Security | Scanner ownership/signature update process, test samples, failure handling and audit evidence. | **PENDING** |
+| Incident response | Define contacts, severity, containment, credential revocation, evidence preservation and worker/service shutdown authority. | Respond to worker escape, exfiltration, compromise or malicious artifact. | Security Operations / Service Owner | Incident Response and IT leadership | Approved runbook, tabletop/exercise and escalation/notification records. | **PENDING** |
+| Cleanup | Destroy job workspaces, temporary credentials, partial outputs and caches per policy on all terminal states; preserve approved audit/artifact records as authorized. | Prevent persistence, cross-job leakage and residual secrets. | Build Service Owner | Security, data owner and service owner | Success/failure/cancel/timeout cleanup tests, residual-data scan and deletion logs. | **PENDING** |
+| Backup requirements | Back up only approved job metadata and retained artifacts; exclude ephemeral workspaces/source unless explicitly authorized. Restore follows SQLite-only real-operation policy for IHP metadata. | Recover required records without reintroducing untrusted workspaces or unauthorized copies. | IHP Operations / Storage Operations | Data owner, Security and recovery owner | Backup scope, encryption/access control, restore/retention tests and documented RPO/RTO owner decisions. | **PENDING** |
+| Operational monitoring | Monitor service availability, queue depth, job duration/failures, quota use, security events and cleanup failures without logging secrets/source contents. | Detect abuse, outage and control failure. | Build Service Owner / Security Operations | Service owner and Security | Alert/runbook tests, safe telemetry review, access controls and ownership/SLO decision. | **PENDING** |
+
+No numeric CPU/memory/disk/time/concurrency quota, retention period, RPO/RTO, endpoint, port, source allowlist or named team has been selected. Values and ownership are review decisions, not Agent assumptions.
+
+### Proposed fixed build templates (not approved or executed)
+
+| Area | Node.js template proposal | ASP.NET Core template proposal |
+| --- | --- | --- |
+| Version | Select a company-supported Node.js LTS major and exact patch/toolchain image during approval; none is selected here. | Align with the current .NET 8 application scope; select an exact supported SDK patch/toolchain image during approval; none is selected here. |
+| Input/lockfile | Require the template's supported `package.json` and committed `package-lock.json`; reject alternate package managers/configuration unless separately approved. Ignore untrusted registry overrides. | Require a supported SDK-style project and committed lock/dependency metadata as selected by the template. Ignore package-source overrides supplied by the project. |
+| Dependency policy | Candidate command: `npm.cmd ci --ignore-scripts` against an approved mirror with network restrictions. Lifecycle scripts are denied by default; an explicitly reviewed exception still runs as hostile code inside the isolated job. | Restore only from approved NuGet mirrors using a worker-managed configuration and locked versions. Treat package build assets, restore hooks and project imports as untrusted code inside the same isolation boundary. |
+| Build command policy | Template may invoke only its fixed Node build step (for example the single `build` script); the script contents are uploaded code and run only inside the sandbox. No caller-supplied shell command, additional script or elevated execution. | Candidate commands are controlled `dotnet restore` and `dotnet publish` for the approved project/target framework. Reject unapproved imports, custom tasks, `Exec` targets and unsupported extensions as defense-in-depth; sandbox containment remains mandatory because project/restore behavior is untrusted. |
+| Publish behavior | No build execution on the IHP host. Toolchain and process tree are pinned/contained. | Publish framework-dependent output with `-p:UseAppHost=false`; reject unexpected `.exe` apphost output. This property does not prove that the SDK itself can run under the company's executable policy; IT/Security must explicitly resolve permitted tool execution on the separate worker. |
+| Output | Validate only the fixed template's declared output paths and existing IHP runtime contract. Current dependency-free Node ESM contract remains the supported runtime shape; packages requiring unapproved runtime dependencies or native components remain unsupported. | Validate the published DLL, matching `.deps.json`, `.runtimeconfig.json`, expected target framework and existing Deployment Agent entry contract. Reject native/unapproved output, links, secrets and unexpected files. |
+| Artifact | Canonical, bounded, immutable IHP package with server-generated metadata, source/template/toolchain/dependency provenance and fingerprint; quarantine pending distinct Administrator review. | Same canonical IHP package/quarantine/fingerprint and distinct Administrator review requirements. |
+
+The Node template proposal includes a separate React static-build profile to preserve the existing M7 source-build scope. Its generated files must match an explicitly validated artifact/serving contract for the existing Deployment Agent/Gateway; this package does not assume that the current runtime contract already supports React output. Any new runtime dependency or serving format needs separate review. These proposals do not execute commands, approve versions, expand package allowlists or authorize arbitrary builds.
+
+### Threat model and required evidence
+
+| Threat | Required controls | Required evidence before approval | Current status |
+| --- | --- | --- | --- |
+| Malicious package scripts/build code | Treat source and lifecycle/build scripts as hostile; run only in disposable OS isolation with no secrets, restricted network and enforced resource/process limits. | Adversarial script attempts to read host/user/other-job files, spawn descendants, access network/secrets, persist or overrun resources; all contained and audited. | **PENDING** |
+| Dependency supply-chain compromise | Approved mirrors, version/hash provenance, reviewed toolchains, dependency inventory, quarantine and output validation. | Mirror/authentication policy, tampered package test, provenance comparison and scanner failure tests. | **PENDING** |
+| Unauthorized filesystem access | Per-job filesystem identity/mount/ACL boundary; deny Registry, source host, user profile and other jobs. | Positive and negative path/ACL tests, traversal/link tests, host and cross-job denial. | **PENDING** |
+| Network exfiltration | Default-deny build network; allow only approved dependency and job channels; no production/corporate data access. | Egress allow/deny tests, packet/flow review by IT, destination allowlist verification. | **PENDING** |
+| Secret theft | No credentials/secrets in build environment or workspace; narrow service identity; sanitized logs/output scans. | Canary-secret access attempts and scans of environment, workspace, artifacts and logs. | **PENDING** |
+| Resource exhaustion | Enforced CPU, memory, disk, process, wall-time and concurrency quotas; cancellation and cleanup. | Stress/timeout/full-disk/concurrency tests and proof of host/other-job availability. | **PENDING** |
+| Child-process escape/persistence | OS boundary contains process trees and denies host interfaces; disposable worker reset. | Escape, detached child, persistence and cross-job tests; clean snapshot/instance evidence. | **PENDING** |
+| Artifact tampering or spoofed provenance | Hash source and output; service-generated signed/tamper-evident attestation bound to job/template/toolchain/dependencies; IHP revalidates in quarantine. | Mutation, replay, wrong-job/hash, forged/expired attestation rejection tests. | **PENDING** |
+| Build-job replay/duplicate execution | Expiring nonce, unique job ID/idempotency key, authenticated state machine, replay cache and explicit new authorization for retry. | Replayed/expired requests and ambiguous timeout/retry tests prove no duplicate unauthorized execution. | **PENDING** |
+| Cross-application data access | Isolated per-job identities/workspaces, application-scoped authorization, no shared app data or Registry access. | Cross-app source/artifact/status/log access denial and concurrent tenant isolation tests. | **PENDING** |
+| Incomplete cleanup | Terminal-state cleanup of workspace, temporary credentials and partial output; monitored cleanup failure and escalation. | Success/failure/cancel/crash/timeout residue scans and audited remediation test. | **PENDING** |
+
+These controls are requirements, not verified guarantees. No security approval or successful isolation test exists yet.
+
+### Actionable approval checklist and blockers
+
+The future review owner should record each decision, evidence link/reference, approver and date. Every item currently has status **PENDING**:
+
+1. Select and approve the build host/service and its data classification boundary.
+2. Name the infrastructure/service owner, support/on-call owner and lifecycle/patching responsibility.
+3. List permitted Node.js, npm, .NET SDK and supporting tools/versions; explicitly resolve the no-`.exe` policy and required build-tool execution.
+4. Approve the dedicated execution identity, authentication, authorization and credential lifecycle.
+5. Select and evidence the OS isolation mechanism, per-job reset and process/child-process containment.
+6. Approve source/artifact transfer architecture, endpoints, direction, protocol, certificates and port; verify IHP retains loopback-only listeners.
+7. Approve dependency mirrors, package sources, egress restrictions and lock/hash policy.
+8. Set enforceable CPU, memory, disk, wall-clock, process and concurrency limits.
+9. Approve a no-secrets policy, any narrowly scoped service credentials and secret-scanning requirements.
+10. Define source, workspace, cache, artifact and log retention, deletion, legal hold and backup/restore scope.
+11. Approve artifact quarantine, format, provenance/attestation, malware scanning and distinct Administrator review workflow.
+12. Approve log content/access/retention and tamper-resistant audit requirements.
+13. Approve incident response, breach escalation, evidence preservation and service shutdown authority.
+14. Approve adversarial isolation testing, acceptance criteria, operational monitoring, capacity, cost and ongoing service ownership.
+
+**Current blockers:** no written IT/Security decision; no confirmed build-service owner or provisioned worker; no allowed tool/version list; no approved network route/port/certificate/dependency mirror; no quotas/retention/scanner/incident/backup policy; and no isolation verification evidence. Source-build implementation and execution are therefore not authorized. M7 must stay IN PROGRESS. The product requirement remains mandatory; do not substitute prebuilt-only behavior or bypass the gate.
+
+## Historical TASK 029 — Mandatory source-build architecture — 2026-11-02
 
 ### Product decision and current implementation boundary
 
