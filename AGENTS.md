@@ -1,5 +1,16 @@
 # Repository Instructions for Codex and Development Agents
 
+## TASK 032 handoff — M8 real-browser acceptance — 2026-11-02
+
+M8 remains IN PROGRESS. The existing acceptance matrix has 53 actual-browser scenarios; none was executed in this task because no approved local browser-control capability is exposed and no operator supplied an already-open approved browser session. The disposable fixture was not started, port 5050 had no listener, and no browser executable/driver was launched or installed. Keep every scenario NOT RUN, private production browser management default-disabled, M7 IN PROGRESS/source builds disabled, and all D00–D29 decisions PENDING. Continue from the exact procedures and matrix in PROGRESS.md and BROWSER_AUTHENTICATION.md. Do not treat HTTP/WebCrypto protocol tests, DOM simulations, fixture readiness, or static review as real-browser acceptance.
+
+## Permanent actual-browser acceptance rules
+
+- Use only an already-approved browser session or a browser-control capability explicitly available and authorized in the current environment. Never launch a prohibited browser executable/driver, install browser tools, create remote-debugging listeners, or change browser/OS security settings.
+- If actual-browser access is unavailable, do not start the manual fixture as a substitute; record the capability blocker, leave unperformed scenarios NOT RUN, and preserve the existing reproducible operator runbook. Distinguish an execution blocker from a scenario actually tested and blocked.
+- Record a scenario PASS only from sanitized evidence of its expected behavior in the real permitted browser. Node, HTTP, WebCrypto, jsdom/DOM, fixture-readiness, and code-review evidence are supporting evidence only.
+- Do not enable production browser management, weaken M11 controls, alter package approval, or change Source Build decisions to make browser tests pass.
+
 ## TASK 031 handoff — Approval review and decision tracking — 2026-11-02
 
 The product owner confirmed prebuilt and source-build deployments are both mandatory. M7 remains IN PROGRESS; source builds remain disabled. TASK 031 consolidates the TASK 030 package into a human-readable summary and evidence-based decision register. The preferred IT-managed isolated Windows worker remains a proposal only; no approval or infrastructure capability is assumed. The product owner handles all IT/Security communication. Do not contact reviewers, submit requests, provision/connect/test a service, open ports, change Windows security, execute uploaded code/builds, or modify application behavior. All register statuses remain PENDING until traceable written evidence from an authorized reviewer is supplied. Recommended TASK 032: record the human-provided decisions and evidence; if any are NEEDS_CLARIFICATION or REJECTED, preserve the disabled state and follow the documented outcome process.

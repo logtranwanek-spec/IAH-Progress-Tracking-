@@ -1,6 +1,12 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
+## Current TASK 032 — M8 real-browser acceptance — 2026-11-02
+
+M8 acceptance remains subject to the exact real-browser scenarios and safety procedures recorded in the current M8 matrix in PROGRESS.md and the browser checklist in BROWSER_AUTHENTICATION.md. The matrix contains 53 scenarios across transport/profile, authentication/session, request security, roles/ownership, Dashboard/deployment data, and usability/accessibility. A scenario may be accepted only from sanitized evidence collected in an approved real browser; automated HTTP/WebCrypto protocol checks, DOM simulation, fixture readiness, or source inspection are not browser acceptance.
+
+For TASK 032, no approved browser-control capability was exposed in the Agent session and no already-open browser session/readiness confirmation was provided. The disposable fixture was not started; a read-only check found no listener on Gateway port 5050. Therefore no browser scenario ran: 0 PASS, 0 FAIL, 0 scenario BLOCKED, 53 NOT RUN. The execution capability is BLOCKED; unattempted scenarios remain NOT RUN. Keep M8 IN PROGRESS and private production browser management disabled by default. This status does not change M7, Source Build, or the separate TASK 031 D00–D29 approval register; all those decisions remain PENDING and Source Build remains disabled.
+
 ## Current TASK 031 — IT/Security approval review and decision tracking — 2026-11-02
 
 ### Human-readable technical review summary

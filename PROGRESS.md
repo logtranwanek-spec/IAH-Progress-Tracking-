@@ -1,5 +1,36 @@
 # Project Progress
 
+## TASK 032 — M8 real-browser acceptance — 2026-11-02
+
+### Outcome and safety boundary
+
+- Re-read the current task, AGENTS.md, PROJECT_REQUIREMENTS.md, IMPLEMENTATION_PLAN.md, PROGRESS.md, and the M8 browser instructions in BROWSER_AUTHENTICATION.md. Reviewed TASK 030/031 tracking: the product owner requires both prebuilt and source-build deployment; Source Build stays disabled pending external review; every D00–D29 status remains PENDING.
+- Revalidated the exact existing acceptance matrix: **53 unique scenarios** across transport/profile (T), authentication/session (A), request security (S), role/ownership (R), Dashboard/deployment (D), and usability/accessibility (U). The individual test definitions remain in the existing “Browser acceptance matrix” below; none was edited or waived.
+- Browser-control discovery exposed no approved browser/computer/driver tool. No already-open approved browser readiness was provided. The manual disposable fixture was not started. Read-only inspection found **no listener on port 5050**. No browser, driver, application, or test service was launched; no setup accounts, data, screenshots, or new evidence were created.
+- The exact operator setup and safe evidence procedure are already available under “Disposable setup and exact operator commands” and “Traceability and evidence rules” below, with the scenario-specific procedures in the matrix. Use those existing instructions and an already-open company-approved browser; do not invent alternate fixture commands or count simulations as browser results.
+
+### Scenario results
+
+No scenario was attempted. Status counts are **0 PASS, 0 FAIL, 0 scenario BLOCKED, 53 NOT RUN**. The browser capability/readiness prerequisite is BLOCKED; because no scenario action occurred, each case remains NOT RUN rather than being relabeled BLOCKED.
+
+| Scenario IDs | Count | Status | Evidence / limitation |
+| --- | ---: | --- | --- |
+| T01–T05 | 5 | NOT RUN | No approved actual-browser control/session. |
+| A01–A09 | 9 | NOT RUN | No approved actual-browser control/session. |
+| S01–S10 | 10 | NOT RUN | No approved actual-browser control/session. |
+| R01–R09 | 9 | NOT RUN | No approved actual-browser control/session. |
+| D01–D15 | 15 | NOT RUN | No approved actual-browser control/session. |
+| U01–U05 | 5 | NOT RUN | No approved actual-browser control/session. |
+| **Total** | **53** | **NOT RUN** | **Execution prerequisite BLOCKED; no browser evidence collected.** |
+
+### Verification, status, and handoff
+
+- Commands/checks performed: tool capability discovery (no browser-control capability found); inspected the exact 53 rows and existing setup/runbook; read-only `Get-NetTCPConnection -State Listen -LocalPort 5050` check returned no listener. No application build, application test, browser run, or `npm.cmd run verify` was performed because there were no application-code changes and no permitted browser environment.
+- Full-regression result for TASK 032: **NOT RUN**. Previously recorded automated-suite results remain historical and are not counted as browser acceptance.
+- No defect was observed because no browser scenario ran. No source/application code or test code changed. M7 remains IN PROGRESS; M8 remains IN PROGRESS; M9/M10/M10-DB/M12 remain NOT STARTED. Production browser management remains default-disabled. All M7 package approval controls and Source Build restrictions are unchanged.
+- Files changed: only the four authorized tracking documents. No screenshots, fixture data, databases, logs, credentials, source code, or build artifacts were created for this task.
+- **Exact next task: TASK 033 — operator-assisted T01–T05.** The operator should start a fresh disposable fixture using the existing masked-password PowerShell block in “Disposable setup and exact operator commands,” keep it in the foreground, open an already-running approved browser to the documented Dashboard URL, confirm readiness, and report sanitized results one scenario at a time. Do not request passwords, cookies, tokens, signatures, nonces, raw request dumps, or sensitive screenshots. Continue with remaining cases only after prerequisite results are evaluated. Keep all unperformed cases NOT RUN and M8 IN PROGRESS.
+
 ## TASK 031 — IT/Security approval review summary and decision tracking — 2026-11-02
 
 ### Decision and current state
