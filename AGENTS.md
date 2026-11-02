@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 033 — Non-executing Build Job metadata API — 2026-11-02
+## Current TASK 034 — Build Worker approval readiness — 2026-11-02
+
+TASK 034 is a documentation-only review of D00–D29, the 16-item final approval checklist and the TASK 033 integration boundary. Do not contact IT/Security, provision/connect a worker, execute tools or source, change application code, or claim approval. Product-owner-reported permission for an isolated worker/toolchain is not written IT/Security authorization. Keep all D00–D29 PENDING absent traceable evidence from the authorized approver, keep Source Build disabled and M7 IN PROGRESS. The readiness gate and current evidence are in PROJECT_REQUIREMENTS.md and PROGRESS.md. Only the four official tracking Markdown files may be committed/pushed for this task.
+
+## Historical TASK 033 — Non-executing Build Job metadata API — 2026-11-02
 
 TASK 033 implements only SQLite Build Job metadata and authenticated application-scoped APIs. Focused tests passed 10/10 and `npm.cmd run verify` passed 587 checks with no failures/skips. M7 remains IN PROGRESS; source builds are disabled and D00–D29 remain PENDING. Use the existing staged intake as a snapshot reference, validate its integrity and source fingerprint, and persist only bounded metadata/events. Production exposes no worker connection, process execution, dependency install, command execution or artifact creation. Valid requests stop at `BLOCKED_WORKER_UNAPPROVED`; the `SIMULATED` adapter is test-only and cannot create an artifact or deployable state. Do not change M7 or approval status, implement another milestone, or broaden the API contract. The current task's evidence and next step are in PROGRESS.md.
 
@@ -17,6 +21,9 @@ The product owner reports that approved Node.js/.NET SDK tools, `node.exe`, `dot
 - Build Job requests accept only the documented application-scoped source snapshot ID/digest, target release label, fixed framework/template and idempotency key. Hash idempotency keys at rest. Keep the only API states to `REQUESTED`, `VALIDATED`, `REJECTED_VALIDATION`, `BLOCKED_WORKER_UNAPPROVED` and `CANCELLED`; keep transition events append-only and bounded. Reject command/executable/path/environment/dependency/credential fields.
 - The production no-worker adapter is an inert status boundary only. It has no endpoint, network client, credential, process launcher or execution method. A `SIMULATED` result may exist only in isolated tests; never serialize it as production success or produce an artifact. Do not treat a staged folder's same-user filesystem as an OS isolation boundary; a future approved worker must revalidate snapshot existence and fingerprint.
 - Actual tool inventory/version/hash, service identity, OS/filesystem/process isolation, worker connectivity, dependency endpoints, resource values, retention and operational controls remain gated on written approval and provisioning. Preserve the Phase 1 exit gate and keep Source Build disabled until all applicable approvals and boundary verification pass.
+- Approval readiness is evidence-driven: record the exact authorized reviewer, evidence reference/date, written decision and technical acceptance evidence for every applicable D00–D29 item. A product-owner report, proposed design, passing metadata test or unprovisioned configuration is not an approval or proof of isolation.
+- Before any worker integration, verify the approved infrastructure exists and matches the written design; verify tool binary provenance/hashes, executable scope, filesystem/process isolation, network/authentication, dependency allowlist, resource limits, audit/monitoring, cleanup/recovery and adversarial acceptance. Keep build dispatch absent until a separate implementation assignment passes this gate.
+- No future worker may launch uploaded or source-generated `.exe` files or arbitrary unapproved executables. The distinct authorized Administrator must approve the exact immutable output fingerprint before existing deployment authorization; build completion never approves or deploys.
 
 ## Historical TASK 032 handoff — M8 real-browser acceptance — 2026-11-02
 

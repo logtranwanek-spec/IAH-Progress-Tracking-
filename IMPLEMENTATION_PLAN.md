@@ -4,7 +4,9 @@
 
 Internal Application Hosting & Deployment Platform (project code: Internal Hosting Platform / IHP). The complete, canonical requirements are in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md).
 
-**Latest assignment (2026-11-02): TASK 033 — Non-executing Build Job metadata API.** The authorized Category A subset is implemented and verified. `npm.cmd run verify` passed with 587 checks, 0 failures and 0 skips, including the new SQLite/M11 Build Job tests; DLL publish checks and owned loopback smoke passed. M7 remains IN PROGRESS; source builds are disabled, no worker is provisioned/connected, and all D00–D29 remain PENDING. Valid API requests stop at `BLOCKED_WORKER_UNAPPROVED`; no uploaded source executes and no artifact is created. Preserve these gates and do not begin another milestone.
+**Latest assignment (2026-11-02): TASK 034 — IT/Security approval evidence and Build Worker readiness.** This documentation-only task reviews D00–D29, prepares the 16-item approval checklist, defines an objective implementation gate and records the TASK 033 integration seams. The product-owner-reported policy clarifications remain unapproved; all D00–D29 remain PENDING. No IT/Security contact, worker provisioning/connection, source execution, application change, build or test is authorized. M7 remains IN PROGRESS and Source Build disabled. Do not begin integration until written approvals and actual isolation/provisioning evidence pass the gate in PROJECT_REQUIREMENTS.md.
+
+**Historical assignment (2026-11-02): TASK 033 — Non-executing Build Job metadata API.** The authorized Category A subset is implemented and verified. `npm.cmd run verify` passed with 587 checks, 0 failures and 0 skips, including the SQLite/M11 Build Job tests; DLL publish checks and owned loopback smoke passed. Valid API requests stop at `BLOCKED_WORKER_UNAPPROVED`; no worker is provisioned/connected, no uploaded source executes and no artifact is created. This metadata-only work did not change M7 or the D00–D29 approval gate.
 
 **Historical assignment (2026-11-02): TASK 032 — M8 real-browser acceptance.** The existing PROGRESS.md matrix has 53 scenarios; the approved operator procedure remains available. No approved browser-control capability was exposed, no fixture was started and no browser scenario ran: 0 PASS, 0 FAIL, 0 scenario BLOCKED, 53 NOT RUN. M8 stays IN PROGRESS/default-disabled. This preceding task does not change current M7/source-build approval status.
 
@@ -437,6 +439,27 @@ dotnet .\artifacts\publish\Platform.Integration.Tests\Platform.Integration.Tests
 **Status:** COMPLETED for the metadata-only TASK 033 scope after focused and full verification passed. This does not change M7, approve a worker, or satisfy any source-build execution, output validation, exact-artifact approval or deployment acceptance criterion.
 
 TASK 033 is a separately scoped, pre-approval metadata-only subset. It does not complete Phase 2, permit queue/dispatch/worker lifecycle transitions, or pass the Phase 1 approval/provisioning gate below. The existing phase dependencies remain authoritative for every operational build capability.
+
+#### TASK 034 — IT/Security approval evidence and Build Worker readiness (documentation-only scope)
+
+**Objective:** prepare a decision-by-decision evidence ledger, final approval checklist and objective implementation-readiness gate before any future worker integration.
+
+**Scope:** review the D00–D29 register and TASK 029–033 records; distinguish product-owner-reported policy clarification from traceable written IT/Security approval and verified technical evidence; map the 16 required approval areas; inspect TASK 033 integration seams read-only; document the work required before dispatch, authentication, status, artifact, failure or audit integration. Do not contact reviewers, provision/connect a service, modify application code, execute source/tools, create executable artifacts, change security settings or begin another milestone.
+
+**Dependencies:** TASK 029–033 documentation, existing Build Job metadata API and the unchanged Phase 1 approval gate. The listed responsible/approver roles remain proposed until authorized people are named. The reported permission for approved tools and an isolated worker is not IT/Security authorization.
+
+**Acceptance criteria:**
+
+- The D00–D29 readiness matrix identifies reported context, missing written evidence, required technical configuration/acceptance and status for all 30 decisions, without inferring approval.
+- The final 16-item checklist distinguishes reported information, verified technical evidence, written approval and outstanding requirements.
+- The implementation gate requires applicable written decisions plus actual provisioning, independent isolation, binary/policy, network/authentication, dependency, resource, logging/monitoring, recovery, artifact-integrity and exact-fingerprint Administrator approval evidence.
+- TASK 033 dispatch/auth/status/fingerprint/failure/audit boundaries are described accurately from static inspection; existing metadata behavior and its fail-closed state are preserved.
+- Only the four official tracking documents change; formatting, consistency and `git diff --check` pass. Application build/tests are not run because implementation is out of scope.
+- M7 remains IN PROGRESS, Source Build stays disabled and every D00–D29 decision stays PENDING absent written authorization.
+
+**Status:** COMPLETED for TASK 034 approval-readiness documentation only. No milestone or D-register status changes. No approval, worker readiness or isolation success is claimed.
+
+**Next task:** TASK 035 — review traceable written IT/Security responses against D00–D29 and the readiness checklist. Update statuses only with authorized evidence. If approvals and provisioning/isolation evidence are complete, propose a separate bounded worker-integration task; otherwise record clarifications/rejections and keep Source Build disabled.
 
 #### TASK 031 — Human review summary and decision register (prepared; all decisions PENDING)
 

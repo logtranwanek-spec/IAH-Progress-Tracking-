@@ -1,6 +1,39 @@
 # Project Progress
 
-## Current TASK 033 — Non-executing Build Job Metadata API — 2026-11-02
+## Current TASK 034 — IT/Security approval evidence and Build Worker readiness — 2026-11-02
+
+### Scope and review outcome
+
+- Documentation and read-only inspection only. Read AGENTS.md, PROJECT_REQUIREMENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md; reviewed TASK 029–033 and the full D00–D29 register, TASK 030 control/threat/checklist material, TASK 031 evidence process and TASK 033 API/schema/migration/tests. No reviewer contact or approval request was sent. No worker was provisioned, connected or tested; no application code, database, Windows setting or infrastructure was changed; no source/tool/process/executable ran.
+- Recorded the product-owner-reported clarification: a dedicated Windows Build Worker, approved Node.js/.NET SDK tools including `node.exe`/`dotnet.exe`, fixed approved build commands, restricted service identities, secure communication, isolated environments, approved dependency sources, resource restrictions and monitoring are permitted in principle. The report prohibits executing user-uploaded/source-generated `.exe` files and arbitrary unapproved executables. This is not written IT/Security approval or technical verification.
+- Reviewed D00–D29 individually. **30/30 remain PENDING**; no traceable authorized reviewer evidence was supplied. The matrix records per-decision reported context, missing approval evidence, technical configuration/acceptance gates and status. Existing responsible/approver roles remain proposed roles, not confirmed named owners.
+- Added a final 16-item checklist covering worker host/VM, owner, service identity, toolchain, executable policy, OS/filesystem isolation, process restrictions, network, authentication, dependency sources, CPU/RAM/storage/job limits, logging/retention, monitoring, artifact integrity/provenance, exact-fingerprint Administrator approval, recovery and operations. Each item separates reported context, verified technical evidence, written approval and outstanding requirements.
+- Added an objective readiness gate. All applicable written decisions and actual provisioning must be verified before integration; approval alone is insufficient. Isolation/escape, binary provenance/hashes, executable policy, authenticated network scope, dependency allowlists, enforced quotas, audit/monitoring, cleanup/recovery, artifact provenance/quarantine and exact immutable fingerprint review must pass. Uploaded/generated `.exe` execution remains prohibited; M11 deployment authorization remains separate.
+
+### TASK 033 integration boundary (read-only)
+
+- Static inspection confirmed `BuildJobs.create` authorizes and validates an existing staged snapshot, records metadata and transitions valid requests through `REQUESTED → VALIDATED → BLOCKED_WORKER_UNAPPROVED`. `UnapprovedBuildWorker` returns only that fixed state. No dispatch queue, worker endpoint/authentication/network client, process launch, artifact transfer or build-success status exists.
+- `BuildJobController` exposes application-scoped create/list/detail/cancel. Cancellation is metadata-only. `BuildJobs` writes bounded state events and M11 audit records; the current SQLite constraints allow only the pre-approval metadata state set. The source digest is input-snapshot identity, not an output artifact fingerprint.
+- Documented the smallest post-approval seams: gated dispatcher/durable intent; per-job service authentication; authenticated and transactional state ingress via a future additive migration; output validation/fingerprint/quarantine before existing exact-artifact review; bounded cancel/timeout/cleanup/failure handling; and sanitized BuildJob/M11 audit linkage. No seam was implemented or activated.
+
+### Files and verification
+
+- Updated only `AGENTS.md`, `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md` and `PROGRESS.md`. No source, test, schema, migration, app, database or infrastructure file changed.
+- Application builds, automated application tests and browser tests: **NOT RUN**, as required for this documentation-only task.
+- Documentation consistency review: verified D00–D29 are all PENDING, the 16 checklist areas map to the decision register, product-owner-reported statements are not represented as approval, TASK 033 is clearly separated from future worker work, and milestone statuses are preserved.
+- Documentation formatting: `node node_modules/prettier/bin/prettier.cjs --check AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md` — passed. `PROJECT_REQUIREMENTS.md` is explicitly excluded by the repository `.prettierignore`; the modified sections were manually reviewed and checked by the consistency script below.
+- Documentation consistency check: PowerShell script extracted the TASK 034 decision matrix and checklist; verified ordered D00–D29 rows (30/30 PENDING) and checklist rows 1–16 (16/16). Passed.
+- `git diff --check` — passed. No application build/test was run.
+
+### Status, blockers and next task
+
+- M1–M6/M11 remain **COMPLETED**; M7 and M8 remain **IN PROGRESS**; M9, M10, M10-DB and M12 remain **NOT STARTED**. Source Build remains disabled. No milestone acceptance status changed.
+- Blockers: all D00–D29 written approvals/evidence remain absent; no named worker owner, provisioned service, verified isolation, approved binary inventory/hashes, endpoint/authentication, dependency mirror, numeric resource policy, retention/scanner/incident/recovery ownership or worker acceptance evidence exists in the reviewed records.
+- **Recommended TASK 035:** review authorized written IT/Security responses against D00–D29 and the 16-item checklist; record evidence references/dates and update only statuses supported by those records. If any decisions are pending, unclear or rejected, keep Source Build disabled and document follow-up. Only after applicable approvals and actual provisioned-boundary verification should a separately authorized bounded worker-integration task be proposed.
+
+---
+
+## Historical TASK 033 — Non-executing Build Job Metadata API — 2026-11-02
 
 ### Scope and implementation
 

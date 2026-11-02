@@ -1,7 +1,13 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 033 — Non-executing Build Job metadata API — 2026-11-02
+## Current TASK 034 — IT/Security approval evidence and Build Worker readiness — 2026-11-02
+
+This task is approval-readiness documentation and read-only review only. The product owner reports that a dedicated Windows Build Worker, approved Node.js/.NET SDK tools including `node.exe`/`dotnet.exe`, fixed approved build commands, restricted service identities, secure communication, isolated build environments, approved dependency repositories, resource limits and monitoring are permitted in principle. The product owner also prohibits execution of user-uploaded or source-generated `.exe` files and arbitrary unapproved executables. These statements are product-owner-reported policy clarification, not written IT/Security approval or technical evidence.
+
+No authorized reviewer evidence has been supplied; no worker has been provisioned, connected or tested. All D00–D29 remain **PENDING**, Source Build remains disabled and M7 remains **IN PROGRESS**. TASK 033 provides only SQLite Build Job metadata APIs that stop at `BLOCKED_WORKER_UNAPPROVED`; it contains no dispatch, worker authentication, build execution, artifact transfer or artifact approval integration. The detailed readiness matrix, final 16-item checklist and objective implementation gate appear below. Do not infer that approval readiness means implementation readiness.
+
+## Historical TASK 033 — Non-executing Build Job metadata API — 2026-11-02
 
 The M7 metadata-only Build Job API has been implemented against the existing SQLite Registry and M11 authorization. It verifies application ownership, the current staged intake reference and source fingerprint; persists a fixed template and target release label; exposes application-scoped request/list/detail/cancel operations; and records bounded append-only state/audit events. Valid requests stop at `BLOCKED_WORKER_UNAPPROVED`. No worker endpoint, network client, process launcher, dependency install, source command, artifact, package, deployment or dashboard feature was added. Source builds remain disabled, M7 remains IN PROGRESS, D00–D29 remain PENDING, and the full source-build approval/provisioning requirements below are unchanged.
 
@@ -143,6 +149,99 @@ This is the authoritative status ledger for the existing 22 controls and 14-item
 | D29 | Exact-artifact approval and deployment handoff | Preserve distinct Administrator review of immutable output fingerprint and existing deployment authorization. | IHP Product Owner / M11 Security Owner | Deployment Owner and authorized Administrator | PENDING | Written workflow approval and reviewer-separation/hash-binding acceptance. | D15–D18, existing M11/M7 controls | Determines safe link to existing Agent; no auto-approval/deployment. |
 
 **Mapping to the existing 14-item checklist:** item 1→D00; 2→D01; 3→D23–D27; 4→D02; 5→D03–D05; 6→D06; 7→D07/D26; 8→D08–D12; 9→D13/D18; 10→D14–D16/D21; 11→D15/D18/D29; 12→D16–D17; 13→D19; 14→D08–D12/D18–D19/D22/D28. The 22 control rows remain the detailed control specification; the register adds ownership, dependency and implementation-impact tracking rather than weakening or replacing them.
+
+### TASK 034 decision readiness and evidence matrix
+
+The preceding D00–D29 register remains authoritative for proposed responsible roles, required approver roles, dependencies, written evidence and implementation impact. Those roles are not named/confirmed individuals. The matrix below records the product-owner-reported clarification and the remaining written and technical gate for each decision. No traceable IT/Security approval or worker-specific technical verification was provided for this task. TASK 033 tests verify only the non-executing metadata boundary; they do not verify a worker. Every decision remains **PENDING**.
+
+| Decision | Product-owner-reported information | Missing written evidence | Technical configuration / acceptance gate | Status |
+| --- | --- | --- | --- | --- |
+| D00 | A dedicated Windows worker is permitted in principle; no service was selected. | Authorized architecture, service selection and data-scope decision. | Provisioned service matches approved architecture and data boundary; owner verifies intended IHP flow. | PENDING |
+| D01 | Dedicated worker is permitted; no service owner was named. | Named owner, support/on-call, patching and lifecycle commitment. | Service record and operational handoff identify accountable owner and support path. | PENDING |
+| D02 | Restricted service accounts are permitted. | Authorized identity, least-privilege scope and credential lifecycle. | Dedicated non-interactive identity is isolated from IHP, users and app runtimes; access and rotation are verified. | PENDING |
+| D03 | Isolated build environments are permitted. | Approved boundary model and policy for provisioning/reset. | Per-job isolation and reset are provisioned; independent escape and cross-job tests pass. | PENDING |
+| D04 | No filesystem-specific clarification was reported. | Approved storage, ACL and data-owner decision. | Job workspace cannot read/write IHP, Registry, profiles, runtime data or other jobs; positive/negative access tests pass. | PENDING |
+| D05 | Approved SDK executables and fixed build commands are permitted in principle; arbitrary unapproved executables and uploaded/generated `.exe` files remain prohibited. | Exact permitted process/tool surface and child-process containment authorization. | Approved process tree is contained; adversarial child, persistence and host-access tests pass; uploaded/generated `.exe` execution is impossible. | PENDING |
+| D06 | Secure IHP-to-worker communication is permitted. | Approved direction, endpoint, route, protocol, ports, certificates and network owner decision. | Only approved authenticated job/status/artifact flows work; unapproved destinations and replay fail; IHP listeners remain loopback-only. | PENDING |
+| D07 | Approved dependency repositories are permitted. | Named mirrors, package provenance policy and authorized access. | Worker can reach only approved sources; lock/hash and tamper/unavailable-source tests pass. | PENDING |
+| D08 | CPU restrictions are permitted. | Numeric per-job/aggregate limits and approving capacity owner. | Enforced CPU quotas withstand overload tests without escaping the approved boundary. | PENDING |
+| D09 | RAM restrictions are permitted. | Numeric per-job/aggregate limits and exhaustion policy. | Memory cap and out-of-memory containment/recovery tests pass. | PENDING |
+| D10 | Storage restrictions are permitted. | Input/workspace/cache/log/output quotas and retention values. | Quotas are enforced; full-disk and cleanup tests pass without affecting IHP storage. | PENDING |
+| D11 | Resource restrictions are permitted; no timeout values were supplied. | Approved wall-clock limit and cancellation policy. | Timeout terminates all descendants and cleans job state within approved bounds. | PENDING |
+| D12 | Resource restrictions are permitted; no queue/concurrency values were supplied. | Per-user/app/service limits and capacity approval. | Fairness, authorization and overload tests verify enforced concurrency/queue limits. | PENDING |
+| D13 | No secret-policy clarification was reported. | Written no-secret rule, any exception scope and secret-owner approval. | Worker receives no Platform/Registry/database/deployment/runtime secrets; canary scans and access-denial tests pass. | PENDING |
+| D14 | No source/workspace retention clarification was reported. | Approved retention, deletion, legal-hold and backup scope. | Expiry/deletion behavior is verified for source, workspaces and caches. | PENDING |
+| D15 | No artifact quarantine/retention clarification was reported. | Approved quarantine, access and accepted/rejected artifact retention rules. | Artifacts remain private until validation/review; access and retention tests pass. | PENDING |
+| D16 | No build-log policy clarification was reported. | Approved content, access, retention and export policy. | Logs are bounded, sanitized, access-controlled and pass secret-canary tests. | PENDING |
+| D17 | No audit-integrity clarification was reported. | Approved event, tamper protection, access and retention policy. | Required events are complete, tamper-evident and reviewable without exposing secrets/source. | PENDING |
+| D18 | Malware scanning was not covered by the reported clarification. | Authorized scanner, owner, signature/update and fail-closed policy. | Scanner success/failure and infected-source/artifact quarantine tests pass. | PENDING |
+| D19 | Monitoring is permitted; incident-response details were not supplied. | Incident owner, escalation, evidence-preservation and shutdown authority. | Approved incident runbook is exercised with safe evidence handling and containment. | PENDING |
+| D20 | Isolated environments are permitted; cleanup behavior was not evidenced. | Cleanup policy and ownership for failures/crashes. | Success/failure/cancel/timeout/crash tests show no workspace, credential or partial-output residue. | PENDING |
+| D21 | No backup/recovery clarification was reported. | Approved backup scope, encryption/access, retention and RPO/RTO. | Registry/artifact recovery is tested; unapproved source/workspace data is excluded as approved. | PENDING |
+| D22 | Monitoring is permitted. | Named service owner, telemetry/alert/access/retention and support commitments. | Availability, queue, resource, security and cleanup signals alert correctly without source/secrets. | PENDING |
+| D23 | Product owner reports approved worker tools may run, but uploaded/generated `.exe` files may never run. | Written policy-scope interpretation and applicable policy citation from IT/Security/Endpoint Security. | Approved tool executables are distinguished from user/generated artifacts in an enforceable policy and tested. | PENDING |
+| D24 | Approved Node.js/.NET SDK tools including `node.exe` and `dotnet.exe` are permitted in principle. | Exact binaries, versions, hashes, provenance, update and execution scope. | Provisioned toolchain hashes match the signed/approved inventory; unapproved versions are rejected. | PENDING |
+| D25 | Approved build commands may run under restricted identities. | Written authorization naming identity, fixed commands and untrusted child-code scope. | Only fixed templates run inside the approved boundary; arbitrary caller commands and host execution are rejected. | PENDING |
+| D26 | Approved dependency repositories are permitted. | Named source allowlist, exact egress/authentication and provenance policy. | Egress is deny-by-default and only approved mirrors are reachable/authenticated. | PENDING |
+| D27 | No clarification was reported on whether an exception or separate policy is required. | Written exception decision or applicable policy citation/approval. | Build execution policy is documented and validated against the applicable company rule before activation. | PENDING |
+| D28 | Resource restrictions and monitoring are permitted in principle. | Approved adversarial test plan, thresholds, cost/capacity decision and acceptance authority. | Independent acceptance tests pass all approved security/resource thresholds; accountable signer records result. | PENDING |
+| D29 | The existing requirement for exact-fingerprint Administrator approval remains; no worker handoff evidence was supplied. | Written handoff and reviewer-separation approval tied to deployment owner/M11 controls. | Changed artifact invalidates approval; distinct authorized Administrator approves exact immutable output fingerprint; deployment remains separately authorized. | PENDING |
+
+### TASK 034 final approval checklist
+
+This checklist consolidates the 14 TASK 030 review items and the additional executable-policy, worker-authentication and artifact-approval gates. “Product-owner report” is context only. “Verified technical evidence” refers only to evidence actually observed locally; a missing worker is not treated as a passed control. The responsible approver role is cross-referenced in D00–D29 above; a named approver and written decision are still absent for every item.
+
+| # | Approval item / decisions | Product-owner-reported information | Verified technical evidence | Written IT/Security approval | Outstanding requirement |
+| ---: | --- | --- | --- | --- | --- |
+| 1 | Worker host or VM — D00, D03 | Dedicated Windows worker and isolation permitted in principle. | None for a worker; TASK 033 is metadata-only. | PENDING | Select, approve, provision and independently verify the host/service and data boundary. |
+| 2 | Worker service owner — D01, D22 | A dedicated worker is permitted; no owner identified. | None. | PENDING | Name accountable service, support/on-call, patching and lifecycle owners. |
+| 3 | Restricted service identity — D02, D13 | Restricted service accounts are permitted. | None for a worker identity. | PENDING | Approve a unique non-interactive least-privilege identity and credential lifecycle. |
+| 4 | Approved Node.js/.NET toolchain — D24 | Approved Node.js/.NET SDK tools are permitted in principle. | No worker toolchain inspected or run. | PENDING | Approve exact versions, binaries, hashes, provenance and update policy. |
+| 5 | Executable policy — D05, D23–D25 | `node.exe`/`dotnet.exe` and approved fixed commands permitted in principle; uploaded/generated `.exe` and arbitrary unapproved executables prohibited. | No worker executable or uploaded source executed. | PENDING | Obtain policy citation; authorize exact tool/process scope; prove user/generated `.exe` rejection. |
+| 6 | OS and filesystem isolation — D03–D04, D20 | Isolated build environments permitted. | None; same-user staging is explicitly not a sandbox. | PENDING | Approve and provision per-job isolation/reset/storage boundaries; pass escape and cross-job tests. |
+| 7 | Process execution restrictions — D05, D11, D25 | Approved build commands permitted in principle; arbitrary unapproved executables prohibited. | TASK 033 has no process launcher or dispatch. | PENDING | Fix permitted process tree, enforce limits, and prove descendants/host persistence are contained. |
+| 8 | Network communication — D06 | Secure worker communication permitted. | No worker endpoint, route or connection exists. | PENDING | Approve exact direction, endpoint, protocol, port, certificates and deny-by-default tests. |
+| 9 | Worker authentication — D02, D06, D25 | Restricted identities and secure communication permitted. | No worker identity, credentials or authentication protocol implemented. | PENDING | Approve per-job authentication, authorization, replay/expiry and credential rotation; verify rejection tests. |
+| 10 | Dependency repositories — D07, D26 | Approved dependency repositories permitted. | No source-build dependency access attempted. | PENDING | Name approved mirrors and authentication/provenance rules; verify egress allow/deny and tamper handling. |
+| 11 | CPU, RAM, storage and job limits — D08–D12 | Resource restrictions permitted. | No worker quotas or job execution verified. | PENDING | Approve numeric quotas, timeout/concurrency and pass stress, exhaustion and cancellation tests. |
+| 12 | Logging and retention — D14, D16–D17, D21 | No specific log/retention clarification. | TASK 033 metadata/audit behavior only; no worker logs or retention tested. | PENDING | Approve bounded log schema/access/retention, audit integrity, backup and deletion rules. |
+| 13 | Security monitoring — D19, D22, D28 | Monitoring permitted. | No worker telemetry, alert or incident route verified. | PENDING | Approve signals, alert owners, support/SLO, incident response and evidence-preservation procedures. |
+| 14 | Artifact integrity and provenance — D15, D18, D28 | No specific artifact/scanner clarification. | TASK 033 creates no artifact; existing prebuilt package checks do not verify worker provenance. | PENDING | Approve quarantine, scanner, attestation/hash binding, tamper/replay tests and retention. |
+| 15 | Administrator artifact approval — D29 | Existing exact-fingerprint Administrator review remains a mandatory product security control. | TASK 033 creates no artifact or approval request. | PENDING | Approve reviewer separation and hash binding; keep deployment authorization as a separate gate. |
+| 16 | Recovery and operational ownership — D01, D19–D22 | Worker and monitoring permitted in principle; no accountable recovery owner reported. | No worker recovery or operations verified. | PENDING | Assign owners and approve recovery, cleanup, backup/restore, shutdown and incident exercises. |
+
+### Objective Build Worker implementation readiness gate
+
+Worker integration, dispatch and execution remain disabled until every applicable gate below is evidenced. All applicable D00–D29 decisions must be **APPROVED** with traceable reviewer role, evidence reference and date. A written approval alone does not prove provisioning or technical acceptance.
+
+- [ ] The selected worker infrastructure is provisioned by its accountable owner and matches the approved architecture/data classification.
+- [ ] Independent testing verifies OS, filesystem, per-job reset, process/child-process and cross-job isolation; no same-user-only boundary is accepted.
+- [ ] Exact approved Node.js/.NET toolchain binaries, versions, hashes, provenance and update procedure are recorded and match the provisioned worker.
+- [ ] Written executable-policy scope permits only the approved toolchain/fixed templates in the boundary; tests prove uploaded/source-generated `.exe` files and arbitrary unapproved executables cannot run.
+- [ ] Approved network endpoints, direction, protocols, ports, certificates and worker authentication are provisioned; replay, stale job, unauthorized destination and unauthenticated request tests fail closed. IHP listeners remain loopback-only.
+- [ ] Dependency sources are named and approved; deny-by-default egress, authentication, lock/hash verification and unavailable/tampered-source behavior are tested.
+- [ ] CPU, memory, disk, process, wall-clock, concurrency and queue limits are approved, enforced and verified under adversarial/resource-exhaustion tests.
+- [ ] Source, workspace, cache, logs and artifacts follow approved secrets, access, retention, deletion, backup and recovery rules; cleanup is verified on success, failure, cancellation, timeout and crash.
+- [ ] Audit, telemetry, alerting, incident response, service ownership and evidence retention are approved and exercised without exposing secrets or source contents.
+- [ ] Returned artifacts are validated, provenance-bound, fingerprinted and quarantined; a distinct authorized Administrator approves the exact immutable fingerprint, and M11 deployment authorization remains separate and mandatory.
+- [ ] A separately authorized implementation plan defines rollback-safe additive SQLite changes, focused adversarial tests and full regression before any dispatch can be enabled.
+
+Any unchecked item, PENDING/NEEDS_CLARIFICATION/REJECTED decision, missing evidence, failed isolation test or unprovisioned service blocks worker integration. Do not execute uploaded source while the gate is incomplete.
+
+### TASK 033 integration boundary review (read-only)
+
+Static review of TASK 033 found the following present seams and limits; no implementation code or API behavior was changed:
+
+| Concern | Existing seam and verified limit | Smallest future integration point after approval |
+| --- | --- | --- |
+| Dispatch | `BuildJobs.create` authorizes/validates the staged snapshot and persists `REQUESTED → VALIDATED → BLOCKED_WORKER_UNAPPROVED`. `UnapprovedBuildWorker` returns only the constant blocked state; there is no queue, endpoint or process client. | Add a separately authorized dispatcher behind the inert provider, with idempotent job identity and durable dispatch intent. Do not dispatch on upload or before the readiness gate. |
+| Worker authentication | No worker identity, credential, protocol or network channel exists. | Add least-privilege service authentication and per-job authorization using only the IT-approved channel; keep credentials out of SQLite/API/logs and implement replay/expiry checks. |
+| Status updates | Status transitions and `BuildJobEvent` rows are bounded/audited in `BuildJobs`; SQLite migration constraints admit only the current metadata states. | Introduce operational states only through a reviewed additive migration and authenticated status-ingress method; validate legal transitions transactionally and audit each event. |
+| Artifact fingerprint | The current `sourceSha256` identifies validated source snapshot files; TASK 033 creates no output. | Validate returned output paths/types/size/provenance, compute an output fingerprint, bind it to job/source/template/toolchain/dependencies, and store privately in quarantine before review. |
+| Failure/cancellation | Current cancellation changes metadata only and does not contact or stop a worker; operational failure/timeout states do not exist. | After authorization, add bounded worker cancellation, descendant termination, terminal failure/timeout transitions, idempotent cleanup and residue evidence. |
+| Audit logging | `BuildJobEvent` and the existing M11 audit service record metadata transitions; no worker log/result ingestion exists. | Extend sanitized bounded event/audit records to worker identity, status, source/output fingerprints, cleanup and reviewer/deployment references without secrets or raw source/log content. |
+
+After quarantine, use the existing exact-fingerprint Administrator review and separate M11 deployment authorization. These seams do not authorize current dispatch, worker communication, artifact APIs, UI, source execution or deployment; each requires the readiness gate and a separate implementation assignment.
 
 ### Decision outcome handling
 
