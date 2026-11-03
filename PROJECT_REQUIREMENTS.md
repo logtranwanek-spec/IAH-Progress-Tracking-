@@ -1,7 +1,11 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 036 - M10-DB Phase 1 candidate inventory - 2026-11-03
+## Current TASK 037 - M10-DB prospective per-application storage resolver - 2026-11-03
+
+TASK 037 implements a prospective, application-scoped SQLite path resolver and automated path-security checks. It resolves only after the caller explicitly selects `workspace` or `data`; it does not select a default path, map an application’s current database behavior, or resolve DB-W0. It performs validation only and does not create directories, open/attach/provision/modify/migrate/replace/delete databases, change runtime configuration, or execute application code. Existing physical paths and original database bytes remain untouched. M7 and M10-DB remain IN PROGRESS; Source Build remains disabled and D00-D29 remain PENDING without authorized written evidence. See section 9.1.17 and PROGRESS.md for evidence and remaining compatibility decisions.
+
+## Historical TASK 036 - M10-DB Phase 1 candidate inventory - 2026-11-03
 
 Phase 1 now persists metadata for SQLite candidates already detected by the authenticated Folder/ZIP intake and exposes application-scoped M11-protected read APIs. The additive Registry migration contains no application database bytes. This does not implement a runtime database association, storage workspace, provisioning, backup/restore, migration, replacement or Dashboard lifecycle controls. M10-DB is IN PROGRESS for this metadata slice only; M7 remains IN PROGRESS, Source Build remains disabled, and D00-D29 remain PENDING absent authorized written evidence. See section 9.1.16 and PROGRESS.md for implementation and verification evidence.
 
@@ -1758,6 +1762,16 @@ This is the implemented M10-DB Phase 1 metadata slice. Existing authenticated Fo
 The recheck reports only `VERIFIED`, `FINGERPRINT_MISMATCH` or `STAGED_ARTIFACT_UNAVAILABLE`; expiration of private staging never causes the system to recreate or mutate the candidate. Invalid/cross-application references fail closed. APIs expose validated relative paths and bounded metadata only, not host paths, raw DB files, credentials or database contents. Tests use disposable SQLite fixtures; the configured Platform Registry migration remains an explicit operator action and was not applied by TASK 036.
 
 **Not implemented by this phase:** A candidate is not an active application database. There is no runtime attachment, database mode selection, persistent workspace, file provisioning, connection/path rewriting, migration execution, backup, restore, replacement, deletion, database-content download or Dashboard lifecycle management. Uploaded SQL stays inert, and no source or application code is executed. Existing uploaded bytes are not modified. Full lifecycle work remains gated by DB-W0 compatibility decisions and later M10-DB acceptance. Current same-Windows-identity filesystem separation is not a sandbox.
+
+### 9.1.17. TASK 037 current implementation - prospective storage path validation
+
+The API package now contains an internal prospective path resolver for future application database operations. A caller must explicitly select either `workspace` or `data` and provide an application UUID and SQLite-relative file path. The resolver constrains the result to `<IHP_STORAGE_ROOT>/Applications/<application-uuid>/<selected-area>/`, requires storage to be under the current-user profile and outside the repository, and rejects invalid UUIDs, unsupported areas/extensions, rooted or traversing/encoded paths, Windows device/stream aliases, excessive path depth/length, and Registry overlap with application storage. Existing path segments are inspected with `lstat`/`realpath`; symbolic links/junction aliases, wrong file types and multiply linked target files are rejected. Errors contain fixed safe messages rather than absolute paths.
+
+This is path validation only. It creates no directories, opens no SQLite files, returns no Registry path, performs no database read/write, and does not connect the resolver to APIs, application runtime, candidate inventory or database lifecycle. Callers must revalidate at each future operation; path checks alone do not eliminate filesystem time-of-check/time-of-use races or provide OS isolation.
+
+DB-W0 remains unresolved. `workspace` and `data` are explicit choices accepted by this low-level resolver, not a selected default or product decision. No app-relative, CWD-relative, module/assembly-relative or absolute path is transparently remapped. My Work Center remains NOT COMPATIBLE AS-IS under the existing evidence until its module-relative active path, override, startup/migration, health, base-path, export and access-model questions are resolved. No existing app/database was inspected or modified as part of this resolver task.
+
+Verification used disposable test directories and inert byte fixtures only. The resolver does not provision, attach, modify, migrate, replace, back up, restore or delete application data. It is not a sandbox against malicious code running under the same Windows identity. Full lifecycle, authorization integration and per-operation identity checks remain future M10-DB work.
 
 # 10. APPLICATION VERSION MANAGEMENT
 

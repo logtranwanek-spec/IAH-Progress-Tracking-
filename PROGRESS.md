@@ -1,6 +1,51 @@
 # Project Progress
 
-## Current TASK 036 - M10-DB Phase 1 application database inventory - 2026-11-03
+## Current TASK 037 - M10-DB canonical per-application database storage resolver - 2026-11-03
+
+### Scope and DB-W0 compatibility review
+
+Reviewed the latest requirements and DB-W0 work package before adding storage resolution. DB-W0 remains unresolved: the product has not selected workspace versus `data/application.db` defaults, supported path bases, CWD/module/assembly/absolute-path mapping, MWC override acceptance, startup migration handling, import/WAL policy, raw backup-route policy, or same-user trust boundary acceptance. The existing evidence classifies original My Work Center as NOT COMPATIBLE AS-IS; its module-relative `data/my-work-center.db` path is not redirected by changing process CWD. Its existing absolute `WORK_CENTER_DB_PATH` override is not approved as a platform binding. No new MWC inspection or application/database access occurred for this task.
+
+To avoid resolving those product decisions in code, the new resolver requires the caller to explicitly choose `workspace` or `data` and supply a safe relative SQLite filename. It does not impose a default or claim that either location matches an existing application's behavior. No runtime or API integration was added.
+
+### Implemented components
+
+- Added `src/Api/src/application-database-storage.ts`, an internal prospective path resolver under `<IHP_STORAGE_ROOT>/Applications/<canonical-application-UUID>/{workspace|data}/`.
+- Requires absolute configured storage and Registry paths, keeps storage within the current-user profile and outside the repository, and rejects Registry overlap with application storage.
+- Validates canonical UUIDs and relative SQLite paths; rejects rooted/traversing/encoded paths, Windows stream/device aliases, control/format characters, unsupported extensions, and excessive path size/depth.
+- Walks existing path segments with `lstat` and `realpath`; rejects symlinks/junction aliases, unexpected file types and known multiply-linked target files. Returns fixed safe error messages without printing absolute paths.
+- Resolver is not called by API endpoints or the Deployment Agent. It creates no directories, opens no database, does not return Registry paths, does not inject configuration, and has no DB read/write/attachment/provisioning/migration/replacement/deletion behavior. Future callers must revalidate at each operation; filesystem checks do not remove time-of-check/time-of-use races or create an OS sandbox.
+- Added `src/Api/test/storage-resolver.test.mjs` and registered it in `src/Api/package.json`. Ten tests cover prospective non-creation, explicit area selection, UUID/path validation, traversal/device/stream/extension rejection, Registry overlap, cross-app junctions, linked storage roots, hard-link aliases, target type conflicts, and preservation of existing fixture bytes.
+
+### Files changed
+
+- `src/Api/src/application-database-storage.ts` — new resolver.
+- `src/Api/test/storage-resolver.test.mjs` — new disposable path-security tests.
+- `src/Api/package.json` — include resolver tests in the API test script.
+- `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `AGENTS.md`, `PROGRESS.md` — TASK 037 evidence and durable constraints.
+- No schema, migration, configured Registry, application database, deployed application, Gateway, Dashboard or runtime behavior changed.
+
+### Verification evidence
+
+- API formatter ran on the new TypeScript/test files and `src/Api/package.json`.
+- `npm.cmd run build --workspace @ihp/api` — PASS; Prisma WASM validated 24 models, guarded client generation succeeded, and TypeScript compilation succeeded.
+- From `src/Api`, `node --test test/storage-resolver.test.mjs` — **10 passed, 0 failed, 0 skipped**.
+- `npm.cmd test --workspace @ihp/api` — **159 passed, 0 failed, 0 skipped** (144 API checks plus 15 SQLite/migration checks).
+- `npm.cmd run verify` — **602 passed, 0 failed, 0 skipped; exit 0**, including API/SQLite 159, Dashboard 47, browser protocol/DOM simulation 54, Foundation managed DLL 27, Gateway managed DLL 114, samples 82, Deployment Agent managed DLL 27, routing integration 19, package checks 40 and Node readiness/foundation checks 33. Final local smoke passed, owned components stopped, listeners/ports were released and temporary storage was removed.
+- .NET projects were published with `UseAppHost=false` and executed as published DLLs; no `.exe` was run. Smoke listeners remained loopback-only. Protocol/DOM checks are not actual-browser acceptance evidence.
+- Disposable fixture files included inert byte sentinels only. No uploaded application source, original application, configured Registry or production data was executed/opened/modified. No external database engine, Docker, Administrator privilege or Windows security setting was used.
+
+### Status, limitations and next task
+
+- TASK 037's prospective resolver sub-scope is implemented and verified. **M10-DB remains IN PROGRESS**, and DB-W1 remains IN PROGRESS for schemas/modes, associations, lifecycle metadata, authorization and safe operation integration. M1-M6/M11 remain COMPLETED; M7/M8 remain IN PROGRESS; M9/M10/M12 remain NOT STARTED.
+- Source Build remains disabled. D00-D29 remain PENDING (0 approved, 30 pending) without authorized written evidence. M8's 53 actual-browser cases remain unverified/not run as previously recorded.
+- DB-W0 remains a blocker before mapping existing applications to these paths or using the resolver for runtime/lifecycle operations. Path checks are defense-in-depth, not isolation from malicious code with the same Windows identity. No database file or path compatibility is implied by passing resolver tests.
+- No provisioning, attachment, modification, migration, replacement, backup, restore, deletion, database content inspection or source execution occurred.
+- **Recommended TASK 038:** resolve DB-W0 with the product owner using a documented path-compatibility matrix (including CWD/module-relative/absolute paths, workspace/data semantics, MWC disposition and startup migration behavior). Do not connect this resolver to runtime or lifecycle operations until those decisions and required authorization are recorded.
+
+---
+
+## Historical TASK 036 - M10-DB Phase 1 application database inventory - 2026-11-03
 
 ### Scope and implementation
 
