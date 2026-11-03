@@ -4,7 +4,9 @@
 
 Internal Application Hosting & Deployment Platform (project code: Internal Hosting Platform / IHP). The complete, canonical requirements are in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md).
 
-**Latest assignment (2026-11-02): TASK 034 — IT/Security approval evidence and Build Worker readiness.** This documentation-only task reviews D00–D29, prepares the 16-item approval checklist, defines an objective implementation gate and records the TASK 033 integration seams. The product-owner-reported policy clarifications remain unapproved; all D00–D29 remain PENDING. No IT/Security contact, worker provisioning/connection, source execution, application change, build or test is authorized. M7 remains IN PROGRESS and Source Build disabled. Do not begin integration until written approvals and actual isolation/provisioning evidence pass the gate in PROJECT_REQUIREMENTS.md.
+**Latest assignment (2026-11-03): TASK 035 — IT/Security approval evidence review and worker readiness.** Workspace/task evidence review found no traceable IT/Security approval, worker provisioning or isolation results. Decision status is 0 APPROVED / 30 PENDING; readiness is NOT READY. Product-owner-reported policy clarifications remain context only. M7 remains IN PROGRESS and Source Build disabled. No reviewer contact, provisioning, source execution, application build/test or security change occurred. Do not start worker integration until written approvals and actual technical gates pass.
+
+**Historical assignment (2026-11-02): TASK 034 — IT/Security approval evidence and Build Worker readiness.** Prepared a per-decision readiness matrix, 16-item checklist and objective implementation gate, and mapped TASK 033 seams by static review. No approval or worker readiness was claimed. All D00–D29 remain PENDING; M7 remains IN PROGRESS and Source Build disabled.
 
 **Historical assignment (2026-11-02): TASK 033 — Non-executing Build Job metadata API.** The authorized Category A subset is implemented and verified. `npm.cmd run verify` passed with 587 checks, 0 failures and 0 skips, including the SQLite/M11 Build Job tests; DLL publish checks and owned loopback smoke passed. Valid API requests stop at `BLOCKED_WORKER_UNAPPROVED`; no worker is provisioned/connected, no uploaded source executes and no artifact is created. This metadata-only work did not change M7 or the D00–D29 approval gate.
 
@@ -460,6 +462,27 @@ TASK 033 is a separately scoped, pre-approval metadata-only subset. It does not 
 **Status:** COMPLETED for TASK 034 approval-readiness documentation only. No milestone or D-register status changes. No approval, worker readiness or isolation success is claimed.
 
 **Next task:** TASK 035 — review traceable written IT/Security responses against D00–D29 and the readiness checklist. Update statuses only with authorized evidence. If approvals and provisioning/isolation evidence are complete, propose a separate bounded worker-integration task; otherwise record clarifications/rejections and keep Source Build disabled.
+
+#### TASK 035 — IT/Security approval evidence review (documentation-only scope)
+
+**Objective:** decide readiness from evidence actually present in the project workspace or explicitly supplied by the product owner; preserve the current execution/approval gate.
+
+**Evidence reviewed:** product-owner policy clarification in TASK 035 (2026-11-03) and its TASK 032 record (2026-11-02); the D00–D29 register/TASK 031, approval package/TASK 030, mandatory source-build/TASK 029 requirements, TASK 034 checklist/readiness matrix, and TASK 033 API/schema/migration/read-only integration boundary. Workspace filename/text inventory review on 2026-11-03 found no traceable IT/Security decision, signed approval, worker service record, provisioned configuration or isolation-test artifact. The source build policy statements are not reviewer evidence.
+
+**Result:** **0 APPROVED / 30 PENDING; Worker Integration NOT READY.** No named authorized approver or decision evidence reference/date was supplied. All 16 checklist items remain outstanding in whole or in part; TASK 033 proves only the non-executing metadata API. No status changes and no worker or application behavior changes are authorized.
+
+**Acceptance criteria:**
+
+- For each D00–D29, record available evidence sources/dates, reported context, missing written authorization and technical acceptance gate; retain PENDING absent authorized evidence.
+- Verify all 16 readiness items distinguish product-owner report, observed technical evidence, written approval and outstanding actions.
+- Keep written authorization, actual provisioning, independent isolation, approved binaries/hashes, network/authentication, dependency policy, quotas, audit/monitoring, recovery/cleanup and exact-artifact approval as hard prerequisites.
+- Preserve no uploaded/source-generated `.exe`, arbitrary unapproved executable, M11 authorization, exact-fingerprint Administrator approval, loopback-only IHP, SQLite-only, no-Docker/no-Administrator and no-security-policy-change requirements.
+- Documentation checks pass; do not run application tests/builds because no application code changes are in scope.
+- Keep M7 IN PROGRESS, Source Build disabled and D00–D29 PENDING until supported by written evidence.
+
+**Status:** COMPLETED for the evidence-review documentation only. Worker Integration remains **NOT READY**. No approval is fabricated and no source execution/provisioning occurred.
+
+**Next task:** TASK 036 — the product owner supplies traceable written D00–D29 responses and outstanding service/configuration evidence from authorized owners. Update only decisions supported by that evidence. If all approvals are granted and the worker is provisioned and independently verified, propose a separate bounded integration implementation assignment; otherwise record unresolved questions and keep Source Build disabled.
 
 #### TASK 031 — Human review summary and decision register (prepared; all decisions PENDING)
 

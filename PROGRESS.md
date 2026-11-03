@@ -1,6 +1,36 @@
 # Project Progress
 
-## Current TASK 034 — IT/Security approval evidence and Build Worker readiness — 2026-11-02
+## Current TASK 035 — IT/Security approval evidence review — 2026-11-03
+
+### Evidence reviewed and decision
+
+- Read AGENTS.md, PROJECT_REQUIREMENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md. Reviewed TASK 029–034, the full D00–D29 register, TASK 030 controls/threat model/approval package, the TASK 034 checklist/readiness gate, and TASK 033 API, schema, migration, tests and read-only integration boundary.
+- Evidence sources/dates: product-owner policy clarification in the TASK 035 request (2026-11-03), with its earlier report recorded under TASK 032 (2026-11-02); decision/approval register TASK 031 and requirements package TASK 029–030 (2026-11-02); TASK 034 checklist (2026-11-02); read-only workspace filename/text and official-document review (2026-11-03). The source-key mappings and per-D decision citations are in PROJECT_REQUIREMENTS.md.
+- Workspace review found no traceable written IT/Security decision, signed approval, named authorized reviewer, worker service record, provisioned worker configuration or isolation test results. The product-owner policy report confirms permissions in principle only; it is not independent IT/Security approval. Application source files named for approvals/workers are implementation code, not approval evidence.
+- **Decision result: 0 APPROVED, 30 PENDING. Worker integration readiness: NOT READY.** No D00–D29 written or technical acceptance criterion was satisfied by the available evidence. The D register's required approver roles remain proposed role names, not identified authorized individuals.
+- Reviewed the 16-item checklist: no worker host/owner/identity/tool inventory, executable-policy citation, OS/filesystem/process isolation, network/authentication design, dependency allowlist, numeric resource quotas, worker logs/monitoring, artifact provenance/quarantine test, exact-artifact workflow approval, or recovery/cleanup evidence is available. Product-owner-reported categories are distinguished from these missing approvals and tests.
+
+### TASK 033 boundary and implementation decision
+
+- The read-only source review confirmed that current Build Job requests validate staged metadata and stop at `BLOCKED_WORKER_UNAPPROVED`. There is no worker dispatch, worker identity/channel, execution, operational status ingress or returned artifact. The existing source hash is not an output artifact fingerprint; existing M11 exact-fingerprint approval and deployment authorization remain distinct mandatory gates.
+- No bounded worker implementation task is ready to start. The immediate action is for the product owner to obtain traceable D00–D29 decisions and evidence from identified authorized approvers and service owners; required technical provisioning/acceptance must then be separately evidenced. Do not contact reviewers or provision/connect anything as part of this task.
+
+### Files and verification
+
+- Updated only `AGENTS.md`, `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md` and `PROGRESS.md`. No source, test, schema, migration, database, application, system setting or infrastructure changed.
+- Application builds/tests and source/build execution: **NOT RUN**; no application code changed and execution was outside scope.
+- Documentation checks: `node node_modules/prettier/bin/prettier.cjs --check AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md` passed. `PROJECT_REQUIREMENTS.md` is excluded by `.prettierignore`; its changed sections were manually reviewed.
+- Consistency checks verified all 30 D IDs remain PENDING, every readiness row cites applicable source/date keys, the checklist has 16 items, and M7 remains IN PROGRESS with Source Build disabled. `git diff --check` passed.
+
+### Status, blockers and next task
+
+- M1–M6/M11 remain **COMPLETED**; M7 and M8 remain **IN PROGRESS**; M9, M10, M10-DB and M12 remain **NOT STARTED**. No milestone status changed.
+- **NOT READY** blockers: no authorized written decisions; no named approver or accountable worker owner; no provisioned host, identity or verified isolation; no approved binaries/hashes and executable-policy scope; no approved network/authentication/dependency configuration; no quotas, telemetry, retention, scanner, recovery or cleanup evidence; and no worker artifact provenance/approval acceptance evidence.
+- **Recommended TASK 036:** the product owner supplies traceable written D00–D29 decisions and outstanding service/configuration evidence from authorized IT/Security/IT owners. Record each evidence reference/date and update only supported decision statuses. If approvals remain pending/unclear/rejected, preserve Source Build disabled. If all applicable approvals and actual worker isolation/provisioning gates pass, propose a separate bounded integration implementation task.
+
+---
+
+## Historical TASK 034 — IT/Security approval evidence and Build Worker readiness — 2026-11-02
 
 ### Scope and review outcome
 

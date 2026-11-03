@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 034 — Build Worker approval readiness — 2026-11-02
+## Current TASK 035 — IT/Security approval evidence review — 2026-11-03
+
+TASK 035 is evidence review and documentation only. The available evidence review found no traceable written IT/Security approval or worker provisioning/isolation evidence. Record the product-owner policy statements only as reported context, not approval. Keep D00–D29 PENDING (0 approved, 30 pending), Source Build disabled and M7 IN PROGRESS. Do not contact reviewers, provision/connect infrastructure or execute source/build tools. Record the decision-specific sources/dates and NOT READY result in PROJECT_REQUIREMENTS.md and PROGRESS.md. Commit/push only the four official tracking Markdown files.
+
+## Historical TASK 034 — Build Worker approval readiness — 2026-11-02
 
 TASK 034 is a documentation-only review of D00–D29, the 16-item final approval checklist and the TASK 033 integration boundary. Do not contact IT/Security, provision/connect a worker, execute tools or source, change application code, or claim approval. Product-owner-reported permission for an isolated worker/toolchain is not written IT/Security authorization. Keep all D00–D29 PENDING absent traceable evidence from the authorized approver, keep Source Build disabled and M7 IN PROGRESS. The readiness gate and current evidence are in PROJECT_REQUIREMENTS.md and PROGRESS.md. Only the four official tracking Markdown files may be committed/pushed for this task.
 
