@@ -1,6 +1,54 @@
 # Project Progress
 
-## Current TASK 037 - M10-DB canonical per-application database storage resolver - 2026-11-03
+## Current TASK 038 - M10-DB database path compatibility and DB-W0 - 2026-11-03
+
+### Scope and result
+
+Completed the read-only compatibility review and decision record. Added a path-pattern matrix for CWD-relative, Node module-relative, .NET assembly/content-root-relative, absolute, environment-variable and config-file database paths; detailed future NONE/MANAGED_SQLITE/EXISTING_SQLITE behavior; reviewed the TASK 037 resolver boundary; and recorded 13 DB-W0 choices with evidence, proposal/security effect, required product-owner input and status. The work documents proposed/future behavior only; DB-W0 is not fully resolved because the owner has not supplied the remaining decisions.
+
+### Compatibility findings
+
+- **CWD-relative:** Current M5 runtime uses the release as working directory. A future app-specific workspace CWD may preserve truly CWD-relative DB suffixes, but can change other relative assets/config and needs M5 compatibility tests and owner approval. TASK 037 does not set CWD.
+- **Module-relative:** Node `import.meta.url`/`__dirname` paths are independent of process CWD. Keeping data next to code places it under a release; workspace redirection requires an app-supported fixed binding, reviewed adapter or source change. No generic solution is implemented.
+- **Assembly/content-root-relative:** .NET path semantics depend on base/content root and provider. CWD changes are not sufficient evidence; each application requires static/runtime compatibility evidence under separately authorized safe fixtures.
+- **Absolute:** Preserving the same absolute path is possible only if the exact approved location remains. Relocating changes it. Reject arbitrary external paths; a named application override requires explicit approval and a fixed app-scoped canonical target.
+- **Environment variable:** Only a known, fixed allowlisted name with a Platform-generated canonical value could be considered. M5 clears inherited variables and does not currently inject MWC's `WORK_CENTER_DB_PATH`; TASK 037 validates a destination only.
+- **Config file:** No generic parse/rewrite is allowed. Path base, precedence and secrets depend on the application/provider; a typed app-specific contract or application support is required.
+
+### My Work Center review
+
+Read-only inspection of `server/index.mjs`, `server/database.mjs` and `package.json` confirmed the previously recorded module-root database default `data/my-work-center.db` and named `WORK_CENTER_DB_PATH` absolute override. No app or database was executed/opened/read. Additional source facts: startup creates the DB parent, opens SQLite in WAL mode, creates/updates a migration ledger and executes unapplied `drizzle/*.sql`; it may create snapshots and prune app backup history beyond 30; `GET /api/backup.db` serves a raw SQLite snapshot; listener binds to 127.0.0.1 and reads `PORT`; no dedicated health or root-prefix handling was found in the inspected entry point; `package.json` declares Node >=24, `sql.js`, a preparation script chained into `start`, and a hosted Worker `build`, while server code imports `node:sqlite`. Startup logs the resolved DB path. None of these behaviors were run or exercised.
+
+**Compatibility remains NOT COMPATIBLE AS-IS.** The named override is a technical candidate only: it changes the absolute physical location, is not an approved/injected M5 binding, and does not fix automatic migrations, app-managed backup/pruning, raw DB download, health/base-path, dependency/runtime, or shared-localhost access-policy gaps. These remain blockers. Do not modify or execute My Work Center or access its production database.
+
+### Modes and DB-W0 decision status
+
+The requirements now spell out: `NONE` means no association/file and no implicit fallback; `MANAGED_SQLITE` is a future uniquely app-owned Platform-provisioned file with non-overwrite and explicit schema operations; `EXISTING_SQLITE` is a pre-existing explicitly registered/authorized file with no implicit write/delete rights. All modes require M11 authorization, preserve data across releases, fail closed on missing/incompatible state and use separately authorized recovery. Exact `workspace/` versus `data/application.db` semantics remain unresolved.
+
+The 13-row matrix is in PROJECT_REQUIREMENTS.md section 9.1.18. **W0-12 (KEEP as upgrade default) is recorded APPROVED as a product-owner policy decision from TASK 023; implementation remains pending.** TASK 023 also records approval to use valid supplied existing data on first use where safely supported, but W0-10's import mode/provenance/location remains PENDING. The other 12 matrix rows are pending (W0-10 includes the prior partial decision plus its unresolved sub-decision). These product statuses are separate from IT/Security D00-D29, which remain all PENDING (0 approved, 30 pending).
+
+### TASK 037 resolver review
+
+Static source/test review confirms it requires explicit `workspace` or `data`; validates a UUID, SQLite relative path and profile/repository/Registry boundaries; inspects existing segments for symlink/junction and type issues; rejects known hard-link aliases; and creates/opens/changes nothing. It has no API/runtime caller and does not interpret any of the six path patterns. It cannot alone authorize an operation, resolve an app path, ensure race-free filesystem access or provide OS isolation. No resolver changes were made.
+
+### Files and verification
+
+- Updated only `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `AGENTS.md` and `PROGRESS.md`. No source, tests, config, schema, migration, database or application files changed.
+- Application tests/builds: **NOT RUN**, as required for this documentation-only task. No new application behavior is claimed verified.
+- Static source inspection used `Get-Content` and `rg` against My Work Center source only; no app entry point or DB file was executed/opened.
+- PowerShell documentation consistency checks passed 8/8, including 13 DB-W0 rows (1 product decision APPROVED, 12 pending), all six path types, all three modes, My Work Center status, resolver boundary, milestone statuses and no-test claims. The first checker attempt used a mismatched literal for "Source Build disabled"; the assertion was corrected and the final 8/8 passed.
+- `node node_modules/prettier/bin/prettier.cjs --write AGENTS.md PROJECT_REQUIREMENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md` was used to format the plan update; the first format check had flagged `IMPLEMENTATION_PLAN.md`. Final `--check AGENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md` passed. `PROJECT_REQUIREMENTS.md` is excluded by `.prettierignore` and its changed sections/table were reviewed directly.
+- `git diff --check` — PASS. No IT/Security approval or D00-D29 status changed.
+
+### Status and next task
+
+M7 and M10-DB remain **IN PROGRESS**; Source Build remains disabled. M1-M6/M11 remain COMPLETED; M8 remains IN PROGRESS; M9/M10/M12 remain NOT STARTED. M10-DB remains limited to TASK 036 candidate metadata and TASK 037 prospective path validation; no mode, runtime, storage lifecycle or Dashboard management is implemented. The resolver must not be integrated with runtime until relevant DB-W0 path/behavior decisions are settled.
+
+**Recommended TASK 039:** obtain explicit product-owner answers for pending W0-01–W0-11 and W0-13, starting with workspace/data default semantics, supported path bases, MWC override/migration and backup-route disposition, WAL/import policy and same-user trust acceptance. Update statuses only from traceable owner evidence. Afterward, separately scope a fail-closed compatibility preflight; do not enable runtime attachment or provisioning as a side effect.
+
+---
+
+## Historical TASK 037 - M10-DB canonical per-application database storage resolver - 2026-11-03
 
 ### Scope and DB-W0 compatibility review
 

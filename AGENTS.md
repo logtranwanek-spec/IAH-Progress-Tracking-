@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 037 - M10-DB prospective per-application storage resolver - 2026-11-03
+## Current TASK 038 - M10-DB path compatibility and DB-W0 decision record - 2026-11-03
+
+This task is read-only compatibility analysis and documentation. Do not change application/IHP source, resolver behavior, schema/migrations, databases or runtime configuration; do not execute applications, migrations, uploaded source, or access application/production DB contents. Record source-derived facts separately from proposals and owner decisions. DB-W0 decisions without traceable product-owner evidence remain PENDING; do not treat IT approvals D00-D29 as product decisions or mark any of those approved. All IT/Security decisions D00-D29 remain PENDING. Preserve TASK 023's scoped product-owner approvals for first use of a valid supplied DB and KEEP as the upgrade default, without claiming implementation. Keep M7 and M10-DB IN PROGRESS, Source Build disabled, and all existing Windows/SQLite/security restrictions.
+
+## Historical TASK 037 - M10-DB prospective per-application storage resolver - 2026-11-03
 
 TASK 037 adds only an explicit-area, prospective path resolver and disposable security tests. DB-W0 compatibility decisions remain unresolved: callers must select `workspace` or `data` explicitly; no default database path, runtime working directory, application path rewrite or MWC compatibility is inferred. The resolver does not create directories, open/attach/provision/modify/migrate/replace/delete databases, inject runtime settings or execute application code. Revalidate at each future operation and preserve existing paths/data. M7 and M10-DB remain IN PROGRESS; Source Build stays disabled; D00-D29 stay PENDING absent authorized written evidence. Do not start lifecycle or runtime integration as a side effect.
 
@@ -118,7 +122,7 @@ The latest assignment authorizes the secure upload/intake foundation for folders
 - SQL is inert and can be accepted only under the exact reviewed `drizzle/` relative path. Never execute SQL, migrations, package hooks, application code or uploaded commands. Keep `run.cmd` as inert reviewed text under existing M7 rules.
 - Preserve the 50 MiB inclusive compressed ZIP/file-payload cap and existing entry, expansion, per-file, ratio, path, link, reserved-path, quota, timeout, cleanup and upload security constraints. Do not widen extraction limits, global file types, source builds or process execution.
 - Dashboard results may show only authenticated backend-confirmed paths/statuses and safe validation reasons. Never expose raw DB contents, server filesystem paths, logs with sensitive filenames, credentials, or fabricated attachment/deployment status. Apply the permanent upload validation reporting bounds below to every displayed rejected-file list.
-- Intake alone does not authorize database attachment, provisioning, replacement, backup, restore, migrations or runtime DB configuration. TASK 036 separately authorizes metadata inventory only; M10-DB is IN PROGRESS for that slice, while lifecycle work remains future and M7/M8 stay IN PROGRESS. Keep private production browser operations default-disabled until their separate acceptance criteria pass.
+- Intake alone does not authorize database attachment, provisioning, replacement, backup, restore, migrations or runtime DB configuration. TASK 036 authorizes candidate metadata and TASK 037 prospective path validation only; M10-DB is IN PROGRESS for those slices, while lifecycle work remains future and M7/M8 stay IN PROGRESS. Keep private production browser operations default-disabled until their separate acceptance criteria pass.
 
 ## Historical TASK 023 — My Work Center SQLite compatibility investigation — 2026-10-29
 
@@ -357,6 +361,7 @@ Do not commit any source code or other project files into this progress reposito
 - Audit database lifecycle actions, authorization denials, retention decisions and recovery outcomes without sensitive inputs. Do not claim provisioning/backup/restore works until implemented and verified. Phase 1 candidate inventory is metadata-only; lifecycle operations remain unimplemented.
 - Persist candidate metadata only from the existing authenticated Folder/ZIP intake. Candidate list/detail/validation APIs must enforce M11 `application.read`, current application scope and candidate-to-application association before returning bounded metadata.
 - The TASK 037 resolver validates only prospective application-scoped SQLite paths under explicitly selected `workspace` or `data`; it never chooses a default or performs a database operation. Preserve DB-W0 path compatibility decisions, existing application paths and original bytes until their separately authorized resolution.
+- Treat the resolver as a destination validator, not an application path-pattern adapter. It has no runtime caller and cannot by itself preserve or redirect CWD-, module-, assembly-, absolute-, environment- or config-relative application paths. Resolve DB-W0 before adding such integration.
 - Store no candidate database bytes in the Platform Registry. Expose only validated relative paths, opaque IDs, fixed validation states, fingerprints, sizes and safe timestamps; never return absolute paths, raw database content or download links.
 - Candidate records remain review-only and must not attach, provision, modify, migrate, replace, back up, restore, delete or inject a database path. If staged bytes expire, report unavailable; never recreate or alter the original candidate.
 
