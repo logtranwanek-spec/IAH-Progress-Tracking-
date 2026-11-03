@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 038 - M10-DB path compatibility and DB-W0 decision record - 2026-11-03
+## Current TASK 039 - M10-DB product decision package and readiness - 2026-11-03
+
+This assignment is documentation/decision-readiness only. Convert the existing DB-W0 findings into concise recommendations, alternatives and exact product-owner questions; do not make decisions for the owner. Preserve TASK 023's approved first-use (where safely supported), KEEP-on-upgrade and explicit replacement-authorization requirements. A recommendation is not approval. Keep unresolved W0 decisions PENDING, all IT/Security D00-D29 PENDING, M7 and M10-DB IN PROGRESS, and Source Build disabled. Do not change source, schema, migrations, runtime behavior, application files or databases; do not execute applications or access production database contents.
+
+## Historical TASK 038 - M10-DB path compatibility and DB-W0 decision record - 2026-11-03
 
 This task is read-only compatibility analysis and documentation. Do not change application/IHP source, resolver behavior, schema/migrations, databases or runtime configuration; do not execute applications, migrations, uploaded source, or access application/production DB contents. Record source-derived facts separately from proposals and owner decisions. DB-W0 decisions without traceable product-owner evidence remain PENDING; do not treat IT approvals D00-D29 as product decisions or mark any of those approved. All IT/Security decisions D00-D29 remain PENDING. Preserve TASK 023's scoped product-owner approvals for first use of a valid supplied DB and KEEP as the upgrade default, without claiming implementation. Keep M7 and M10-DB IN PROGRESS, Source Build disabled, and all existing Windows/SQLite/security restrictions.
 
@@ -362,6 +366,8 @@ Do not commit any source code or other project files into this progress reposito
 - Persist candidate metadata only from the existing authenticated Folder/ZIP intake. Candidate list/detail/validation APIs must enforce M11 `application.read`, current application scope and candidate-to-application association before returning bounded metadata.
 - The TASK 037 resolver validates only prospective application-scoped SQLite paths under explicitly selected `workspace` or `data`; it never chooses a default or performs a database operation. Preserve DB-W0 path compatibility decisions, existing application paths and original bytes until their separately authorized resolution.
 - Treat the resolver as a destination validator, not an application path-pattern adapter. It has no runtime caller and cannot by itself preserve or redirect CWD-, module-, assembly-, absolute-, environment- or config-relative application paths. Resolve DB-W0 before adding such integration.
+- Product-owner recommendations are not decisions. Update a W0 status only when traceable product-owner confirmation is supplied; keep IT/Security D00-D29 as a separate approval register. Do not reopen the TASK 023-approved safe first-use/KEEP/explicit-replacement policy unless a precise implementation detail remains unresolved.
+- Do not claim an application is path-compatible or enable runtime binding from resolver tests alone. Require a reviewed app-specific compatibility preflight covering path base, creation/migration behavior, data identity, WAL/SHM, health, route prefix, package/runtime and access policy.
 - Store no candidate database bytes in the Platform Registry. Expose only validated relative paths, opaque IDs, fixed validation states, fingerprints, sizes and safe timestamps; never return absolute paths, raw database content or download links.
 - Candidate records remain review-only and must not attach, provision, modify, migrate, replace, back up, restore, delete or inject a database path. If staged bytes expire, report unavailable; never recreate or alter the original candidate.
 

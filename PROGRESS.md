@@ -1,6 +1,47 @@
 # Project Progress
 
-## Current TASK 038 - M10-DB database path compatibility and DB-W0 - 2026-11-03
+## Current TASK 039 - M10-DB product decision package and readiness - 2026-11-03
+
+### Result
+
+Prepared a concise, grouped product-owner decision package in PROJECT_REQUIREMENTS.md section 9.1.19, building on rather than repeating TASK 038's compatibility analysis. Each unresolved group identifies current behavior, recommended option, alternative, security/existing-application impact and the exact confirmation needed. No owner response was supplied in this task, so recommendations remain unapproved.
+
+### Confirmed decisions preserved
+
+- TASK 023 approved first use of valid supplied existing data where safely supported; no data was tested or imported here.
+- Upgrade default remains KEEP existing database. Replacement remains an explicit, separately authorized and confirmed operation with backup/recovery requirements.
+- These are product requirements, not proof of lifecycle implementation. They are not being requested again. W0-10's import mode/provenance/location remains unresolved.
+
+### Product decision status
+
+- The original 13-row W0 matrix retains its IDs. W0-12 (KEEP-on-upgrade) is the sole fully resolved row. W0-01–W0-11 and W0-13 remain pending; W0-10 contains the prior safe-first-use policy but its mode/provenance/location subdecision is pending.
+- Added supplemental W0-14 for the M5 health/M6 routing-prefix compatibility contract without renumbering existing decisions. It is PENDING.
+- IT/Security D00–D29 remain a separate register, all PENDING (0 approved, 30 pending). M7 and M10-DB remain IN PROGRESS; Source Build remains disabled.
+
+### Architecture and My Work Center
+
+Recommended architecture remains a metadata-only Platform Registry plus independent, app-owned SQLite databases outside releases/public trees, with stable data across releases, no automatic replacement, and no cross-app/Registry access. This remains a target, not implemented lifecycle support.
+
+My Work Center remains **NOT COMPATIBLE AS-IS**. Existing static evidence and blockers are retained in the requirements: module-relative DB default; unapproved `WORK_CENTER_DB_PATH`; startup migrations and DB creation; app-managed backup/pruning and raw DB download; absent exact health/base-path contract; package/runtime concerns; shared-localhost access. The proposed minimum profile is recorded as future requirements only. No My Work Center source or database was changed, executed or accessed in this task.
+
+### Implementation readiness and next scope
+
+**Readiness is NOT READY for path-dependent runtime/lifecycle implementation.** W0 path defaults/bases, app bindings, import semantics, WAL/SHM source handling, migration gate, backup/restore operations, trust boundary, MWC compatibility, and health/routing contract still require product-owner confirmation and applicable technical/security acceptance.
+
+**Proposed TASK 040 (NOT STARTED):** a separately authorized, metadata-only database mode and association-intent foundation in the SQLite Registry. Keep it inert: no physical paths, active/ready database state, candidate-content reads, filesystem or SQLite operations, runtime injection, provisioning, attachment, migrations, backup/restore, replacement, deletion or application execution. Use M11 ownership/RBAC and audit; verify only against disposable Registry fixtures. This scope can be isolated from unresolved path choices, but it does not resolve or waive them.
+
+### Files and verification
+
+- Updated only `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `PROGRESS.md` and `AGENTS.md`.
+- No application code, tests, schemas, migrations, databases, runtime configuration or deployed applications changed. No application/build tests were run, as required.
+- Compatibility evidence is static and based on the recorded TASK 023/TASK 038 sources; no application was executed and no production database content was accessed.
+- Documentation consistency checks passed: the 13 original DB-W0 decisions are accounted for with W0-12 as the sole approved product-policy row and the other 12 pending (W0-10 retains its approved safe-first-use requirement while its mode/provenance remains pending); supplemental W0-14 is pending; D00-D29 remain separately pending; milestone/source-build states and My Work Center compatibility blockers are consistent; TASK 040 is proposed but not started. Prettier check passed for AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md; PROJECT_REQUIREMENTS.md is excluded by the repository Prettier ignore rules and was manually reviewed. `git diff --check` passed. Application tests/builds were not run because this task is documentation-only.
+
+**Exact next task:** TASK 040, only after a separate implementation assignment, with the metadata-only boundaries above. Product-owner answers to W0-01–W0-11 and W0-13/W0-14 remain necessary before runtime/lifecycle integration. Keep M7/M10-DB IN PROGRESS and Source Build disabled.
+
+---
+
+## Historical TASK 038 - M10-DB database path compatibility and DB-W0 - 2026-11-03
 
 ### Scope and result
 
