@@ -1,7 +1,11 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 035 — IT/Security approval evidence review — 2026-11-03
+## Current TASK 036 - M10-DB Phase 1 candidate inventory - 2026-11-03
+
+Phase 1 now persists metadata for SQLite candidates already detected by the authenticated Folder/ZIP intake and exposes application-scoped M11-protected read APIs. The additive Registry migration contains no application database bytes. This does not implement a runtime database association, storage workspace, provisioning, backup/restore, migration, replacement or Dashboard lifecycle controls. M10-DB is IN PROGRESS for this metadata slice only; M7 remains IN PROGRESS, Source Build remains disabled, and D00-D29 remain PENDING absent authorized written evidence. See section 9.1.16 and PROGRESS.md for implementation and verification evidence.
+
+## Historical TASK 035 — IT/Security approval evidence review — 2026-11-03
 
 This evidence-only review found no traceable written IT/Security decisions or worker provisioning/isolation evidence in the project workspace or supplied task statements. **0/30 decisions are APPROVED; all D00–D29 remain PENDING. Worker integration is NOT READY.** The product-owner-reported permissions below are not independent IT policy evidence or approval. M7 remains IN PROGRESS and Source Build remains disabled. The 16-item checklist and implementation gate below remain unsatisfied; no IT/Security contact, worker provisioning/connection or source execution occurred.
 
@@ -479,7 +483,7 @@ Implementation must proceed through the gated phases in IMPLEMENTATION_PLAN.md: 
 | Node.js and ASP.NET Core prebuilt deployments | Implemented and managed-fixture verified | Supported reviewed prebuilt formats are prepared without overwrite and exercised through the existing Agent/Gateway workflow under explicit trusted-package opt-in. This is not verification of arbitrary application compatibility. |
 | Source-only upload/build | Intentionally disabled; acceptance unmet | Source-only folder analysis reports BUILD_REQUIRED. No npm install/build, package hook, uploaded shell command, dotnet restore/build, or uploaded source execution is performed. |
 | Browser deployment workflow | Candidate exists; actual-browser acceptance not verified | The signed boundary/DOM tests are simulations. The browser scenario matrix remains 53 NOT RUN; private production browser management remains default-disabled. |
-| Persistent application SQLite workspace | Not implemented; M10-DB NOT STARTED | Candidate data is staged for review. Agent working directory is the selected release directory; no persistent per-app database association or runtime path injection exists. |
+| Persistent application SQLite workspace | Not implemented; M10-DB Phase 1 metadata only is IN PROGRESS | Candidate metadata references its registered application; no persistent per-app database association, workspace or runtime path injection exists. |
 
 ### Deployment model assessment
 
@@ -500,7 +504,7 @@ Implementation must proceed through the gated phases in IMPLEMENTATION_PLAN.md: 
 
 M7's verified upload/review/prebuilt subset is distinct from a fully completed deployment milestone. Package intake can report review and approval state; package preparation is non-overwriting; actual trusted runtime start is a separate opt-in, exact-approval and Agent gate. Source-only packages remain BUILD_REQUIRED and are never converted to packages by running uploaded code. M7 remains **IN PROGRESS** until its existing acceptance criteria are verified or changed through an explicit authorized requirements decision.
 
-The current SQLite workflow can identify, stage and inspect uploaded database candidates separately from code, but it does not associate a candidate with a deployed application or place it into a persistent app workspace. Package generation excludes database artifacts. Runtime launch uses the release directory as working directory and does not inject an application database path. Therefore a database-dependent application cannot rely on the documented M10-DB target workflow today. M10-DB remains **NOT STARTED**; no database was opened or changed for this assessment.
+The current SQLite workflow identifies, stages and inspects uploaded database candidates separately from code. TASK 036 adds persistent metadata linking each candidate to its application and intake reference; that review metadata is not an active database association. Package generation excludes database artifacts. Runtime launch uses the release directory as working directory and does not inject an application database path. Therefore a database-dependent application cannot rely on the documented M10-DB target workflow today. M10-DB is **IN PROGRESS for candidate metadata only**; no uploaded application database was opened writable or changed.
 
 No application, ZIP, database, source, schema or security policy was changed for TASK 028. Prior TASK 027 verification remains the latest execution evidence: package suite 40/40 and full suite 577/577 passed. This read-only assessment adds no test or runtime evidence.
 
@@ -528,11 +532,11 @@ TASK 025 verified structured Folder/ZIP rejection details through API, Dashboard
 
 TASK 024 authorizes authenticated folder and ZIP upload/intake that separates supported SQLite artifacts from application code, stages them privately per application, validates them with bounded read-only checks, and displays safe review metadata. Preserve M7 package validation/fingerprinting and Administrator approval. Database bytes must never enter the code-release package or its fingerprint. Existing limits remain in force. SQL remains inert. This scope does not implement DB lifecycle management (M10-DB), replace/restore/provision databases, run migrations or applications, modify My Work Center, alter runtime working directories/environment, or change Gateway routes. M7 remains IN PROGRESS and M10-DB remains NOT STARTED.
 
-## Current TASK 023 — My Work Center SQLite compatibility investigation — 2026-10-29
+## Historical TASK 023 — My Work Center SQLite compatibility investigation — 2026-10-29
 
 This assignment is a read-only compatibility investigation and documentation update. Do not implement Managed Application Databases, modify IHP or My Work Center code/configuration, alter runtime directories/allowlists, execute the application, or inspect/modify database contents. The product owner has approved first deployment from supported existing SQLite data and **Keep Existing Database** as the upgrade default, with database replacement only as an explicit user choice subject to authorization, confirmation, consistent backup, safe shutdown, validation and recoverable failure handling. These behaviors remain unimplemented. M7/M8 remain IN PROGRESS and M10-DB remains NOT STARTED. See section 9.1.15 for verified findings and proposed gates.
 
-## Current TASK 022 — Persistent application workspace and SQLite design — 2026-10-29
+## Historical TASK 022 — Persistent application workspace and SQLite design — 2026-10-29
 
 This assignment is **investigation and documentation only**. It records approved requirements to preserve existing SQLite data and application-relative database paths, and proposes an implementation design for a per-application persistent workspace distinct from approved releases and backups. No API, Dashboard, Agent, schema, migration, package-validation or database behavior is implemented by this document. M7/M8 remain IN PROGRESS; M10-DB remains NOT STARTED. Do not treat design proposals or historical tests as implementation evidence. Wait for a separate explicit implementation assignment before starting M10-DB.
 
@@ -542,15 +546,15 @@ This assignment is **investigation and documentation only**. It records approved
 **Development Approach:** Production-oriented, modular architecture  
 **Primary Objective:** Self-service deployment of Node.js and ASP.NET Core applications through a centralized hosting platform.
 
-## Current TASK 021 implementation record — 2026-10-29
+## Historical TASK 021 implementation record — 2026-10-29
 
 The default-off Dashboard candidate now provides the M7 folder upload flow through the existing authorized APIs. Keep M7 and M8 IN PROGRESS; actual-browser acceptance remains NOT RUN, and private production browser management stays disabled by default. Source builds remain disabled and M10-DB remains NOT STARTED. Section 5.4 distinguishes this implemented, automated-test-verified candidate from remaining acceptance; the normative security and workflow requirements below remain in force.
 
-## Current M8 continuation authorization — 2026-10-28
+## Historical M8 continuation authorization — 2026-10-28
 
 The latest user resumes M8 implementation after the documentation task: resolve and verify the recorded API startup/readiness failure, assess and secure the opt-in browser authentication candidate, integrate only authorized real Dashboard operations and run focused/full regression. Preserve M11 protections, approved trusted-prebuilt execution gates and all company restrictions. Actual-browser acceptance requires permitted real-browser evidence; keep private production operations disabled and M8 IN PROGRESS if that gate or another required criterion remains unmet. M7 remains IN PROGRESS; M9/M10/M10-DB/M12 are not assigned. The Managed Application Database requirements in section 9.1 are unchanged future work. This supersedes the prior documentation-only scope for the current task, not any security restriction.
 
-## Current documentation-only directive — 2026-10-27
+## Historical documentation-only directive — 2026-10-27
 
 Define the future Managed Application Database architecture in section 9.1: **1 Platform Database + N Independent Application Databases**, with application databases optional. This assignment authorizes changes only to PROJECT_REQUIREMENTS.md, AGENTS.md, IMPLEMENTATION_PLAN.md and PROGRESS.md; it does not authorize implementation, schema changes, migrations, application execution, builds or application tests. It supersedes earlier active implementation assignments for this task only. Preserve all existing milestone statuses: M1–M6/M11 COMPLETED, M7/M8 IN PROGRESS, and M9/M10/M12 NOT STARTED. The new M10-DB sub-milestone is NOT STARTED and requires a future explicit implementation assignment.
 
@@ -1438,7 +1442,7 @@ The platform should be designed to support hostname-based routing in the future,
 
 # 9. DATABASE MANAGEMENT
 
-**Current policy and scope:** Only SQLite is allowed for real database operations. SQL Server, PostgreSQL and MySQL are **metadata-only connection references**; no real connection, authentication, migration, provisioning or connectivity testing against those engines is permitted. This restriction supersedes the original existing-company-server/connectivity wording retained below. Their missing real connectivity verification remains the accepted company-policy gap, not a claim of operational support. Section 9.1 defines future application database requirements; it does not describe implemented provisioning, backup or restore features.
+**Current policy and scope:** Only SQLite is allowed for real database operations. SQL Server, PostgreSQL and MySQL are **metadata-only connection references**; no real connection, authentication, migration, provisioning or connectivity testing against those engines is permitted. This restriction supersedes the original existing-company-server/connectivity wording retained below. Their missing real connectivity verification remains the accepted company-policy gap, not a claim of operational support. M10-DB is IN PROGRESS only for TASK 036's metadata-only candidate inventory (section 9.1.16); application database provisioning, attachment, backup, restore and runtime configuration remain unimplemented.
 
 The Platform Registry will use SQLite initially.
 
@@ -1472,7 +1476,7 @@ Never automatically execute arbitrary SQL files from uploaded packages.
 
 ## 9.1. Managed Application Databases
 
-**Target architecture:** **1 Platform Database + N Independent Application Databases**. The dedicated SQLite Platform Registry contains platform management records. Each deployed application may optionally use its own independent SQLite database; applications without a database remain fully valid. N may be zero. This service is future work in M10-DB, NOT STARTED. Existing connection-reference APIs are not evidence that application database lifecycle operations have been implemented.
+**Target architecture:** **1 Platform Database + N Independent Application Databases**. The dedicated SQLite Platform Registry contains platform management records. Each deployed application may optionally use its own independent SQLite database; applications without a database remain fully valid. N may be zero. M10-DB is IN PROGRESS for candidate inventory metadata only; the application database service described below remains future lifecycle work. Existing connection-reference APIs and candidate metadata APIs are not evidence that application database lifecycle operations have been implemented.
 
 ### 9.1.1. Optional application database modes
 
@@ -1658,9 +1662,9 @@ The future validator should use an approved in-process SQLite provider opened re
 5. **Related database groups:** Multiple databases are independent unless the application owner declares a consistency group. If related, backup/replacement must be one coordinated stop/backup/validate/promote/recovery transaction for the group. No success is reported until every member is consistent. Group declaration and atomicity semantics require approval. No cross-file merge is supported.
 6. **Failure/restart/rollback:** On validation or pre-promotion failure, retain active data and keep the package in review. On interruption, recover from a durable operation journal and preserve old and staged data until a verified outcome. Application rollback selects older approved code and leaves workspace/database unchanged. If schema compatibility is unknown or unsafe, block or require an explicit operator decision; never reverse schema changes or automatically restore a backup.
 
-### 9.1.13. Proposed API and Dashboard contracts (unimplemented)
+### 9.1.13. Proposed database lifecycle API and Dashboard contracts (unimplemented)
 
-No endpoint or Dashboard behavior below is implemented. Names and payloads are design proposals requiring API/M11 review. Keep operations application-scoped and explicit; do not add a generic filesystem browser, arbitrary path input or generic proxy.
+The lifecycle/import endpoints and Dashboard behavior below remain proposals requiring API/M11 review and are unimplemented. The metadata-only candidate list/detail/validation endpoints currently implemented by TASK 036 are documented in section 9.1.16. Keep operations application-scoped and explicit; do not add a generic filesystem browser, arbitrary path input or generic proxy.
 
 | Proposed operation | Contract sketch | Required server checks |
 | --- | --- | --- |
@@ -1736,6 +1740,24 @@ For My Work Center, even approach C does not resolve auto-created DBs/migrations
 Approved first-deploy/upgrade behavior is already stated above: use valid supplied existing data when safely supported; update defaults to KEEP; replacement is explicit and protected by authorization, confirmation, a consistent backup, safe stop, validation and recovery. Further product/security decisions are: whether a changed absolute path via the app's existing `WORK_CENTER_DB_PATH` override is acceptable while retaining the relative suffix; whether an IHP-only compatibility adapter may supply health/base-path behavior without changing the app; whether the raw app DB-export route can ever be allowed or must be denied; and whether a new/pending app migration must always block deployment until a separately authorized process applies it. Existing policy against automatic SQL execution is not an open question and must not be weakened.
 
 ---
+
+### 9.1.16. TASK 036 current implementation - SQLite candidate metadata inventory
+
+This is the implemented M10-DB Phase 1 metadata slice. Existing authenticated Folder/ZIP intake already discovers and privately stages supported SQLite files and WAL/SHM sidecars. TASK 036 persists bounded inventory metadata in the SQLite Platform Registry; it does not change that intake's validation, staging, package fingerprint, Administrator approval or deployment behavior.
+
+**Additive Registry schema:** migration `202611030007_database_candidate_inventory` adds application-scoped candidate and sidecar metadata. A candidate identifies the application, intake/upload, opaque candidate ID, detector, application owner at detection, original validated relative path, artifact kind, SHA-256 fingerprint, byte size, existing read-only validation status/evidence, snapshot status, lifecycle status `CANDIDATE_REVIEW_ONLY`, and detection time. Related WAL/SHM metadata records only safe relative path, sidecar kind, size and fingerprint. Foreign keys, uniqueness, bounded values, indexes and immutable/retention constraints protect the records. No application database content is stored in the Registry.
+
+**Implemented read APIs:**
+
+| Endpoint | Behavior | Required controls |
+| --- | --- | --- |
+| `GET /_platform/api/applications/:id/database-candidates` | Paginated list of metadata for the selected application's detected candidates. | Active M11 session, `application.read`, application scope; never include bytes or absolute storage paths. |
+| `GET /_platform/api/applications/:id/database-candidates/:candidateId` | Retrieve one candidate only when both application and candidate IDs match. | Same M11 controls and application-to-candidate association check. |
+| `GET /_platform/api/applications/:id/database-candidates/:candidateId/validation` | Return persisted safe validation metadata and recheck staged artifact fingerprints read-only. | Same M11 scope; stream hashes, fixed result states only, no writable database open or content response. |
+
+The recheck reports only `VERIFIED`, `FINGERPRINT_MISMATCH` or `STAGED_ARTIFACT_UNAVAILABLE`; expiration of private staging never causes the system to recreate or mutate the candidate. Invalid/cross-application references fail closed. APIs expose validated relative paths and bounded metadata only, not host paths, raw DB files, credentials or database contents. Tests use disposable SQLite fixtures; the configured Platform Registry migration remains an explicit operator action and was not applied by TASK 036.
+
+**Not implemented by this phase:** A candidate is not an active application database. There is no runtime attachment, database mode selection, persistent workspace, file provisioning, connection/path rewriting, migration execution, backup, restore, replacement, deletion, database-content download or Dashboard lifecycle management. Uploaded SQL stays inert, and no source or application code is executed. Existing uploaded bytes are not modified. Full lifecycle work remains gated by DB-W0 compatibility decisions and later M10-DB acceptance. Current same-Windows-identity filesystem separation is not a sandbox.
 
 # 10. APPLICATION VERSION MANAGEMENT
 

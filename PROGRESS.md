@@ -1,6 +1,62 @@
 # Project Progress
 
-## Current TASK 035 — IT/Security approval evidence review — 2026-11-03
+## Current TASK 036 - M10-DB Phase 1 application database inventory - 2026-11-03
+
+### Scope and implementation
+
+Implemented the authorized metadata-only inventory for SQLite database candidates already detected by the authenticated Folder/ZIP intake. Candidate records are persisted in the SQLite Platform Registry through additive migration `202611030007_database_candidate_inventory`; the Registry stores metadata only, never candidate database bytes. Existing intake remains review-only and does not change application package fingerprints or approval state.
+
+The schema records application ID, upload/intake ID, opaque candidate ID, validated original relative path, database/sidecar classification, SHA-256 fingerprint, byte size, read-only validation and snapshot status, detector and application-owner-at-detection, detection time, lifecycle state `CANDIDATE_REVIEW_ONLY`, and validated WAL/SHM sidecar metadata. Foreign keys, uniqueness, bounds, indexes and immutable/retention triggers protect the inventory. No persistent application database is provisioned or associated for runtime use.
+
+Added authenticated, application-scoped read APIs:
+
+- `GET /_platform/api/applications/:id/database-candidates` - paginated metadata list.
+- `GET /_platform/api/applications/:id/database-candidates/:candidateId` - one candidate's metadata.
+- `GET /_platform/api/applications/:id/database-candidates/:candidateId/validation` - metadata plus a read-only staged-artifact fingerprint recheck.
+
+All require an active M11 session and `application.read`; lookup is scoped by application and candidate together. Responses omit database bytes and absolute filesystem paths. Fingerprint review returns only fixed states `VERIFIED`, `FINGERPRINT_MISMATCH` or `STAGED_ARTIFACT_UNAVAILABLE`; it hashes staged artifacts as a stream and does not open a candidate database writable. Once temporary staging expires, validation reports unavailable rather than recreating or modifying data.
+
+### Security boundary and deferred work
+
+- SQLite remains the only engine used for real database operations. SQL Server, PostgreSQL and MySQL remain metadata-only references; no connection attempt was made.
+- The additive Registry migration was not applied to the configured Registry. Tests used disposable SQLite fixtures.
+- No candidate database bytes were stored in the Registry; no uploaded DB was attached, initialized, modified, migrated, replaced, backed up, restored, deleted, or assigned a runtime path. No source or application code was executed.
+- Runtime database modes, persistent per-application storage, safe path resolution, provisioning, backup/restore, retention/deletion, migrations, release persistence semantics and Dashboard controls remain future M10-DB work.
+- Existing M11 authorization, M7 package/fingerprint/approval rules, Source Build disabled, and D00-D29 PENDING are unchanged. M7 remains IN PROGRESS.
+
+### Files changed for implementation
+
+- `src/Api/prisma/schema.prisma`
+- `src/Api/prisma/migrations/202611030007_database_candidate_inventory/migration.sql`
+- `src/Api/src/database-inventory.ts`
+- `src/Api/src/folder-intakes.ts`
+- `src/Api/src/folder-intake-controllers.ts`
+- `src/Api/src/app.ts`
+- `src/Api/test/database.test.mjs`
+- `src/Api/test/folder-intake.test.mjs`
+- `tests/DeploymentAgent.Tests/Program.cs` - updated the expected Platform Registry migration count for the additive migration.
+- Tracking record updates: `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `AGENTS.md`, `PROGRESS.md`.
+
+### Verification evidence
+
+- `npm.cmd run build --workspace @ihp/api` - PASS; Prisma WASM validated 24 models, generated the safe client, and TypeScript compilation passed.
+- `npm.cmd test --workspace @ihp/api` - PASS: API tests 134/134 and SQLite/migration tests 15/15; 149 focused checks total.
+- Focused cases cover detection and metadata persistence for Folder and ZIP intake, SQLite validation evidence and WAL/SHM metadata, authorized ownership-scoped list/detail/recheck, anonymous/Viewer/foreign-application denial, invalid references, staged fingerprint mismatch/expiry, safe response fields, and unchanged database bytes. The integration also verifies that no application/source execution or runtime database attachment occurs.
+- `npm.cmd run verify` - PASS, exit 0: **592 passed, 0 failed, 0 skipped**, including local smoke and cleanup. The full gate included API 134, database/migration 15, Dashboard 47, Gateway 114, package 40, routing integration 19, Agent managed-DLL 27, Foundation managed-DLL 27, samples 82, browser protocol/DOM simulations 54, and readiness/foundation Node checks 33.
+- Verification published .NET checks with `UseAppHost=false` and ran the managed test DLL; no `.exe` was run. Smoke listeners were loopback-only and owned temporary storage/ports were cleaned up. DOM/protocol checks are not actual-browser acceptance evidence.
+- The first full-gate attempt exposed a stale Agent test expectation for the Registry migration count (6); it was corrected to 7. A subsequent complete verification passed. An earlier formatter failure was corrected for affected JS/TS files before the final pass.
+- No configured Registry migration, external database test, application deployment or actual-browser test was run.
+
+### Status, remaining work, and next task
+
+- M1-M6 and M11 remain **COMPLETED**; M7 and M8 remain **IN PROGRESS**; M9, M10 and M12 remain **NOT STARTED**. **M10-DB is IN PROGRESS for Phase 1 candidate metadata only.**
+- M7 source builds remain disabled; D00-D29 remain PENDING without authorized written evidence. The 53 actual-browser M8 scenarios remain unverified/not run as recorded in prior evidence.
+- Outstanding M10-DB scope: resolve DB-W0 path/provenance and compatibility decisions; implement a canonical app-scoped storage resolver; optional database modes and non-overwriting provisioning; authorized initialization and lifecycle; consistent backup/restore, retention and recovery; release persistence; M11-protected Dashboard and audit; broader security/regression acceptance.
+- **Recommended TASK 037:** resolve the remaining DB-W0 path/provenance and compatibility gate from verified application behavior, then separately implement and test the canonical per-application storage resolver. Keep candidate inventory review-only; do not provision or attach any database until the relevant requirements and explicit authorization are satisfied.
+
+---
+
+## Historical TASK 035 — IT/Security approval evidence review — 2026-11-03
 
 ### Evidence reviewed and decision
 

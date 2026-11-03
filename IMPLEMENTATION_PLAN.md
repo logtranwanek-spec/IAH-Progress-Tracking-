@@ -4,7 +4,9 @@
 
 Internal Application Hosting & Deployment Platform (project code: Internal Hosting Platform / IHP). The complete, canonical requirements are in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md).
 
-**Latest assignment (2026-11-03): TASK 035 — IT/Security approval evidence review and worker readiness.** Workspace/task evidence review found no traceable IT/Security approval, worker provisioning or isolation results. Decision status is 0 APPROVED / 30 PENDING; readiness is NOT READY. Product-owner-reported policy clarifications remain context only. M7 remains IN PROGRESS and Source Build disabled. No reviewer contact, provisioning, source execution, application build/test or security change occurred. Do not start worker integration until written approvals and actual technical gates pass.
+**Current assignment (2026-11-03): TASK 036 - M10-DB Phase 1 candidate metadata inventory.** The existing authenticated Folder/ZIP intake now persists review-only SQLite candidate and WAL/SHM metadata in an additive SQLite Registry migration and exposes three M11 `application.read`-protected app-scoped read endpoints. No database bytes enter Registry; no candidate is attached, modified or executed; no runtime configuration or lifecycle operations are added. Final verification passed 592/592 with zero failures/skips. M10-DB is IN PROGRESS for this metadata slice only. M7 remains IN PROGRESS with Source Build disabled; D00-D29 remain PENDING. See PROGRESS.md for exact evidence. Do not begin runtime attachment, provisioning, backup/restore or another milestone.
+
+**Historical assignment (2026-11-03): TASK 035 — IT/Security approval evidence review and worker readiness.** Workspace/task evidence review found no traceable IT/Security approval, worker provisioning or isolation results. Decision status is 0 APPROVED / 30 PENDING; readiness is NOT READY. Product-owner-reported policy clarifications remain context only. M7 remains IN PROGRESS and Source Build disabled. No reviewer contact, provisioning, source execution, application build/test or security change occurred. Do not start worker integration until written approvals and actual technical gates pass.
 
 **Historical assignment (2026-11-02): TASK 034 — IT/Security approval evidence and Build Worker readiness.** Prepared a per-decision readiness matrix, 16-item checklist and objective implementation gate, and mapped TASK 033 seams by static review. No approval or worker readiness was claimed. All D00–D29 remain PENDING; M7 remains IN PROGRESS and Source Build disabled.
 
@@ -91,7 +93,7 @@ M1 commands below refer to existing artifacts. Commands for later milestones rem
 - Use bounded restart attempts and backoff. Do not assume unattended startup after logout or reboot without IT approval.
 - Authentication and deployment authorization must fail closed. Before their milestone is complete, any development-only management access must remain local and must not enable untrusted or network-accessible deployment.
 
-Managed Application Database requirements are defined in PROJECT_REQUIREMENTS.md section 9.1. The architecture is one dedicated Platform Registry plus optional independent application SQLite databases. M10-DB is future work; it neither changes current physical paths nor upgrades the implemented metadata-only connection manager into a database lifecycle service. Registry/application separation, release-independent data, explicit authorization, SQLite-only operations and the same-Windows-identity isolation limitation apply to every future milestone that touches database storage.
+Managed Application Database requirements are defined in PROJECT_REQUIREMENTS.md section 9.1. The architecture is one dedicated Platform Registry plus optional independent application SQLite databases. M10-DB is IN PROGRESS for TASK 036 candidate metadata only; runtime database lifecycle remains future work. Candidate inventory does not change current physical paths or upgrade the existing metadata-only connection manager into a lifecycle service. Registry/application separation, release-independent data, explicit authorization, SQLite-only operations and the same-Windows-identity isolation limitation apply throughout this work.
 
 ## Milestones
 
@@ -782,15 +784,15 @@ dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.In
 
 **Status:** NOT STARTED
 
-### M10-DB — Managed Application Database Service (future sub-milestone)
+### M10-DB — Managed Application Database Service (Phase 1 metadata in progress; lifecycle future)
 
-**Objective:** Implement the optional **1 Platform Database + N Independent Application Databases** architecture from requirements section 9.1, including a persistent per-application workspace that preserves approved app-relative SQLite paths while keeping mutable data separate from exact-fingerprint code releases and backups. This adds future scope only; no workspace, provisioning, import, backup, restore, database Dashboard UI or new schema is claimed implemented.
+**Objective:** Implement the optional **1 Platform Database + N Independent Application Databases** architecture from requirements section 9.1. TASK 036 authorizes and completes only a first metadata slice: persist review-only metadata for SQLite candidates already detected by authenticated Folder/ZIP intake. Persistent workspace, mode selection, runtime attachment/configuration, provisioning, backup, restore and Dashboard lifecycle remain future work and are not claimed implemented.
 
-**Roadmap placement:** After M10 version management/rollback and the required M8 secure Dashboard capabilities, before final M12 acceptance of this extension. Existing M1–M12 identifiers, statuses and historical completion evidence are unchanged. M11 was already prioritized/completed earlier and remains a dependency, not new work. Implementation requires a future explicit assignment; do not start this sub-milestone during the documentation task or resume it merely because other code exists.
+**Roadmap placement:** Full lifecycle work remains after M10 version management/rollback and required M8 secure Dashboard capabilities, before final M12 acceptance of this extension. The separately authorized Phase 1 inventory slice uses existing M4 Registry, M7 intake and M11 authorization foundations. Existing M1-M12 identifiers and unrelated statuses are unchanged; M11 remains a dependency.
 
-**Tasks (future, independently verifiable):**
+**Remaining tasks (future, independently verifiable):**
 
-1. Define reviewed metadata, authorization contracts and any explicit versioned Registry migrations for NONE, MANAGED_SQLITE and EXISTING_SQLITE. Preserve current Registry data/configuration and metadata-only external-engine references; do not apply a storage/schema migration implicitly.
+1. Phase 1 candidate metadata contract, additive Registry migration and API are implemented by TASK 036. Still define reviewed database modes, lifecycle authorization contracts and any additional explicit versioned Registry migrations for NONE, MANAGED_SQLITE and EXISTING_SQLITE. Preserve current Registry data/configuration and metadata-only external-engine references; never apply a configured Registry migration implicitly.
 2. Implement an application-scoped storage resolver under configurable IHP_STORAGE_ROOT and the target logical layout. Validate canonical containment, file identity, traversal/reparse/symlink/alias escapes and cross-application targets for registration, provisioning, SQLite sidecars, backups, restore and deletion. Preserve existing implemented paths unless a separately authorized compatibility migration changes them.
 3. Implement idempotent/concurrency-safe non-overwriting per-application provisioning and explicit association/initialization, safe metadata/status/integrity/usage/limits, retention, authorized deletion and interrupted-operation recovery. NONE must allocate no database; EXISTING_SQLITE requires explicit registration/location authorization without automatic creation, migration or deletion authority.
 4. Implement explicitly authorized SQLite-consistent backup and validated restore, with protected backup history/retention outside releases, writer coordination/downtime, source/target identity checks and recoverable failure handling. Never use an uncoordinated active-file copy as proof of backup correctness.
@@ -798,7 +800,14 @@ dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.In
 6. Integrate a future Application Database Management Dashboard section through secured Platform API contracts: mode selection, provisioning, safe status/metadata/usage, authorized backup/restore/history, retention and deletion requests. Apply server-side M11 RBAC/current ownership; Viewer read-only and destructive authorization/confirmation. No raw file download or public path/Registry/secret exposure.
 7. Add credential-safe lifecycle/security audit events and operational documentation for backup/restore/recovery/retention, permission boundaries, limits and same-user trust. Extend existing automated/managed verification with owned SQLite-only fixtures; preserve all prior behavior and policy controls.
 
-**Implementation work packages (future plan; all NOT STARTED):** Each package below requires a separate implementation assignment. File paths are anticipated from the current repository layout and must be confirmed during that assignment. No package status is being changed by TASK 022.
+**Implementation work packages:** DB-W1 has started for candidate metadata only and remains IN PROGRESS for its broader scope. Other packages remain NOT STARTED. File paths are anticipated from the current repository layout and must be confirmed during the relevant assignment.
+
+#### TASK 036 Phase 1A - Existing-intake candidate metadata (completed sub-scope)
+
+- **Scope delivered:** additive migration `202611030007_database_candidate_inventory`; candidate/sidecar metadata linked to application and intake, including validated relative paths, fingerprints, sizes, owner/detector snapshot, validation/snapshot/lifecycle states and timestamps; app-scoped list/detail/validation APIs protected by M11 `application.read`; read-only staged-byte fingerprint recheck with fixed outcomes.
+- **Acceptance evidence:** focused API and SQLite/migration tests passed 149/149; full `npm.cmd run verify` passed 592 checks, 0 failures and 0 skips. API responses expose no DB bytes or absolute paths. Tests cover unauthorized/cross-application denial, invalid references, fingerprint mismatch/unavailable, metadata-only persistence, immutable uploaded bytes, and absence of source execution/runtime attachment.
+- **Limits:** migration was tested on disposable SQLite only and was not applied to the configured Registry. This slice creates no runtime DB association, application database file or storage resolver.
+- **Status:** completed sub-scope. M10-DB overall is IN PROGRESS; DB-W1 remains IN PROGRESS for database modes, lifecycle metadata and canonical path resolution.
 
 #### DB-W0 — Resolve product/security decisions and path compatibility contract
 
@@ -811,7 +820,7 @@ dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.In
 
 #### DB-W1 — Reviewed Registry metadata, migration and canonical storage resolver
 
-- **Scope:** Add explicit versioned metadata for modes, database IDs, app ownership, safe relative-path mapping, provenance, status, revisions, operation journal, limits and audit references. Build an application-scoped resolver that canonicalizes identity and checks containment/reparse/alias/cross-app/Registry boundaries. Keep backups/workspace outside releases/public trees.
+- **Scope:** TASK 036 adds Phase 1 candidate inventory metadata and read APIs. Remaining DB-W1 work is explicit versioned metadata for database modes/associations, revisions and lifecycle operations, plus an application-scoped resolver that canonicalizes identity and checks containment/reparse/alias/cross-app/Registry boundaries. Keep backups/workspace outside releases/public trees.
 - **Dependencies:** DB-W0 decisions; M4 explicit migration contract; M11 ownership and authorization.
 - **Likely files:** `src/Api/prisma/schema.prisma`, reviewed additive migration directory, `src/Api/src` database modules, `src/Api/test`, migration/architecture docs.
 - **Acceptance:** Fresh and upgrade migrations work only through the reviewed explicit migration command; path resolver rejects traversal, links/reparse points, aliases and foreign targets; NONE has no file; metadata contains no DB contents/secrets; pre-existing storage is preserved.
@@ -820,7 +829,7 @@ dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.In
 
 #### DB-W2 — Separate database candidate intake and review-only validation state
 
-- **Scope:** Add an authenticated, bounded data-artifact intake separate from ZIP/folder code package allowlists. Preserve normalized application-relative paths and multiple candidate identity; stage under private Temporary; create no active DB association and do not alter an approved code fingerprint.
+- **Scope:** Existing TASK 024 Folder/ZIP intake detects and privately stages review-only SQLite candidates separately from code. TASK 036 persists their inventory metadata. Any future standalone data-artifact intake beyond those existing paths must remain authenticated/bounded, preserve normalized app-relative paths and multiple candidate identities, and create no active DB association or code-fingerprint change.
 - **Dependencies:** DB-W0/DB-W1; M7 intake/session/approval contracts; M11 auth/ownership; approved candidate/WAL bundle policy.
 - **Likely files:** `src/Api/src` new database-import module/controller, `src/Api/test`, `src/Dashboard/src/api.ts` only when its secured workflow is separately in scope, package/API docs.
 - **Acceptance:** `.db`/sidecar artifacts enter only the dedicated reviewed path; path collisions/traversal and malformed/mismatched bundles reject; limits and cleanup hold; status is REVIEW_ONLY; retry is idempotent; no package fingerprint or code approval changes; no active DB is replaced.
@@ -914,7 +923,7 @@ npm.cmd run verify
 
 Before future execution, align actual scripts/fixtures with the implementation, review any explicit migrations separately and record commands/results. Real-browser acceptance requires permitted actual-browser evidence; DOM simulations alone do not satisfy it. No database file or backup should enter the progress repository.
 
-**Status:** NOT STARTED
+**Status:** IN PROGRESS (Phase 1 candidate metadata only)
 
 **Unresolved future design choices:** See PROJECT_REQUIREMENTS.md section 9.1.14 for path/CWD compatibility, default versus workspace mapping, imported mode/provenance, candidate and WAL policy, replacement approval, consistency groups, SQLite provider/limits and same-user isolation decisions. Exact safe API/schema contracts, backup layout/default retention/limits and recovery coordination require review and verification. Nothing in this record authorizes new utilities, runtime permissions, OS isolation, automatic migrations or untrusted/source execution. Existing M7/M8 gaps and no-.exe/loopback/SQLite-only restrictions remain unchanged.
 
@@ -1011,22 +1020,22 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 
 ## Requirement coverage
 
-| Requirement area                                                                                    | Planned milestone(s) |
-| --------------------------------------------------------------------------------------------------- | -------------------- |
-| Foundation, architecture, local development                                                         | M1                   |
-| YARP gateway and health                                                                             | M2                   |
-| Node.js and ASP.NET Core samples                                                                    | M3                   |
-| Platform API, SQLite, Prisma, schema/migrations                                                     | M4                   |
-| Process/runtime deployment engine and recovery                                                      | M5                   |
-| Registry-backed runtime routing and subpaths                                                        | M6                   |
-| ZIP validation, prebuilt packages, approved builds                                                  | M7                   |
-| React dashboard and deployment experience                                                           | M8                   |
-| Metrics, health, structured logs, retention                                                         | M9                   |
-| Releases, history, safe updates, rollback                                                           | M10                  |
-| Optional independent application SQLite databases, lifecycle, backup/restore and database Dashboard | M10-DB (future)      |
-| Login, roles, ownership, approvals, audit                                                           | M11                  |
-| Security, resilience, compatibility, docs, final acceptance                                         | M12                  |
+| Requirement area                                                                                    | Planned milestone(s)                                    |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Foundation, architecture, local development                                                         | M1                                                      |
+| YARP gateway and health                                                                             | M2                                                      |
+| Node.js and ASP.NET Core samples                                                                    | M3                                                      |
+| Platform API, SQLite, Prisma, schema/migrations                                                     | M4                                                      |
+| Process/runtime deployment engine and recovery                                                      | M5                                                      |
+| Registry-backed runtime routing and subpaths                                                        | M6                                                      |
+| ZIP validation, prebuilt packages, approved builds                                                  | M7                                                      |
+| React dashboard and deployment experience                                                           | M8                                                      |
+| Metrics, health, structured logs, retention                                                         | M9                                                      |
+| Releases, history, safe updates, rollback                                                           | M10                                                     |
+| Optional independent application SQLite databases, lifecycle, backup/restore and database Dashboard | M10-DB (Phase 1 metadata in progress; lifecycle future) |
+| Login, roles, ownership, approvals, audit                                                           | M11                                                     |
+| Security, resilience, compatibility, docs, final acceptance                                         | M12                                                     |
 
 M1–M6 and M11 are `COMPLETED`; SQLite-only policy/accepted gap remain. M7 and M8 are `IN PROGRESS` with source builds and approved browser authentication unavailable respectively. M9–M10 and M12 remain `NOT STARTED`; do not begin them. All .NET checks use published managed DLLs; uncreated later-milestone commands remain planned. Change status only with matching evidence and policy.
 
-The added M10-DB sub-milestone is **NOT STARTED** and does not change any status above. Section 9.1 defines new future acceptance requirements; provisioning, application database backup/restore and their Dashboard controls are not implemented or verified by this documentation update. Final M12 review must account for this extension when separately authorized, rather than treating prior Registry/reference tests as evidence of its acceptance.
+M10-DB is **IN PROGRESS for TASK 036 Phase 1 candidate metadata only**; its broader lifecycle acceptance remains incomplete. Section 9.1 defines the future requirements. Provisioning, runtime attachment, application database backup/restore and Dashboard lifecycle controls are not implemented. Final M12 review must account for this extension without treating this metadata slice as lifecycle acceptance.
