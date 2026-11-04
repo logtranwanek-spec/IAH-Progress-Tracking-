@@ -1454,7 +1454,7 @@ The platform should be designed to support hostname-based routing in the future,
 
 # 9. DATABASE MANAGEMENT
 
-**Current policy and scope:** Only SQLite is allowed for real database operations. SQL Server, PostgreSQL and MySQL are **metadata-only connection references**; no real connection, authentication, migration, provisioning or connectivity testing against those engines is permitted. This restriction supersedes the original existing-company-server/connectivity wording retained below. Their missing real connectivity verification remains the accepted company-policy gap, not a claim of operational support. M10-DB is IN PROGRESS for TASK 036 candidate metadata, TASK 037 prospective path validation, and TASK 040 inert mode/association-intent requests (sections 9.1.16–20); no active database mode or lifecycle capability is implemented. Application database provisioning, attachment, backup, restore and runtime configuration remain unimplemented.
+**Current policy and scope:** Only SQLite is allowed for real database operations. SQL Server, PostgreSQL and MySQL are **metadata-only connection references**; no real connection, authentication, migration, provisioning or connectivity testing against those engines is permitted. This restriction supersedes the original existing-company-server/connectivity wording retained below. Their missing real connectivity verification remains the accepted company-policy gap, not a claim of operational support. M10-DB is IN PROGRESS for TASK 036 candidate metadata, TASK 037 prospective path validation, TASK 040 inert mode/association-intent requests and TASK 041 Administrator review/rejection metadata (sections 9.1.16–21); no database mode is active and no application database lifecycle capability is implemented. Application database provisioning, attachment, backup, restore and runtime configuration remain unimplemented.
 
 The Platform Registry will use SQLite initially.
 
@@ -1488,7 +1488,7 @@ Never automatically execute arbitrary SQL files from uploaded packages.
 
 ## 9.1. Managed Application Databases
 
-**Target architecture:** **1 Platform Database + N Independent Application Databases**. The dedicated SQLite Platform Registry contains platform management records. Each deployed application may optionally use its own independent SQLite database; applications without a database remain fully valid. N may be zero. M10-DB is IN PROGRESS for candidate inventory metadata and prospective path validation only; the application database service described below remains future lifecycle work. Existing connection-reference APIs, candidate metadata APIs and the non-integrated path validator are not evidence that application database lifecycle operations have been implemented.
+**Target architecture:** **1 Platform Database + N Independent Application Databases**. The dedicated SQLite Platform Registry contains platform management records. Each deployed application may optionally use its own independent SQLite database; applications without a database remain fully valid. N may be zero. M10-DB is IN PROGRESS for candidate inventory, prospective path validation, inert database-mode requests and Administrator review/rejection metadata only; the application database service described below remains future lifecycle work. Existing connection-reference APIs, candidate metadata APIs, the non-integrated path validator and request review APIs are not evidence that application database lifecycle operations have been implemented.
 
 ### 9.1.1. Optional application database modes
 
@@ -1916,6 +1916,38 @@ Creation is idempotent per application/requesting user/idempotency-key digest. R
 API and migration verification used disposable SQLite Platform Registry fixtures. Tests cover all three modes, persistence, idempotency including concurrent duplicate submission, same-application candidate metadata validation, invalid and foreign candidate references, anonymous/Viewer/foreign-owner denial, strict input and escalation rejection, cancellation/audit/state-transition constraints, additive upgrade preservation, absence of application data-file creation, and responses/schema without database contents or physical paths.
 
 The additive migration was not applied to a configured/production Registry. Existing candidate metadata was read from Registry metadata only; candidate bytes were not opened or copied. No application database was created/opened/attached/modified/migrated/backed up/restored/replaced/deleted, and no runtime path/configuration or source execution was enabled. TASK 040 does not resolve pending DB-W0 decisions, establish My Work Center compatibility, add Dashboard controls, or implement lifecycle operations. M10-DB remains **IN PROGRESS**; M7 remains **IN PROGRESS** and Source Build remains disabled. D00-D29 remain PENDING without authorized written approval. See `PROGRESS.md` for exact commands and suite totals.
+
+### 9.1.21. TASK 041 - Administrator database-mode request review (implemented, metadata only)
+
+TASK 041 adds the Administrator review workflow for the inert requests from TASK 040. It changes request review status only; it does not approve or activate a database mode and performs no application database lifecycle operation.
+
+#### State transitions and review metadata
+
+Only these transitions are valid:
+
+- `REQUESTED` → `PENDING_REVIEW` through an Administrator review action.
+- `PENDING_REVIEW` → `REJECTED` through an Administrator rejection action.
+- Existing permitted cancellation transitions remain unchanged.
+
+All other transitions fail closed. No `APPROVED`, `ACTIVE`, `READY`, `PROVISIONED` or `ATTACHED` state is introduced. Review history records request ID, reviewer, timestamp, prior/new state, event code, audit linkage and an optional bounded allowlisted rejection reason code. Rejection reason codes are `CANDIDATE_NOT_ACCEPTED`, `POLICY_NOT_SUPPORTED`, and `UNSUPPORTED_CONFIGURATION`; the default is `UNSUPPORTED_CONFIGURATION`. Free-form rejection text is not accepted. Idempotency keys are bounded and hashed at rest; their raw values are not returned.
+
+#### API and authorization
+
+All routes remain behind the existing M11 session and application-scoped authorization boundary:
+
+| Endpoint | Permission | Behavior |
+| --- | --- | --- |
+| `POST /_platform/api/applications/:id/database-mode-requests/:requestId/review` | `application.write` plus Administrator role | Atomically moves `REQUESTED` to `PENDING_REVIEW`; requires an idempotency key. |
+| `POST /_platform/api/applications/:id/database-mode-requests/:requestId/reject` | `application.write` plus Administrator role | Atomically moves `PENDING_REVIEW` to `REJECTED`; requires an idempotency key and accepts only the listed reason codes. |
+| `GET /_platform/api/applications/:id/database-mode-requests/:requestId/history` | `application.read` | Returns bounded review/cancellation history only within the authorized application scope. |
+
+The API applies current session, role, permission, ownership/grant, and route application-scope checks on the server. The service also checks the Administrator role for review/rejection. Review/rejection state, append-only history events and audit records are written atomically. Duplicate same-action requests are idempotent; key reuse for another action/input conflicts. Cross-application requests and unauthorized roles are rejected without exposing another application's request details.
+
+#### Verification and limits
+
+Focused tests verify valid review/rejection, non-Administrator denial, wrong application scope, illegal transitions, replay/idempotency, concurrent review/rejection, reason-code validation, audit/history integrity, preservation through the additive migration, and no application database files or path/content exposure. The configured Registry was not migrated. No application database was opened, created, attached, modified, migrated, backed up, restored, replaced or deleted; runtime configuration and source execution remain unchanged.
+
+TASK 041 does not resolve pending DB-W0 decisions, establish My Work Center compatibility, add Dashboard database controls or implement provisioning/lifecycle operations. M10-DB and M7 remain **IN PROGRESS**; Source Build remains disabled; D00-D29 remain PENDING absent authorized written evidence. The review status is not a database approval or operational readiness signal. See `PROGRESS.md` for exact commands and verification totals.
 
 # 10. APPLICATION VERSION MANAGEMENT
 

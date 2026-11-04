@@ -1,6 +1,50 @@
 # Project Progress
 
-## Current TASK 040 - M10-DB database modes and association-intent metadata - 2026-11-04
+## Current TASK 041 - M10-DB Administrator database-mode request review - 2026-11-04
+
+### Outcome
+
+Completed the metadata-only Administrator review/rejection workflow for TASK 040 database-mode requests. TASK 041 is complete as a bounded M10-DB sub-scope; **M10-DB remains IN PROGRESS** because database activation, storage, runtime integration, lifecycle operations and Dashboard database management remain unimplemented. M7 remains IN PROGRESS and Source Build remains disabled. D00-D29 remain PENDING; no DB-W0 decision changed. M1-M6/M11 remain COMPLETED, M8 remains IN PROGRESS, and M9/M10/M12 remain NOT STARTED.
+
+### Implemented workflow
+
+- Added Registry migration `src/Api/prisma/migrations/202611040009_database_mode_request_review/migration.sql` and Prisma metadata fields. The migration preserves existing request/event rows, adds review/rejection event metadata and per-action idempotency digests, and constrains status transitions, actor role, audit linkage, reason codes and append-only history. It is additive and was tested on disposable SQLite Registry fixtures only; the configured Registry was not migrated.
+- `src/Api/src/database-mode-requests.ts` now performs Administrator-only review and rejection, retrieves bounded app-scoped event history, and persists audit/event/state changes transactionally. The service explicitly checks the Administrator role in addition to global M11 session/permission and app-scope enforcement. The controller requires a bounded idempotency key for state-changing actions.
+- `src/Api/src/database-mode-request-controllers.ts` exposes:
+  - `POST /_platform/api/applications/:id/database-mode-requests/:requestId/review` (`application.write` plus Administrator role): `REQUESTED` → `PENDING_REVIEW`.
+  - `POST /_platform/api/applications/:id/database-mode-requests/:requestId/reject` (`application.write` plus Administrator role): `PENDING_REVIEW` → `REJECTED`.
+  - `GET /_platform/api/applications/:id/database-mode-requests/:requestId/history` (`application.read`): bounded application-scoped transition/audit history.
+- Existing permitted cancellation transitions remain unchanged. Other transitions reject. There are no `APPROVED`, `ACTIVE`, `READY`, `PROVISIONED` or `ATTACHED` statuses. Rejection accepts only `CANDIDATE_NOT_ACCEPTED`, `POLICY_NOT_SUPPORTED`, or `UNSUPPORTED_CONFIGURATION`; omitted code becomes `UNSUPPORTED_CONFIGURATION`. Arbitrary/free-form reason text is rejected. Raw idempotency keys are never persisted or returned; exact same-action replay is idempotent, while incompatible reuse conflicts.
+- Review history preserves request ID, reviewer identity, action timestamp, previous/new status, event code and linked audit event. Cross-application request IDs are not disclosed. Concurrent actions are serialized/checked atomically; only valid state transitions commit.
+
+### Security and scope boundaries
+
+M11 authentication, Administrator role, permission and application ownership/grant checks remain server-enforced. Tests reject anonymous, Developer/Viewer escalation, wrong application scope, invalid transitions and invalid reason/key inputs. Audit/history preserves append-only evidence without exposing secrets. No physical database path is accepted or stored. No application database was opened, created, attached, modified, migrated, backed up, restored, replaced or deleted; there was no runtime configuration change or source execution. No DB-W0 or D00-D29 decision was changed. Source Build stays disabled.
+
+### Files changed
+
+- Source (local workspace only): `src/Api/prisma/schema.prisma`; new additive migration `src/Api/prisma/migrations/202611040009_database_mode_request_review/migration.sql`; `src/Api/src/database-mode-requests.ts`; `src/Api/src/database-mode-request-controllers.ts`; `src/Api/test/database-mode-requests.test.mjs`; expected migration counts in `src/Api/test/database.test.mjs` and `tests/DeploymentAgent.Tests/Program.cs`.
+- Tracking records: this entry in `PROGRESS.md`; TASK 041 architecture/API details in `PROJECT_REQUIREMENTS.md` section 9.1.21; M10-DB roadmap/task evidence in `IMPLEMENTATION_PLAN.md`; permanent review/security rules in `AGENTS.md`.
+
+### Verification evidence
+
+- `npm.cmd run build --workspace @ihp/api` — PASS.
+- From `src/Api`, `node --test --test-concurrency=1 --test-timeout=60000 test/database-mode-requests.test.mjs` — **9 passed, 0 failed, 0 skipped**. Coverage includes valid review/rejection, Administrator enforcement, cross-application denial, invalid and concurrent transitions, idempotency, reason validation, audit/history integrity, additive-upgrade preservation and no application database file operations.
+- Initial focused runs reported 7/9 and 8/9 because test expectations/fixtures did not match the intended M11 authorization order, SQLite row prototype shape, and active Administrator fixture. Those test-only issues were corrected; the final focused run passed 9/9 and the full suite passed.
+- `npm.cmd run test:gateway` — **114 passed, 0 failed** using the published Gateway.Tests DLL.
+- `npm.cmd run verify` — **PASS, exit 0; 611 passed, 0 failed, 0 skipped**. Suite breakdown: Node foundation 33; API 153; Registry/migration 15; Dashboard 47; browser protocol/DOM 54; managed Foundation 27; Gateway 114; samples 82; Deployment Agent 27; routing integration 19; package verification 40. Build, formatting/type checks and .NET format verification passed. Smoke verified the owned Gateway/API/Dashboard on loopback, then stopped owned processes, released ports and removed temporary storage. The browser protocol/DOM checks are not actual-browser acceptance evidence.
+- .NET projects were published with `UseAppHost=false`; publish checks found no executable artifacts, and verifiers were run as published DLLs. No `.exe`, Docker, Administrator privilege, firewall/security change, corporate listener, external database engine, production Registry, deployed application, uploaded source build or browser executable was used.
+- Documentation consistency checks passed **7/7**: task presence, transition vocabulary, M7/M10-DB statuses, Source Build disabled, D00-D29 pending, matching full-suite totals, and metadata-only boundary. `node ./node_modules/prettier/bin/prettier.cjs --check AGENTS.md PROJECT_REQUIREMENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md` passed; `git diff --check` passed. No configured Registry migration was run.
+
+### Remaining issues and next task
+
+- M10-DB is still IN PROGRESS. DB-W0 compatibility/product decisions remain unresolved. This workflow records review/rejection only; it does not approve a database mode or provide activation, provisioning, attachment, storage path binding, backup/restore, replacement/deletion, migration, runtime or Dashboard lifecycle functionality.
+- M7 remains IN PROGRESS with Source Build disabled pending written IT/Security approval and verified isolation. D00-D29 remain PENDING. M8 remains IN PROGRESS; actual-browser acceptance is still required for its own completion criteria.
+- **Recommended TASK 042:** finalize the unresolved DB-W0 product-owner decisions and update the implementation readiness gate, preserving the already-approved KEEP-on-upgrade/first-use policies. Do not start database lifecycle/runtime operations until the relevant decisions and technical/security gates pass.
+
+---
+
+## Historical TASK 040 - M10-DB database modes and association-intent metadata - 2026-11-04
 
 ### Outcome
 
