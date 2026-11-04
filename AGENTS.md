@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 043 - M10-DB product-owner decisions and MVP priority - 2026-11-04
+## Current TASK 044 - existing trusted-prebuilt MVP vertical slice - 2026-11-04
+
+TASK 044 verifies the existing Administrator-to-trusted-prebuilt flow without changing the Source Build or application-database gates. Runtime status and release logs are exposed only through read-only application-scoped M11 `application.read` APIs and the fixed signed Gateway allowlist. Do not expose Agent PIDs, internal ports, sessions, filesystem paths, manifests, credentials or unbounded log output. Keep logs capped, redacted, and rendered as text. Dashboard production browser management stays disabled until permitted actual-browser acceptance is complete. Preserve M7/M8/M10-DB IN PROGRESS and all other milestone statuses; do not implement database lifecycle features or start another milestone.
+
+## Historical TASK 043 - M10-DB product-owner decisions and MVP priority - 2026-11-04
 
 The product-owner response dated 2026-11-04 is recorded in PROJECT_REQUIREMENTS.md section 9.1.23. Treat W0-01 through W0-14 as approved product direction only to the extent stated there; it is not IT/Security approval, implementation evidence or authority for real database operations. The owner prioritizes the existing Administrator-to-trusted-prebuilt deployment MVP. Preserve M7/M8 as IN PROGRESS, Source Build disabled, D00-D29 PENDING, and the M8 real-browser acceptance gap. Do not create/open/modify/attach/replace/delete application databases, run migrations, change paths/runtime, execute application source, or alter Windows security. Do not expand Database Management beyond the recorded MVP scope. Record actual focused test evidence without claiming simulated browser checks as actual-browser acceptance. The next bounded task is TASK 044, the existing prebuilt MVP vertical slice; no unrelated milestone is authorized.
 
@@ -284,6 +288,7 @@ Capability/configuration references (checked 2026-10-28): [official OpenAI subag
 - Do not execute arbitrary uploaded scripts, manifest commands, builds, or application code without an approved deployment policy and security boundary. If safe isolation cannot be achieved with available permissions, restrict deployment to reviewed trusted applications and document the limitation.
 - Validate upload archives, paths, route paths, and proxy destinations. Never allow a package to overwrite platform files or a user to register an arbitrary proxy destination.
 - Protect credentials and redact secrets from API responses and logs. Do not store plaintext passwords.
+- Runtime status/log views require M11 `application.read`, verify application/deployment ownership in the backend, return only allowlisted Agent-recorded status, and bound/redact logs before exposing them. Never expose process IDs, runtime ports, Agent sessions, process ticks, server paths or release manifests.
 - Do not assume applications support path-based routing; verify base paths and report incompatibility clearly.
 - Keep filesystem paths, ports, and runtime settings configurable. Do not hardcode the Windows username.
 - Do not assume unattended startup after logout or reboot is available without IT-approved configuration.

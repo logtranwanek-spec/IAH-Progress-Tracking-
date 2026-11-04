@@ -1,6 +1,46 @@
 # Project Progress
 
-## Current TASK 043 - M10-DB product-owner decisions and existing MVP priority - 2026-11-04
+## Current TASK 044 - existing trusted-prebuilt MVP vertical slice - 2026-11-04
+
+### Outcome
+
+The existing trusted-prebuilt path was reused and exercised end to end with disposable approved test fixtures. The verified automated workflow covers package upload and inspection, exact Administrator fingerprint approval, deployment and Agent startup, dynamic Gateway URL access, stop, restart, runtime status and deployment logs. New read-only runtime visibility was added because the API and Dashboard previously showed those views as unavailable.
+
+### Implementation
+
+- `GET /_platform/api/applications/:id/runtime` is protected by M11 `application.read`. It returns an allowlisted last-persisted Agent state, desired state, release version, attempts, relevant timestamps, exit code and safe end-reason code. The UI labels it as Agent-recorded status, not a live health probe. Process IDs, internal ports, Agent sessions, process-start ticks, paths and manifests are not returned.
+- `GET /_platform/api/applications/:id/packages/:deploymentId/logs?limit=1..100` checks package/application association, reads at most 100 rows and a bounded message prefix, redacts credential-like values and local filesystem paths, and returns plain text. Anonymous and cross-application requests fail closed; owner, Administrator and granted Viewer reads use existing M11 enforcement.
+- The signed Gateway boundary adds only exact GET mappings for those operations and whitelists the logs `limit` query. No generic proxy or new write/control endpoint was added.
+- The Dashboard displays persisted runtime status and log records with loading, error, empty, refresh and plain-text rendering states. BrowserApi remains disabled by default; no browser-auth setting or M11 check was weakened.
+
+### Verification evidence
+
+- `npm.cmd run build` — passed; production Dashboard bundle built and .NET projects published with `UseAppHost=false`; publish checks reported no `.exe` artifacts.
+- `npm.cmd run test:auth` — **38 passed, 0 failed, 0 skipped**, including owner/Viewer/Admin reads, anonymous/cross-app denial, invalid limits, metadata exclusion, credential/path redaction.
+- `npm.cmd run test:dashboard` — **48 passed, 0 failed, 0 skipped**, including runtime/status/log display and read-only Viewer behavior.
+- `npm.cmd run test:browser` — **54 passed, 0 failed, 0 skipped**. This uses signed HTTP/WebCrypto plus DOM simulation with real local API/Gateway/Agent services; it is not actual-browser acceptance.
+- `npm.cmd run verify` — exited **0**. Aggregate suite summaries: **613 passed, 0 failed, 0 skipped**. This includes Foundation 27, Gateway 114, Samples 82, Deployment Agent 27, routing integration 19, package deployment 40, Dashboard 48, signed protocol/DOM 54, API 154, Registry migration 15 and Node foundation/readiness 33. Formatting, TypeScript lint and `dotnet format --verify-no-changes` passed.
+- The published package suite verified Node.js and ASP.NET Core prebuilt fixtures, exact distinct-Administrator fingerprint approval, deploy/start, route URL access, stop/restart, tamper/revocation refusal and cleanup. Smoke started the four owned local components on loopback (Gateway 5050, API 53120, Dashboard 53121), verified health/static/proxy behavior and disabled browser authentication, then stopped owned processes, released ports and removed temporary storage.
+- Intermediate focused runs exposed three test issues and were corrected: a revoked outsider session was replaced with a fresh active outsider for the intended 404 assertion; the Dashboard assertion now waits for async runtime state; and the Gateway preserves its established signed-query tamper response while applying exact new endpoint/query allowlists. The final focused runs and full verification all pass.
+
+### Limitations and status
+
+- Actual-browser acceptance was **NOT RUN**. No approved browser-control capability was available and no browser executable/driver was launched. DOM/protocol results are not real-browser evidence. Keep production browser management disabled and M8 **IN PROGRESS**.
+- M7 remains **IN PROGRESS**: the prebuilt workflow is automated-test verified, but mandatory Source Build stays disabled pending an approved isolated worker and written IT/Security evidence. D00-D29 remain **PENDING**.
+- M10-DB remains **IN PROGRESS** for its previously completed metadata/path-validation scopes only. No application database was created, opened, attached, changed, migrated, backed up, restored or replaced.
+- No production system, existing deployed application, Windows security setting, firewall or corporate-network listener was modified. Verification used owned test fixtures and cleaned up their processes/storage.
+
+### Files and handoff
+
+Source and test files changed: `src/Api/src/controllers.ts`, `src/Api/src/registry.ts`, `src/Api/src/package-controllers.ts`, `src/Api/src/packages.ts`, `src/Api/test/auth.test.mjs`, `src/Gateway/BrowserBoundary.cs`, `src/Dashboard/src/api.ts`, `src/Dashboard/src/browser-session.ts`, `src/Dashboard/src/app.tsx`, `src/Dashboard/test/native-harness.mjs`, `src/Dashboard/test/dashboard.test.mjs`, and `src/Dashboard/test/browser.test.mjs`. No schema migration or application database behavior changed.
+
+**Manual local startup (only with an authorized disposable/local Registry):** in PowerShell from the repository root, run `npm.cmd run doctor`, `npm.cmd run build`, `npm.cmd --workspace @ihp/api run db:migrate`, then `npm.cmd run start:local`. Open `http://127.0.0.1:5050/admin/`; check `http://127.0.0.1:5050/_platform/health`; stop the owned stack with Ctrl+C. The default Dashboard is deliberately read-only/locked for privileged browser operations. The actual upload-to-deploy workflow is verified by `npm.cmd run verify` against disposable fixtures; do not claim manual browser login/upload acceptance until a permitted real browser is used and the existing M8 gate is met.
+
+**Exact next task:** operator-run actual-browser M8 acceptance in an already-approved browser session while keeping production management disabled unless the existing security gate is explicitly satisfied. Do not start M9 or M10, or expand M10-DB. Source Build remains disabled.
+
+---
+
+## Historical TASK 043 - M10-DB product-owner decisions and existing MVP priority - 2026-11-04
 
 ### Outcome and owner decisions
 
