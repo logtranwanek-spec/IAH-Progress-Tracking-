@@ -1,8 +1,8 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 042 - M10-DB decision finalization and readiness - 2026-11-04
+## Current TASK 043 - M10-DB product-owner decisions and MVP priority - 2026-11-04
 
-TASK 042 is documentation and decision-readiness only. Review DB-W0 W0-01 through W0-14, preserve TASK 023's approved first-use-where-safe, KEEP-on-upgrade and explicit authorized/safeguarded replacement requirements, and distinguish these product requirements from implementation or IT/Security approval. W0-12 is approved; W0-10 remains partially decided with import mode/provenance/location pending; all other unresolved W0 choices remain PENDING. Reuse the grouped decision package in PROJECT_REQUIREMENTS.md section 9.1.19 and document a concise current readiness matrix in section 9.1.22. Do not create/open/modify/attach/replace/delete application databases, run migrations, change paths/runtime, execute application source, or alter Windows security. Keep M7 and M10-DB IN PROGRESS, Source Build disabled, and D00-D29 PENDING. Update only the four tracking documents; run documentation consistency/format checks, not application builds/tests.
+The product-owner response dated 2026-11-04 is recorded in PROJECT_REQUIREMENTS.md section 9.1.23. Treat W0-01 through W0-14 as approved product direction only to the extent stated there; it is not IT/Security approval, implementation evidence or authority for real database operations. The owner prioritizes the existing Administrator-to-trusted-prebuilt deployment MVP. Preserve M7/M8 as IN PROGRESS, Source Build disabled, D00-D29 PENDING, and the M8 real-browser acceptance gap. Do not create/open/modify/attach/replace/delete application databases, run migrations, change paths/runtime, execute application source, or alter Windows security. Do not expand Database Management beyond the recorded MVP scope. Record actual focused test evidence without claiming simulated browser checks as actual-browser acceptance. The next bounded task is TASK 044, the existing prebuilt MVP vertical slice; no unrelated milestone is authorized.
 
 ## Permanent database-mode review rules
 
@@ -14,9 +14,13 @@ TASK 042 is documentation and decision-readiness only. Review DB-W0 W0-01 throug
 ## Permanent DB-W0 decision and readiness rules
 
 - Keep product-owner requirements, recommendations, implementation evidence and IT/Security approvals distinct. Do not infer or mark an approval from a proposed architecture, prior test, or metadata workflow.
-- Preserve the TASK 023 decisions: valid supplied SQLite data may be used on first deployment where safely supported; KEEP is the default on upgrade; replacement is explicit and requires authorization and recovery safeguards. Do not ask the product owner to reconfirm these requirements. W0-10's mode/provenance/location detail remains pending.
-- Before path-dependent database lifecycle or runtime work, resolve the relevant W0 decisions and require the specific technical/security acceptance for storage identity, isolation, provider, permissions and recovery. An approved product choice does not itself authorize operation on a real database.
+- Preserve the TASK 023 decisions: valid supplied SQLite data may be used on first deployment where safely supported; KEEP is the default on upgrade; replacement is explicit and requires authorization and recovery safeguards. Do not ask the product owner to reconfirm these requirements. TASK 043 additionally records the owner-approved product direction for storage/path policy, fixed app-specific bindings, safe import modes, no automatic migrations, disabled MVP backup/restore, trusted reviewed apps, and unsupported-as-is My Work Center. See PROJECT_REQUIREMENTS.md section 9.1.23; do not treat these product decisions as implementation evidence or IT/Security approval.
+- Before path-dependent database lifecycle or runtime work, require a separate implementation assignment and the specific technical/security acceptance for storage identity, isolation, provider, permissions and recovery. An approved product choice does not itself authorize operation on a real database. Automatic migrations and Platform backup/restore remain outside MVP; no provisioning, attachment, import, replacement or deletion is authorized by TASK 043.
 - Continue to describe original My Work Center as NOT COMPATIBLE AS-IS until every recorded path, migration, backup/download, runtime, health/routing, package and access-policy blocker is resolved and verified. Do not modify or execute it or access its production database as part of a decision review.
+
+## Historical TASK 042 - M10-DB decision finalization and readiness - 2026-11-04
+
+At the time of TASK 042, no new product-owner response had been received. Its pending decision snapshot and readiness matrix remain preserved in PROJECT_REQUIREMENTS.md sections 9.1.19 and 9.1.22; current outcomes are in section 9.1.23. TASK 042 changed documentation only and did not perform application or database operations.
 
 ## Historical TASK 040 - M10-DB database mode and association-intent metadata - 2026-11-04
 

@@ -1,6 +1,37 @@
 # Project Progress
 
-## Current TASK 042 - M10-DB DB-W0 decision finalization and implementation readiness - 2026-11-04
+## Current TASK 043 - M10-DB product-owner decisions and existing MVP priority - 2026-11-04
+
+### Outcome and owner decisions
+
+Recorded the product owner's explicit 2026-11-04 decisions in `PROJECT_REQUIREMENTS.md` section 9.1.23. W0-01-W0-10 and W0-13 follow the selected recommended product direction; W0-11 selects the alternative to keep Platform backup/restore disabled for the MVP; W0-12's existing KEEP/safe-first-use/explicit-REPLACE policy is unchanged; W0-07/W0-14 select support for already-compatible apps while keeping My Work Center blocked until a simple safe compatibility solution is verified. This is product direction only, not written IT/Security approval or implementation readiness.
+
+- W0 decisions and recommendations are not inferred from silence. The direct product-owner response in this conversation is the traceable decision evidence; no external IT/Security approval artifact was supplied.
+- All W0-01-W0-14 decisions now have product direction recorded. D00-D29 remain **PENDING**; no Build Worker is approved/provisioned and Source Build remains disabled.
+- Database provisioning, import/association, runtime path configuration, migration, Platform backup/restore and replacement remain unavailable or outside MVP. M10-DB stays **IN PROGRESS**. My Work Center remains **NOT COMPATIBLE AS-IS**.
+- The product owner's immediate priority is the existing MVP flow: Administrator login -> trusted-prebuilt ZIP upload -> exact package review/approval -> deploy/start -> access URL -> stop/restart. This does not waive M7/M8/M11 security controls or M8 actual-browser acceptance.
+
+### Focused verification evidence
+
+- `npm.cmd run test:packages` — **40 passed, 0 failed**. Existing trusted-prebuilt package checks exercised validation, exact Administrator package fingerprint approval and deployment-policy controls. No uploaded application was newly approved or deployed by this documentation task.
+- `npm.cmd run test:browser` — **54 passed, 0 failed, 0 skipped**. This suite uses API/Gateway protocol and DOM simulation. It is not actual-browser acceptance evidence.
+- `npm.cmd run verify` — **PASS**, exit code 0: **611 passed, 0 failed, 0 skipped**. This includes API/startup, authentication/authorization, database metadata, intake/package, Dashboard, signed Gateway/browser protocol simulation, Foundation/Gateway/Agent/Sample managed-DLL checks, 19 routing integration checks and 40 package deployment checks. All .NET outputs were published with `UseAppHost=false`, checked for absence of `.exe`, and executed as published DLLs where applicable.
+- The included smoke phase passed: four owned loopback components became healthy; Gateway/API/Dashboard listeners were confirmed loopback-only; owned processes stopped, ports released, and temporary test storage removed.
+- Actual-browser acceptance remains outstanding (the prior 53 scenarios are still NOT RUN); production browser management remains disabled by default.
+
+### Changes, limitations, and handoff
+
+- Updated only `PROJECT_REQUIREMENTS.md`, `AGENTS.md`, `IMPLEMENTATION_PLAN.md`, and this file. No application source/tests, schema/migration, Registry or application database, app files, runtime configuration, security setting or network listener changed.
+- Current documentation section 9.1.23 records owner choices, lifecycle readiness, My Work Center blockers and the MVP priority. Section 9.1.22 and TASK 039's decision package are retained as historical snapshots; they are not silently overwritten.
+- M7 and M8 remain **IN PROGRESS**; M10-DB remains **IN PROGRESS**. Other milestone statuses are unchanged. Source Build remains disabled; M11 controls remain mandatory.
+- Documentation consistency checks passed **8/8**. Prettier check passed for all four tracking documents; `git diff --check` passed. Two draft custom-check invocations did not pass because the PowerShell checker flattened its test cases and then used one overly literal phrase assertion; the corrected checker passed 8/8 with content-aligned assertions.
+- The four-file tracking-document Git delivery remains to be completed. No application source change was made. The verification build produced local generated build/publish outputs; these are not part of the authorized tracking commit.
+
+**Exact next task: TASK 044 — Existing trusted-prebuilt MVP vertical slice.** Reuse the current implementation to close and verify Administrator login -> package upload -> exact fingerprint approval -> deploy/start -> Gateway URL -> stop/restart, with permitted actual-browser acceptance evidence. Do not enable Source Build, modify My Work Center, implement database lifecycle behavior, or start another milestone.
+
+---
+
+## Historical TASK 042 - M10-DB DB-W0 decision finalization and implementation readiness - 2026-11-04
 
 ### Outcome and decision status
 
