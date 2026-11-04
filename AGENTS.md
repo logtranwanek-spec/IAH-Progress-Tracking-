@@ -1,8 +1,8 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 041 - M10-DB Administrator review of database-mode requests - 2026-11-04
+## Current TASK 042 - M10-DB decision finalization and readiness - 2026-11-04
 
-TASK 041 adds only an Administrator review/rejection workflow for inert application-scoped database-mode requests in the SQLite Platform Registry. Allowed transitions are `REQUESTED` -> `PENDING_REVIEW` and `PENDING_REVIEW` -> `REJECTED`, while preserving the existing permitted cancellation transition. Review/history operations must retain M11 session, role, permission and application-scope checks; the service must explicitly require the Administrator role for review/rejection. Use atomic state/event/audit writes, hashed idempotency keys, append-only history and bounded allowlisted rejection reason codes. Do not add approval or active database states, accept free-form sensitive reasons, record physical paths, or open/create/modify/delete/attach application database files. Do not change runtime configuration, provision/migrate/backup/restore/replace data, or execute application code. Keep DB-W0 unresolved, M10-DB and M7 IN PROGRESS, Source Build disabled, and D00-D29 PENDING absent traceable written approval. Verify with disposable SQLite Registry fixtures and record exact commands/results.
+TASK 042 is documentation and decision-readiness only. Review DB-W0 W0-01 through W0-14, preserve TASK 023's approved first-use-where-safe, KEEP-on-upgrade and explicit authorized/safeguarded replacement requirements, and distinguish these product requirements from implementation or IT/Security approval. W0-12 is approved; W0-10 remains partially decided with import mode/provenance/location pending; all other unresolved W0 choices remain PENDING. Reuse the grouped decision package in PROJECT_REQUIREMENTS.md section 9.1.19 and document a concise current readiness matrix in section 9.1.22. Do not create/open/modify/attach/replace/delete application databases, run migrations, change paths/runtime, execute application source, or alter Windows security. Keep M7 and M10-DB IN PROGRESS, Source Build disabled, and D00-D29 PENDING. Update only the four tracking documents; run documentation consistency/format checks, not application builds/tests.
 
 ## Permanent database-mode review rules
 
@@ -10,6 +10,13 @@ TASK 041 adds only an Administrator review/rejection workflow for inert applicat
 - Allow only `REQUESTED` -> `PENDING_REVIEW`, `PENDING_REVIEW` -> `REJECTED`, and the previously defined cancellation transitions. Reject every other transition. Never interpret request/review status as approval, active/ready/provisioned/attached state, or authority for database operations.
 - Persist reviewer, timestamp, previous/new status, audit linkage, bounded allowlisted rejection reason code, and idempotency digest in the append-only request history. Never persist or return raw idempotency keys or unbounded free-form rejection text.
 - Keep the feature metadata-only: no filesystem paths, application database reads/writes, provisioning, attachment, runtime settings, migrations, backup, restore, replacement, deletion or source execution.
+
+## Permanent DB-W0 decision and readiness rules
+
+- Keep product-owner requirements, recommendations, implementation evidence and IT/Security approvals distinct. Do not infer or mark an approval from a proposed architecture, prior test, or metadata workflow.
+- Preserve the TASK 023 decisions: valid supplied SQLite data may be used on first deployment where safely supported; KEEP is the default on upgrade; replacement is explicit and requires authorization and recovery safeguards. Do not ask the product owner to reconfirm these requirements. W0-10's mode/provenance/location detail remains pending.
+- Before path-dependent database lifecycle or runtime work, resolve the relevant W0 decisions and require the specific technical/security acceptance for storage identity, isolation, provider, permissions and recovery. An approved product choice does not itself authorize operation on a real database.
+- Continue to describe original My Work Center as NOT COMPATIBLE AS-IS until every recorded path, migration, backup/download, runtime, health/routing, package and access-policy blocker is resolved and verified. Do not modify or execute it or access its production database as part of a decision review.
 
 ## Historical TASK 040 - M10-DB database mode and association-intent metadata - 2026-11-04
 

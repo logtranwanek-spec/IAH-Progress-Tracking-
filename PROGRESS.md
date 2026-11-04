@@ -1,6 +1,65 @@
 # Project Progress
 
-## Current TASK 041 - M10-DB Administrator database-mode request review - 2026-11-04
+## Current TASK 042 - M10-DB DB-W0 decision finalization and implementation readiness - 2026-11-04
+
+### Outcome and decision status
+
+Completed the documentation-only review of DB-W0 W0-01 through W0-14. No product-owner response or new approval evidence was supplied during TASK 042. The complete grouped decision table with recommendations, alternatives, technical/security impact and exact confirmation wording remains in `PROJECT_REQUIREMENTS.md` section 9.1.19; the current status/readiness matrix is in section 9.1.22.
+
+- **One fully approved decision:** W0-12, KEEP existing database as the upgrade default. The explicit replacement requirement remains: replacement is a separate, authorized and safeguarded operation.
+- **Preserved prior decision:** TASK 023 approved first use of valid supplied SQLite data where safely supported. This is not implementation evidence or permission to import a real database in this task.
+- **Partially decided:** W0-10 safe first use is preserved, while imported-data mode, provenance and authorized storage/location ownership remain PENDING.
+- **Unresolved:** W0-01–W0-11, W0-13 and W0-14 contain pending or partially pending details (13 decision IDs with unresolved portions). W0-12 is not being asked again.
+- **Separate security register:** D00–D29 remain PENDING. They continue to gate M7 Source Build; they are not relabeled as DB-W0 product decisions or DB approvals.
+
+### Product-owner confirmations still needed
+
+The grouped confirmations below map to the full exact question wording in PROJECT_REQUIREMENTS.md section 9.1.19:
+
+1. **W0-01–04 — storage and paths:** choose the canonical `workspace/` versus `data/` relationship/default and supported path bases; otherwise require an explicit per-app path and leave unsupported bases blocked.
+2. **W0-05–06 — configuration:** decide whether only fixed allowlisted app-specific variables/configuration can receive Platform-generated canonical app-owned paths, or whether all runtime path/config injection remains unsupported.
+3. **W0-07/W0-14 — My Work Center and health/routing:** keep My Work Center unsupported unless a narrowly scoped, reviewed compatibility boundary or separately reviewed immutable artifact satisfies health, prefix, raw-backup denial and existing policy; otherwise support only apps already satisfying those contracts.
+4. **W0-08/W0-10 — import and WAL/SHM:** choose imported data's mode/provenance versus externally retained `EXISTING_SQLITE`; specify when live/incomplete WAL sets must be rejected until a consistent snapshot is available. The safe-first-use requirement itself is already approved.
+5. **W0-09 — startup migrations:** accept fail-closed startup for missing/pending/changed migration ledgers with migration separately authorized, or restrict support to already-current, non-mutating apps.
+6. **W0-11 — backup/restore:** identify the approved SQLite-consistent provider, writer/downtime coordination, retention/limits and operational recovery owner; otherwise keep operations disabled.
+7. **W0-13 — same-user trust:** accept the documented limitation for trusted reviewed applications or require a separately approved identity/ACL boundary before database-backed runtime support.
+8. **W0-12:** no confirmation requested; KEEP stays the upgrade default, and replacement stays explicit, authorized and safeguarded.
+
+Recommendations remain proposals. No status was changed to APPROVED by inference.
+
+### Implementation readiness
+
+| Capability                         | Readiness                                     | Main outstanding gate                                                                                                                                |
+| ---------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Per-application persistent storage | **NOT READY**                                 | W0-01–06/W0-13 path, identity and same-user trust decisions; TASK 037 resolver validates prospective targets but creates nothing.                    |
+| Managed SQLite provisioning        | **NOT READY**                                 | Storage decisions plus W0-08–10 import/WAL/migration policy, and separately authorized non-overwrite, limits, recovery and lifecycle implementation. |
+| Existing SQLite association/import | **NOT READY**                                 | W0-04–06/W0-08–10/W0-13 location ownership, provenance and consistent snapshot contract; candidate metadata is not an association.                   |
+| Runtime database configuration     | **NOT READY**                                 | W0-03–07/W0-09/W0-13/W0-14 and verified M5/M7 app-specific runtime, health, route and access compatibility. No path injection exists.                |
+| Backup and restore                 | **NOT READY**                                 | W0-08/W0-11/W0-13 provider, writer coordination, authorization, retention, recovery owner and restore validation.                                    |
+| KEEP/REPLACE lifecycle             | **POLICY APPROVED; IMPLEMENTATION NOT READY** | W0-12 is fixed, but storage, consistent backup/recovery and M10 release/deployment coordination are not implemented.                                 |
+| Dashboard database management      | **NOT READY**                                 | No lifecycle APIs/UI; M8 actual-browser acceptance is outstanding and private production browser management remains default-disabled.                |
+
+No operational database lifecycle component can be enabled from current evidence. After applicable product decisions and a separate implementation authorization, the safe sequence is read-only compatibility preflight, per-app storage and explicit association/provisioning, independently authorized SQLite-consistent backup/restore, then Dashboard controls after the secure M8 gate. Each stage needs dedicated security and regression evidence. SQLite is the only engine permitted for real operations; SQL Server/PostgreSQL/MySQL remain metadata-only.
+
+### My Work Center and security blockers
+
+The original My Work Center remains **NOT COMPATIBLE AS-IS**. The inspected database path is module-relative; `WORK_CENTER_DB_PATH` is not approved or injected; startup may create a database and execute migrations; app-managed backup pruning and `/api/backup.db` conflict with IHP's explicit backup authorization/no-raw-download requirements; the reviewed server lacks the required health/base-path contract; Node/package/runtime compatibility and the selected shared-localhost access model remain unresolved. The minimum future profile is recorded in PROJECT_REQUIREMENTS.md section 9.1.19. No My Work Center code was changed or executed, and no production database was accessed.
+
+Same-Windows-identity filesystem separation is not a security sandbox. No OS identity/ACL change, security-policy change, app path change, database operation or uploaded source execution occurred. M7 and M10-DB remain IN PROGRESS; Source Build remains disabled; D00–D29 remain PENDING. All other milestone statuses remain unchanged.
+
+### Files and verification
+
+- Updated only `PROJECT_REQUIREMENTS.md` (new section 9.1.22 decision/readiness snapshot), `IMPLEMENTATION_PLAN.md` (TASK 042 current assignment/readiness), `AGENTS.md` (permanent DB-W0/readiness rules), and this progress log.
+- No application/source/test code, schema, migration, database, runtime configuration, or existing application changed. Application builds/tests were **NOT RUN**, as appropriate for this documentation-only task.
+- Documentation consistency checks passed **11/11**, covering TASK 042 presence, W0-01–W0-14 retention, approved/pending split, preserved TASK 023 requirements, exact decision package fields, readiness labels, My Work Center status, milestone/source-build/approval status, and documentation-only scope. `node ./node_modules/prettier/bin/prettier.cjs --check AGENTS.md PROJECT_REQUIREMENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md` passed after formatting `PROGRESS.md`; the initial check identified its formatting issue. `git diff --check` passed. No configured Registry migration or application/database access was performed.
+
+### Next task
+
+**Recommended TASK 043:** obtain traceable product-owner answers to the grouped W0-01–W0-11/W0-13/W0-14 confirmations, preserve W0-12 and the already-approved safe-first-use/replacement requirements, and update decision statuses only from supplied evidence. Keep all real database lifecycle work disabled until the relevant decisions and technical/security gates are satisfied; do not treat TASK 043 as implementation authorization.
+
+---
+
+## Historical TASK 041 - M10-DB Administrator database-mode request review - 2026-11-04
 
 ### Outcome
 

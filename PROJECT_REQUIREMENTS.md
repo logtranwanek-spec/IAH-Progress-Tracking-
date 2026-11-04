@@ -1454,7 +1454,7 @@ The platform should be designed to support hostname-based routing in the future,
 
 # 9. DATABASE MANAGEMENT
 
-**Current policy and scope:** Only SQLite is allowed for real database operations. SQL Server, PostgreSQL and MySQL are **metadata-only connection references**; no real connection, authentication, migration, provisioning or connectivity testing against those engines is permitted. This restriction supersedes the original existing-company-server/connectivity wording retained below. Their missing real connectivity verification remains the accepted company-policy gap, not a claim of operational support. M10-DB is IN PROGRESS for TASK 036 candidate metadata, TASK 037 prospective path validation, TASK 040 inert mode/association-intent requests and TASK 041 Administrator review/rejection metadata (sections 9.1.16–21); no database mode is active and no application database lifecycle capability is implemented. Application database provisioning, attachment, backup, restore and runtime configuration remain unimplemented.
+**Current policy and scope:** Only SQLite is allowed for real database operations. SQL Server, PostgreSQL and MySQL are **metadata-only connection references**; no real connection, authentication, migration, provisioning or connectivity testing against those engines is permitted. This restriction supersedes the original existing-company-server/connectivity wording retained below. Their missing real connectivity verification remains the accepted company-policy gap, not a claim of operational support. M10-DB is IN PROGRESS for TASK 036 candidate metadata, TASK 037 prospective path validation, TASK 040 inert mode/association-intent requests, TASK 041 Administrator review/rejection metadata and TASK 042 decision/readiness documentation (sections 9.1.16–22); no database mode is active and no application database lifecycle capability is implemented. Application database provisioning, attachment, backup, restore and runtime configuration remain unimplemented.
 
 The Platform Registry will use SQLite initially.
 
@@ -1948,6 +1948,49 @@ The API applies current session, role, permission, ownership/grant, and route ap
 Focused tests verify valid review/rejection, non-Administrator denial, wrong application scope, illegal transitions, replay/idempotency, concurrent review/rejection, reason-code validation, audit/history integrity, preservation through the additive migration, and no application database files or path/content exposure. The configured Registry was not migrated. No application database was opened, created, attached, modified, migrated, backed up, restored, replaced or deleted; runtime configuration and source execution remain unchanged.
 
 TASK 041 does not resolve pending DB-W0 decisions, establish My Work Center compatibility, add Dashboard database controls or implement provisioning/lifecycle operations. M10-DB and M7 remain **IN PROGRESS**; Source Build remains disabled; D00-D29 remain PENDING absent authorized written evidence. The review status is not a database approval or operational readiness signal. See `PROGRESS.md` for exact commands and verification totals.
+
+### 9.1.22. TASK 042 - DB-W0 decision status and implementation readiness
+
+This section is the current decision/readiness snapshot. The complete product-owner decision package—current evidence, recommendation, alternative, technical/security impact and exact confirmation wording—remains in section 9.1.19. Recommendations are not decisions or authorization.
+
+#### Decision status
+
+There is **one fully approved DB-W0 decision: W0-12**. The product owner approved KEEP as the upgrade default and explicit, separately authorized replacement with recovery safeguards. TASK 023 also approved use of valid supplied SQLite data on first deployment where safely supported. These requirements are preserved; no re-confirmation is requested. W0-10 remains partly decided: safe first use is approved, but imported-data mode, provenance and authorized location/ownership semantics remain pending. W0-01–W0-11, W0-13 and W0-14 have unresolved decisions (13 decision IDs with pending or partially pending detail). No recommendation below changes these statuses.
+
+| Pending decision IDs | Topic and current status | Product-owner confirmation needed (exact grouped wording is in section 9.1.19) |
+| --- | --- | --- |
+| W0-01–04 | Storage default, workspace/data relationship, relative-path bases and absolute-path handling — PENDING. | Choose a canonical storage/path contract and the supported CWD/other path bases; otherwise require an explicit app target and leave unsupported patterns blocked. |
+| W0-05–06 | Fixed application-specific environment/config binding — PENDING. | Decide whether only a named allowlisted variable such as `WORK_CENTER_DB_PATH` may receive a Platform-generated canonical app-owned value; otherwise permit no injection/config rewrite. |
+| W0-07, W0-14 | My Work Center plus health, route-prefix and raw-backup-route compatibility — PENDING. | Keep My Work Center unsupported unless a narrow, verified IHP-owned compatibility boundary or separately reviewed immutable compatibility artifact is accepted; otherwise support only applications already meeting the contracts. |
+| W0-08, W0-10 | Existing-data import semantics and WAL/SHM consistency — import mode/provenance/location PENDING; safe first use is already approved. | Choose `MANAGED_SQLITE` with imported provenance versus `EXISTING_SQLITE` for data that remains external, and decide when unsafe/live WAL sets must be rejected pending a consistent snapshot. |
+| W0-09 | Startup schema migrations — PENDING. | Accept fail-closed startup for missing/pending/changed ledgers and require migration as a separately authorized operation, or limit support to applications whose existing schema is already current. |
+| W0-11 | Backup/restore provider, operation coordination and ownership — PENDING. | Select an approved consistent provider, writer/downtime coordination, retention/limits and recovery owner; otherwise keep backup/restore disabled. |
+| W0-13 | Same-Windows-identity trust boundary — PENDING. | Accept the limitation for trusted reviewed applications or require an approved separate identity/ACL boundary before database-backed runtime support. |
+| W0-12 | KEEP/REPLACE policy — APPROVED as product requirement; implementation is pending. | No re-confirmation. Preserve KEEP by default; replacement remains explicit, separately authorized and guarded by recovery safeguards. |
+
+IT/Security decisions D00–D29 are a separate register, remain **PENDING**, and continue to block Source Build. They are not reclassified as DB-W0 approvals. Product-owner confirmation alone does not authorize an operation on a real Registry or application database; each future implementation requires an explicit task and technical/security verification.
+
+#### Lifecycle implementation readiness
+
+No operational database lifecycle component is ready to enable. Previously completed TASK 036/037/040/041 work is limited to candidate metadata, a prospective path validator, inert mode requests, and their review history. It does not prove that a storage area is approved, a runtime binding is compatible, or an application database may be opened or changed.
+
+| Capability | Current readiness | Decisions and independent gates still required |
+| --- | --- | --- |
+| Per-application persistent storage | **NOT READY** | W0-01–06 and W0-13; define canonical area/path semantics and identity checks. TASK 037 validates a prospective destination only and does not create storage. |
+| Managed SQLite provisioning | **NOT READY** | W0-01–06, W0-08–10 and W0-13; non-overwrite/idempotency, initialization, quotas, recovery and owner authorization require a separately reviewed implementation. |
+| Existing SQLite association/import | **NOT READY** | W0-04–06, W0-08–10 and W0-13; authorized location/ownership, consistent snapshot and import provenance remain unresolved. Candidate review metadata is not an association. |
+| Runtime database configuration | **NOT READY** | W0-03–07, W0-09, W0-13 and W0-14, plus M5/M7 compatibility and exact per-application startup/health/routing checks. No path/environment injection exists. |
+| SQLite backup and restore | **NOT READY** | W0-08, W0-11 and W0-13; approved SQLite-consistent provider, writer coordination, retention, downtime, restore validation and operational ownership are absent. Raw copying an active DB is not acceptable. |
+| Upgrade KEEP / explicit REPLACE | **POLICY APPROVED; IMPLEMENTATION NOT READY** | W0-12 is fixed; storage, backup/recovery and M10 version/deployment coordination must be implemented and tested. No upgrade, rollback or deletion may change data automatically. |
+| Dashboard database management | **NOT READY** | Secured API lifecycle operations do not exist; M8 actual-browser acceptance is outstanding and private production browser management remains disabled by default. M11 backend checks remain mandatory. |
+
+After the applicable product decisions are recorded and a separate bounded implementation task is authorized, a safe sequence can begin with read-only compatibility preflight, followed by per-app storage/provisioning or explicitly authorized existing-file association, then an approved SQLite-consistent backup/restore provider, and finally Dashboard integration after its security gate. Each phase requires its own tests and authorization. No operation against a real application DB is authorized by this readiness review. Only SQLite may perform real database operations; SQL Server, PostgreSQL and MySQL remain metadata-only.
+
+#### My Work Center and security blockers
+
+The original My Work Center remains **NOT COMPATIBLE AS-IS**. Its module-relative database path is not redirected by the current resolver; `WORK_CENTER_DB_PATH` is not an approved or implemented binding; startup migrations may create/change data; application-owned backup pruning and `/api/backup.db` conflict with explicit IHP backup authorization and no raw database download; the reviewed server lacks the required IHP health/base-path behavior; its Node/runtime/package contract and shared-localhost access model remain unverified or incompatible. The minimum future compatibility conditions remain in section 9.1.19. Do not modify or execute the application or access its production database.
+
+Same-user filesystem separation is not a sandbox. No OS identity/ACL change or other security setting is authorized here. Source Build remains disabled; M7 remains IN PROGRESS; M10-DB remains IN PROGRESS. No application, Registry or database operation was performed for TASK 042.
 
 # 10. APPLICATION VERSION MANAGEMENT
 
