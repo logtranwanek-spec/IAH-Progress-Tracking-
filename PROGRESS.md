@@ -1,6 +1,50 @@
 # Project Progress
 
-## Current TASK 039 - M10-DB product decision package and readiness - 2026-11-03
+## Current TASK 040 - M10-DB database modes and association-intent metadata - 2026-11-04
+
+### Outcome
+
+Completed the authorized metadata-only request foundation for `NONE`, `MANAGED_SQLITE` and `EXISTING_SQLITE`. TASK 040 is complete as a bounded sub-scope; **M10-DB remains IN PROGRESS** because database review operations, active association, storage/runtime lifecycle and Dashboard management are not implemented. M7 remains IN PROGRESS and Source Build remains disabled. D00-D29 remain PENDING; no DB-W0 decision was changed. M1-M6/M11 remain COMPLETED, M8 remains IN PROGRESS, and M9/M10/M12 remain NOT STARTED.
+
+### Implemented components
+
+- Additive migration `src/Api/prisma/migrations/202611040008_database_mode_intents/migration.sql` adds `application_database_mode_requests` and `application_database_mode_request_events`, plus a composite application/candidate key. Constraints enforce the three modes, bounded statuses (`REQUESTED`, `PENDING_REVIEW`, `REJECTED`, `CANCELLED`), optional candidate requirements, one-time request initialization, audited cancellation, immutable request identity, append-only events, and retained request records.
+- Prisma models and relations in `src/Api/prisma/schema.prisma` cover request, application, requester/reviewer/canceller, same-app candidate, creation audit, and ordered transition events. Metadata includes UUID request/association intent, mode, optional candidate ID, status, user/time fields, review/cancel metadata, a hashed idempotency key and audit linkage. The new request table contains no database path, content, credential, or copied candidate fingerprint.
+- `src/Api/src/database-mode-requests.ts` implements strict mode/body validation, eligible candidate metadata checks without opening candidate bytes, app-scoped list/detail, idempotent create and cancel, transactionally linked audit/events, and allowlisted response projection.
+- `src/Api/src/database-mode-request-controllers.ts`, registered in `src/Api/src/app.ts`, exposes M11-protected endpoints:
+  - `POST /_platform/api/applications/:id/database-mode-requests` (`application.write`): create request.
+  - `GET /_platform/api/applications/:id/database-mode-requests` (`application.read`): paginated list with mode/status filters.
+  - `GET /_platform/api/applications/:id/database-mode-requests/:requestId` (`application.read`): application-scoped detail.
+  - `POST /_platform/api/applications/:id/database-mode-requests/:requestId/cancel` (`application.write`): pending request cancellation.
+- Reusing the same idempotency key with the same request returns the original; reuse for different input conflicts. Only a SHA-256 digest is persisted. `EXISTING_SQLITE` requires an eligible candidate ID belonging to the same application and checks only existing immutable Registry metadata. It does not open or validate the candidate file at request time.
+- New requests start at `REQUESTED`; cancellation is the only exposed transition. `PENDING_REVIEW`/`REJECTED` and review columns are constrained metadata for a later separately assigned review workflow; TASK 040 adds no Administrator review/rejection API. A request does not activate a database or authorize later operations.
+
+### Security and operational boundary
+
+M11 session, role, permission, current application ownership/grant checks remain server-enforced. Cross-application candidate links are blocked by scoped queries and a composite SQLite foreign key. API responses omit idempotency key/hash, candidate relative path/fingerprint and DB bytes; audit records contain bounded operation/mode/status/candidate identifiers only. No application database file was created, opened, attached, modified, migrated, copied, replaced, backed up, restored or deleted. No runtime path/configuration changed; no application source was executed. The configured Registry was not migrated; migration testing used disposable SQLite fixtures only. DB-W0 remains unresolved (W0-12 retains the previous approved KEEP product policy); D00-D29 remain PENDING. This metadata work does not imply My Work Center compatibility or same-user OS isolation.
+
+### Files changed
+
+- Implementation: `src/Api/prisma/schema.prisma`; new migration `src/Api/prisma/migrations/202611040008_database_mode_intents/migration.sql`; new service/controller `src/Api/src/database-mode-requests.ts` and `src/Api/src/database-mode-request-controllers.ts`; `src/Api/src/app.ts`; new focused tests `src/Api/test/database-mode-requests.test.mjs`; API test script in `src/Api/package.json`; expected additive migration/model counts in `src/Api/test/database.test.mjs` and `tests/DeploymentAgent.Tests/Program.cs`.
+- Tracking: `PROJECT_REQUIREMENTS.md` section 9.1.20, M10-DB/TASK 040 roadmap and summary in `IMPLEMENTATION_PLAN.md`, current-task and permanent DB scope rules in `AGENTS.md`, and this record.
+
+### Verification evidence
+
+- `npm.cmd run build --workspace @ihp/api` — PASS. Guarded Prisma WASM validation reported 26 models; in-process TypeScript client generation reported no native artifacts/processes/downloads; TypeScript build succeeded.
+- From `src/Api`: `node --test --test-concurrency=1 --test-timeout=60000 test/database-mode-requests.test.mjs` — **6 passed, 0 failed, 0 skipped**.
+- `npm.cmd run verify` — **PASS, exit 0**. Counted automated checks: **608 passed, 0 failed, 0 skipped**: Foundation Node 33; API 150; Registry/migration 15; Dashboard 47; browser protocol/DOM 54; Foundation managed DLL 27; Gateway managed DLL 114; samples managed DLL 82; Deployment Agent managed DLL 27; routing integration managed DLL 19; package verification managed DLL 40. Build and format/type checks passed. Smoke verified owned loopback Gateway/API/Dashboard readiness and socket binding, and stopped owned components/released ports/removed temporary storage. The browser protocol/DOM suite is not actual-browser acceptance evidence.
+- .NET verification outputs were published with `UseAppHost=false`, checked for absence of executable artifacts, and invoked as published DLLs; no `.exe` was run. No Docker, Administrator privilege, firewall/security change, corporate listener, external database engine, configured/production Registry, deployed app, uploaded source build or browser executable was used.
+- Documentation consistency cross-check passed for all three mode labels, migration identity, M10-DB status, disabled Source Build and pending D00-D29. `node ./node_modules/prettier/bin/prettier.cjs --check AGENTS.md PROJECT_REQUIREMENTS.md IMPLEMENTATION_PLAN.md PROGRESS.md` passed for all four files. `git diff --check` passed.
+
+### Known gaps and next task
+
+- No Administrator review/rejection action is exposed; the API supports create/list/detail/cancel only. There is no active mode field on applications and no physical association, data file, provisioning, attachment, runtime binding, migration, backup/restore, retention/deletion, Dashboard database management, or operational review workflow.
+- DB-W0 path/import/WAL/migration/backup/trust/compatibility decisions remain pending as in section 9.1.19. MWC remains NOT COMPATIBLE AS-IS. M7 Source Build remains disabled pending approved worker/isolation evidence; M8's real-browser acceptance remains unverified.
+- **Recommended TASK 041:** implement an Administrator-only review/rejection workflow for inert database-mode requests, with explicit `REQUESTED` → `PENDING_REVIEW` → `REJECTED` transitions, audit and idempotency, strict M11 ownership/RBAC tests and no mode activation or database/file/runtime operation. Keep DB-W0 and D00-D29 unchanged unless separately supported by evidence.
+
+---
+
+## Historical TASK 039 - M10-DB product decision package and readiness - 2026-11-03
 
 ### Result
 

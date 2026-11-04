@@ -1,7 +1,7 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 039 - M10-DB product decision package and readiness - 2026-11-03
+## Historical TASK 039 - M10-DB product decision package and readiness - 2026-11-03
 
 TASK 039 converts the existing DB-W0 findings into grouped product-owner decisions with current evidence, recommended options, alternatives, security/existing-application impact and exact confirmations. Recommendations remain recommendations. The TASK 023-approved first-use/KEEP/explicit replacement-authorization requirements are preserved; W0-12 remains approved, while unresolved path/import/runtime decisions remain pending. No application/platform source, schema, migration, runtime, database or existing application changed or ran. M7/M10-DB remain IN PROGRESS; Source Build stays disabled; D00-D29 remain PENDING. See section 9.1.19 and PROGRESS.md.
 
@@ -1454,7 +1454,7 @@ The platform should be designed to support hostname-based routing in the future,
 
 # 9. DATABASE MANAGEMENT
 
-**Current policy and scope:** Only SQLite is allowed for real database operations. SQL Server, PostgreSQL and MySQL are **metadata-only connection references**; no real connection, authentication, migration, provisioning or connectivity testing against those engines is permitted. This restriction supersedes the original existing-company-server/connectivity wording retained below. Their missing real connectivity verification remains the accepted company-policy gap, not a claim of operational support. M10-DB is IN PROGRESS only for TASK 036 candidate metadata and TASK 037 prospective path validation (sections 9.1.16–17); application database provisioning, attachment, backup, restore and runtime configuration remain unimplemented.
+**Current policy and scope:** Only SQLite is allowed for real database operations. SQL Server, PostgreSQL and MySQL are **metadata-only connection references**; no real connection, authentication, migration, provisioning or connectivity testing against those engines is permitted. This restriction supersedes the original existing-company-server/connectivity wording retained below. Their missing real connectivity verification remains the accepted company-policy gap, not a claim of operational support. M10-DB is IN PROGRESS for TASK 036 candidate metadata, TASK 037 prospective path validation, and TASK 040 inert mode/association-intent requests (sections 9.1.16–20); no active database mode or lifecycle capability is implemented. Application database provisioning, attachment, backup, restore and runtime configuration remain unimplemented.
 
 The Platform Registry will use SQLite initially.
 
@@ -1877,7 +1877,45 @@ For My Work Center, the minimum future profile would require: (1) a reviewed fix
 
 **Readiness:** ready for product-owner review; **NOT READY for path-dependent runtime/lifecycle implementation**. W0-01–W0-11 and W0-13/W0-14 remain pending. D00–D29 remain PENDING. No production DB, application or runtime was accessed.
 
-**Proposed TASK 040 (not started):** implement a metadata-only database mode and association-intent foundation in the SQLite Registry. It may persist an app-scoped selected mode and an inert review/request reference using existing M11 ownership/RBAC and audit contracts, but must not accept physical paths, mark a database active/ready, inspect or open candidate bytes, or perform filesystem/SQLite/runtime operations. Use an additive migration and managed verification on disposable Registry fixtures. Test anonymous/Viewer/foreign-owner/privilege-escalation denial, unique app association, idempotency, audit redaction and that no path or DB operation is exposed. Gate execution of this proposed task on a separate explicit implementation assignment; it does not resolve DB-W0 or authorize provisioning, attachment, migration, backup, restore, replacement or deletion.
+**TASK 040 status:** the metadata-only request foundation described in section 9.1.20 is implemented and verified. This is not DB-W0 approval and does not authorize provisioning, attachment, migration, backup, restore, replacement or deletion.
+
+### 9.1.20. TASK 040 - Database mode and association-intent metadata (implemented, metadata only)
+
+TASK 040 adds an additive SQLite Platform Registry migration `202611040008_database_mode_intents` and authenticated application-scoped request APIs. The implementation records requests to use the existing mode vocabulary; it does not set an application's active/current database mode or create a live database association.
+
+#### Persisted request metadata
+
+The `application_database_mode_requests` table records:
+
+- Request UUID and unique opaque association-intent UUID.
+- Application UUID, requested mode (`NONE`, `MANAGED_SQLITE`, or `EXISTING_SQLITE`), and an optional candidate UUID for `EXISTING_SQLITE` only.
+- Bounded request status (`REQUESTED`, `PENDING_REVIEW`, `REJECTED`, `CANCELLED`), requesting user and timestamp.
+- SHA-256 digest of the idempotency key; the submitted key is not stored or returned.
+- Optional constrained reviewer, review timestamp/code, and cancellation actor/time metadata.
+- Creation-audit reference and bounded append-only status-event metadata with audit links.
+
+Foreign keys and a composite application/candidate reference prevent cross-application candidate association. SQLite constraints enforce allowed modes/states, candidate requirements, initial state, immutable request identity, audited cancellation transitions, append-only events, and retention of request rows. The Registry stores no application database contents, physical database paths, credentials, or copied candidate fingerprint. Existing candidate inventory may itself retain its validated relative path and fingerprint under its separate TASK 036 contract; the mode-request API does not return those fields.
+
+#### API and authorization
+
+All endpoints require the existing M11 session and application-scoped permission/ownership checks:
+
+| Endpoint | Permission | Behavior |
+| --- | --- | --- |
+| `POST /_platform/api/applications/:id/database-mode-requests` | `application.write` | Creates an intent for a validated mode. `EXISTING_SQLITE` requires an eligible candidate belonging to that same application. |
+| `GET /_platform/api/applications/:id/database-mode-requests` | `application.read` | Lists bounded, paginated requests with optional mode/status filters. |
+| `GET /_platform/api/applications/:id/database-mode-requests/:requestId` | `application.read` | Retrieves a request only within its application scope. |
+| `POST /_platform/api/applications/:id/database-mode-requests/:requestId/cancel` | `application.write` | Idempotently cancels an eligible pending request; it does not affect files or runtime state. |
+
+Creation is idempotent per application/requesting user/idempotency-key digest. Reuse with the same request returns the existing record; reusing the key for different request data fails with conflict. Responses use an explicit metadata allowlist, omit the submitted key/digest and candidate path/fingerprint/content, and include linked audit event identifiers. M11 server authorization remains authoritative; UI roles do not grant access.
+
+`REQUESTED` is the only creation state and cancellation is the only exposed transition. `PENDING_REVIEW` and `REJECTED` are schema-bounded vocabulary/review metadata only; TASK 040 adds no Administrator review/rejection endpoint or review action. None of these request states means a database is active, ready, provisioned or attached.
+
+#### Verification and limits
+
+API and migration verification used disposable SQLite Platform Registry fixtures. Tests cover all three modes, persistence, idempotency including concurrent duplicate submission, same-application candidate metadata validation, invalid and foreign candidate references, anonymous/Viewer/foreign-owner denial, strict input and escalation rejection, cancellation/audit/state-transition constraints, additive upgrade preservation, absence of application data-file creation, and responses/schema without database contents or physical paths.
+
+The additive migration was not applied to a configured/production Registry. Existing candidate metadata was read from Registry metadata only; candidate bytes were not opened or copied. No application database was created/opened/attached/modified/migrated/backed up/restored/replaced/deleted, and no runtime path/configuration or source execution was enabled. TASK 040 does not resolve pending DB-W0 decisions, establish My Work Center compatibility, add Dashboard controls, or implement lifecycle operations. M10-DB remains **IN PROGRESS**; M7 remains **IN PROGRESS** and Source Build remains disabled. D00-D29 remain PENDING without authorized written approval. See `PROGRESS.md` for exact commands and suite totals.
 
 # 10. APPLICATION VERSION MANAGEMENT
 
