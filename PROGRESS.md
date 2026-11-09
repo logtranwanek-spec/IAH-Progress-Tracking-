@@ -1,5 +1,17 @@
 # Project Progress
 
+## Local startup launcher and component verification - 2026-11-09
+
+Searched the workspace and accessible Git history for Windows `.cmd`, `.bat` and `.ps1` launchers. None exists in the workspace or Git history; the local Git repository tracks only the four progress documents, so no original source launcher was available to restore. Added root-level `START-IHP.cmd`, a minimal wrapper that calls the existing `npm.cmd run start:local` script and does not migrate a Registry automatically.
+
+Before launch, the configured loopback ports 5050/5065/5173 were free. The configured user storage tree existed but contained no SQLite database files or application storage directories; the static route list was empty. Ran `npm.cmd --workspace @ihp/api run db:migrate` and then `db:status` to initialize/verify a new empty local Platform Registry only. Read-only SQLite checks found 0 users and 0 applications. No production or application database existed or was modified; no account was seeded.
+
+Started the stack by running `START-IHP.cmd` in the foreground. The existing launcher started the API and Deployment Agent before Gateway and Dashboard readiness. Verified Gateway health at `127.0.0.1:5050` and API health at `127.0.0.1:5065` returned status `ok`; Gateway-hosted Dashboard `http://localhost:5050/admin/` and Dashboard service `http://127.0.0.1:5173/admin/` each returned HTTP 200. Listener inspection confirmed all three ports bind only to `127.0.0.1`. Deployment Agent emitted `IHP_AGENT_READY` and one process was running `DeploymentAgent.dll`; it opened no network listener and no application runtimes were present. Published folders contained no `.exe` files.
+
+The running Dashboard is static/read-only for browser management. `BrowserApi` reports browser authentication unavailable and rejects all privileged operations; the regular local launcher removes `IHP_BROWSER_AUTH_ENABLED`, while M11 native API requests continue to reject browser-origin access. The freshly initialized Registry has no Administrator account. No actual-browser interaction or acceptance scenario was performed. Production browser management remains disabled; M7/M8/M10-DB statuses and all other milestone statuses are unchanged, and Source Build remains disabled.
+
+Commands/evidence: `npm.cmd run doctor` passed; `npm.cmd --workspace @ihp/api run db:migrate` and `db:status` passed; `START-IHP.cmd` remained running after component health/readiness checks. No source feature, security setting, existing application or application database was changed. **Next operator step:** open `http://localhost:5050/admin/` in the already-approved browser to inspect the Dashboard shell. Administrator sign-in, upload, approval and deployment cannot be tested against this empty Registry; follow the existing authorized native bootstrap procedure to create an account only if desired, and keep browser management disabled until the documented actual-browser acceptance gate is met. Stop the running stack with Ctrl+C in the launcher terminal.
+
 ## Current TASK 044 - existing trusted-prebuilt MVP vertical slice - 2026-11-04
 
 ### Outcome
