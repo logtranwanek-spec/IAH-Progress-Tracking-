@@ -1,5 +1,32 @@
 # Project Progress
 
+## Current TASK 046 — M8 real-browser acceptance readiness — 2026-11-10
+
+### Environment and browser capability
+
+Re-read the current TASK 045 handoff, M8 plan/requirements, `AGENTS.md`, and the existing `BROWSER_AUTHENTICATION.md` and PROGRESS acceptance runbook. Inspected the local source workspace and tracking Git state (`main`, before this update at `52fd7d1869302f55d8e227e30737ae690ccfe77c`, equal to `origin/main`). Browser/computer/driver capability discovery returned no permitted browser-control tool, and no already-open approved browser session was supplied.
+
+Read-only checks: `npm.cmd run doctor` exited 0 and reported the configured local Gateway/API/Dashboard ports 5050/5065/5173; `npm.cmd --workspace @ihp/api run db:status` exited 0 with `PASS registry migration history is current.` At inspection there were no listeners on 5050/5065/5173/5266, no IHP launcher/Agent/Gateway/manual-fixture process, and no visible `IHP_*` environment variable names. The configured Registry was not migrated, seeded, or otherwise modified. No application process, disposable fixture, browser, or browser driver was started; no source code changed, so application builds and test suites were not rerun. TASK 045's 613/613 remains the latest full automated result, not new TASK 046 evidence.
+
+### Acceptance results and operator procedure
+
+Actual-browser results for TASK 046: **PASS 0, FAIL 0, scenario BLOCKED 0, NOT RUN 53**. Browser capability is unavailable; this is an execution blocker, not 53 observed scenario failures. M8 remains **IN PROGRESS**. Do not start the manual fixture until an operator is ready and an approved browser is already open.
+
+The existing operator runbook was reviewed and remains the approved procedure; it contains the exact masked-password PowerShell block, T01–T05 expected outcomes, evidence format, account roles, and safe cleanup. From an ordinary approved PowerShell terminal at the project root:
+
+1. Run `npm.cmd run doctor`. If existing reviewed build outputs are missing/stale, run `npm.cmd run build` first. Do not run the configured Registry migration as part of browser preparation.
+2. Open the company-approved browser before fixture startup; confirm Gateway port 5050 is free. Use the runbook's `Read-Host -AsSecureString` block to set a unique test-only `IHP_ACCEPTANCE_PASSWORD` privately. Never use a company password, print it, or enable terminal transcription.
+3. Start only the disposable browser fixture in the foreground with `node tools/browser-acceptance.mjs --manual`. It creates a fresh `IhpM8Acceptance-*` SQLite Registry under the current user's profile, applies reviewed migrations only to that fresh Registry, creates test accounts and sample packages, starts owned loopback services, and prints `Fixture ready; browser acceptance NOT RUN.` It preserves Gateway at `127.0.0.1:5050`; do not use `START-IHP.cmd` to enable private management.
+4. Open **http://localhost:5050/admin/** in the already-open approved browser. The fixture accounts are `accept-admin` and `accept-reviewer` (Administrators), `accept-dev` and `accept-other` (Developers), and `accept-viewer` (Viewer); they share only the privately entered disposable test password. For deployment acceptance, follow the runbook's separate fresh-fixture command `node tools/browser-acceptance.mjs --manual --enable-reviewed-samples`; this permits only the reviewed test samples and still requires distinct exact-fingerprint Administrator review and existing M11 authorization.
+5. Execute the existing matrix starting with T01–T05. Record one sanitized receipt per scenario using the runbook format. Never send passwords, cookies, tokens, signatures, challenges/nonces, raw requests, HAR files, or unredacted screenshots.
+6. Press Ctrl+C in the fixture terminal. Confirm its owned-storage removal and port-release messages; do not kill processes by PID/port or recursively remove an unverified path. Remove the temporary password environment variable as in the runbook.
+
+Expected T01–T05 results remain those in the existing matrix: confirm exact localhost/IPv4 loopback and acknowledge HTTP's lack of TLS; verify secure-context/WebCrypto key properties without exporting/retaining secrets; inspect security headers and prefixed assets; observe foreign script blocking under CSP without relaxing policy; and check service-worker state without clearing or unregistering it. Stop and report BLOCKED if an expected condition is not established. Browser management remains default-disabled outside the explicitly disposable acceptance fixture.
+
+M7 remains **IN PROGRESS** with Source Build disabled and D00–D29 **PENDING**. M8 remains **IN PROGRESS** because all actual-browser scenarios are unrun. M10-DB remains **IN PROGRESS** for metadata/path-validation subsets only; M11 remains **COMPLETED**. No other milestone changed.
+
+**Next action:** the operator opens an approved browser and confirms readiness; only then start the disposable fixture and guide T01–T05 one at a time. Do not start another milestone.
+
 ## Current TASK 045 — M8 browser authentication and trusted-prebuilt acceptance — 2026-11-10
 
 ### Findings and implementation

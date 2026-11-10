@@ -1,7 +1,11 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 045 — M8 browser authentication acceptance record — 2026-11-10
+## Current TASK 046 — M8 actual-browser acceptance status — 2026-11-10
+
+No approved browser-control capability or operator-supplied approved browser session was available for TASK 046. The manual fixture was not started; all 53 actual-browser acceptance scenarios remain NOT RUN and M8 remains IN PROGRESS. Read-only environment checks (`npm.cmd run doctor` and configured Registry `db:status`) passed; no Registry data/account was modified. Use only the existing disposable-fixture procedure in PROGRESS.md and `BROWSER_AUTHENTICATION.md`; it must not run until an operator is ready and an approved browser is already open. Keep production browser management default-disabled, M7 and M10-DB IN PROGRESS, M11 COMPLETED, Source Build disabled, D00–D29 PENDING, and all M11 controls unchanged.
+
+## Historical TASK 045 — M8 browser authentication acceptance record — 2026-11-10
 
 The signed browser-authentication candidate and trusted-prebuilt Dashboard operations remain default-disabled for ordinary startup. LocalStack must discard inherited `IHP_BROWSER_AUTH_ENABLED`; only the disposable acceptance fixture may enable the candidate through an explicit option. This prevents ambient process configuration from enabling private management through the regular local launcher. Preserve the existing M11 session, role, ownership, Origin/Host/Fetch Metadata/CSRF/replay checks and fixed Gateway allowlist.
 
