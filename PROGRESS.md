@@ -1,5 +1,47 @@
 # Project Progress
 
+## Current TASK 045 — M8 browser authentication and trusted-prebuilt acceptance — 2026-11-10
+
+### Findings and implementation
+
+The Dashboard already contains the signed browser-session candidate and trusted-prebuilt management operations. Its normal `BrowserApi` remains unavailable by default; the standard local launcher must not make privileged browser operations usable. I found a configuration-boundary defect in `tools/local.mjs`: it removed inherited `IHP_BROWSER_AUTH_ENABLED` from the API environment but could pass the same inherited opt-in to Gateway. Thus an ambient environment value could accidentally enable the candidate during ordinary startup.
+
+Applied the smallest fix: `LocalStack` now defaults to browser authentication disabled and only enables it via an explicit constructor option. It always strips the inherited opt-in from Gateway startup; only the disposable browser-acceptance fixture and its test explicitly opt in. The smoke test injects a stale inherited opt-in and verifies that ordinary startup still returns 404 for browser capabilities. M11 authentication, roles, ownership, Origin/Host/Fetch Metadata/CSRF/replay controls, fixed Gateway allowlists, and the M7 package approval gates were not weakened.
+
+Changed local source/test files: `tools/local.mjs`, `tools/browser-acceptance.mjs`, `tools/smoke.mjs`, and `src/Dashboard/test/browser.test.mjs`. These application files are outside the progress repository commit scope and were not pushed.
+
+### M8 acceptance gap map
+
+| Acceptance area                                                                     | Existing implementation and automated evidence                                                                                                                                                                                          | Current classification                                                                                    |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Browser login, current user, logout, expiry/revocation, private-state cleanup       | Signed candidate in `src/Dashboard/src/browser-session.ts` and `src/Dashboard/src/api.ts`, fixed Gateway boundary in `src/Gateway/BrowserBoundary.cs`; covered by `src/Dashboard/test/browser.test.mjs` and `npm.cmd run test:browser`. | IMPLEMENTED AND AUTOMATION VERIFIED; actual-browser behavior NOT VERIFIED, candidate remains default-off. |
+| Roles, ownership, application management, approvals and trusted-prebuilt operations | Existing API/M11 enforcement, Dashboard actions and exact signed Gateway mappings; covered by API auth tests, Dashboard tests, browser protocol tests and `tests/Packages.Tests`.                                                       | IMPLEMENTED AND AUTOMATION VERIFIED against owned fixtures; actual browser operation NOT RUN.             |
+| Deployment Agent start/stop/restart, Gateway access, status and bounded logs        | Existing M5/M6 flow, TASK 044 read-only views; covered by package and routing integration tests plus Dashboard DOM/native-client tests.                                                                                                 | AUTOMATED END-TO-END VERIFIED with disposable samples; not verified through an actual browser.            |
+| Default-off production boundary                                                     | `tools/local.mjs` now strips inherited opt-in; only `tools/browser-acceptance.mjs` explicitly opts into its disposable fixture; `tools/smoke.mjs` asserts normal-startup rejection.                                                     | IMPLEMENTED AND VERIFIED by smoke; production browser management remains disabled.                        |
+| Browser transport/profile, browser-generated headers, visual/accessibility behavior | Existing T01–T05/A01–A09/S01–S10/R01–R09/D01–D15/U01–U05 matrix and operator runbook.                                                                                                                                                   | BLOCKED by unavailable approved browser-control/session; all 53 scenarios NOT RUN.                        |
+| Remaining original M8 wizard/settings/legacy-contract criteria                      | Existing limitations remain listed in the M8 section of IMPLEMENTATION_PLAN.md; unsupported APIs and Source Build are not fabricated or enabled.                                                                                        | INCOMPLETE / NOT IMPLEMENTED where documented; not waived by TASK 045 automation.                         |
+
+### Verification evidence
+
+- `npm.cmd run doctor` — passed; local Windows/Node/.NET prerequisites and loopback configuration were reported.
+- `npm.cmd run build` — passed; managed .NET projects published with `UseAppHost=false`, and publish checks found no `.exe` artifacts.
+- `npm.cmd run check` — passed after formatting `tools/smoke.mjs`; Prettier and API/Dashboard TypeScript checks passed.
+- `npm.cmd run test:auth` — 38 passed, 0 failed, 0 skipped.
+- `npm.cmd run test:browser` — 54 passed, 0 failed, 0 skipped. This is signed HTTP/WebCrypto and DOM simulation with owned services, not real-browser acceptance.
+- `npm.cmd run test:dashboard` — first run stopped before tests on a transient Windows `EBUSY` while Prisma generation attempted to replace a generated file; sequential retry passed 48, 0 failed, 0 skipped.
+- `npm.cmd run test:packages` — 40 passed, 0 failed; trusted-prebuilt approval/deployment/routing checks used disposable fixtures.
+- `npm.cmd run test:agent` — 27 passed, 0 failed. The first full-suite attempt had one unhealthy-startup check observe transient exit code `-532462766`; the focused rerun passed, and this check also passed in the final full run.
+- Final `npm.cmd run verify` — exit 0, **613 passed, 0 failed, 0 skipped**, including Foundation 27, Gateway 114, Samples 82, Agent 27, routing integration 19, packages 40, Dashboard 48, browser protocol/DOM 54, API 154, Registry migration 15, and Node foundation/readiness 33. Formatting/type checks passed. Owned loopback smoke verified Gateway 5050, health/assets/CSP and browser-auth rejection, then stopped its own processes, released ports, and removed temporary storage.
+- An earlier captured full run failed at the formatting gate for `tools/smoke.mjs`; formatting was corrected and rechecked before the passing final run. No acceptance test was removed or skipped to get a pass.
+
+### Browser acceptance, status, and handoff
+
+No approved browser-control capability or supplied already-open browser session was available. Per the existing browser rules, no manual fixture was started and no browser executable or driver was launched or installed. The 53 existing actual-browser scenarios (T01–T05, A01–A09, S01–S10, R01–R09, D01–D15, U01–U05) remain **NOT RUN: 0 PASS, 0 FAIL, 0 scenario BLOCKED, 53 NOT RUN**. The execution capability is unavailable; protocol, WebCrypto, DOM, smoke, and code-review evidence do not count as real-browser acceptance. The normal Dashboard remains read-only for private management; administrator login, upload, review, deployment, and runtime controls were not exercised in a real browser. No user Registry/account, configured database, existing application, or Windows security setting was changed.
+
+M7 remains **IN PROGRESS** with Source Build disabled and D00–D29 **PENDING**. M8 remains **IN PROGRESS** because actual-browser acceptance and remaining original acceptance items are not verified. M10-DB remains **IN PROGRESS** for metadata/path-validation subsets only; no database lifecycle operation was performed. M11 remains **COMPLETED**. Other milestone statuses are unchanged.
+
+**Next safe step:** operator-assisted actual-browser acceptance, beginning with T01–T05, using the existing `PROGRESS.md`/`BROWSER_AUTHENTICATION.md` runbook and an already-approved browser session. Start the disposable fixture only when the operator is ready and confirms the browser session. Keep production browser management disabled until the acceptance gate is met. Do not start another milestone.
+
 ## Local startup launcher and component verification - 2026-11-09
 
 Searched the workspace and accessible Git history for Windows `.cmd`, `.bat` and `.ps1` launchers. None exists in the workspace or Git history; the local Git repository tracks only the four progress documents, so no original source launcher was available to restore. Added root-level `START-IHP.cmd`, a minimal wrapper that calls the existing `npm.cmd run start:local` script and does not migrate a Registry automatically.

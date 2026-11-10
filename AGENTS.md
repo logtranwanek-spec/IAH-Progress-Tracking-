@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 044 - existing trusted-prebuilt MVP vertical slice - 2026-11-04
+## Current TASK 045 — M8 browser authentication and trusted-prebuilt acceptance — 2026-11-10
+
+The inherited `IHP_BROWSER_AUTH_ENABLED` environment variable must never enable privileged browser management during ordinary startup. `LocalStack` is default-off and strips this inherited value from Gateway; only the explicit disposable browser-acceptance fixture option may enable the candidate. Preserve all M11, Gateway allowlist, M7 exact-package approval, loopback, no-`.exe`, and SQLite-only restrictions. Final `npm.cmd run verify` passed 613/613, but all 53 actual-browser acceptance scenarios remain NOT RUN because no permitted browser-control capability/session was available. Keep M8 IN PROGRESS and private production browser operations disabled; automated protocol/DOM results are not browser acceptance. M7 remains IN PROGRESS, Source Build remains disabled, and D00–D29 remain PENDING. The next safe step is operator-assisted T01–T05 using the existing runbook and approved browser session. See PROGRESS.md for exact evidence.
+
+## Historical TASK 044 - existing trusted-prebuilt MVP vertical slice - 2026-11-04
 
 TASK 044 verifies the existing Administrator-to-trusted-prebuilt flow without changing the Source Build or application-database gates. Runtime status and release logs are exposed only through read-only application-scoped M11 `application.read` APIs and the fixed signed Gateway allowlist. Do not expose Agent PIDs, internal ports, sessions, filesystem paths, manifests, credentials or unbounded log output. Keep logs capped, redacted, and rendered as text. Dashboard production browser management stays disabled until permitted actual-browser acceptance is complete. Preserve M7/M8/M10-DB IN PROGRESS and all other milestone statuses; do not implement database lifecycle features or start another milestone.
 
@@ -87,6 +91,7 @@ M8 remains IN PROGRESS. The existing acceptance matrix has 53 actual-browser sce
 - If actual-browser access is unavailable, do not start the manual fixture as a substitute; record the capability blocker, leave unperformed scenarios NOT RUN, and preserve the existing reproducible operator runbook. Distinguish an execution blocker from a scenario actually tested and blocked.
 - Record a scenario PASS only from sanitized evidence of its expected behavior in the real permitted browser. Node, HTTP, WebCrypto, jsdom/DOM, fixture-readiness, and code-review evidence are supporting evidence only.
 - Do not enable production browser management, weaken M11 controls, alter package approval, or change Source Build decisions to make browser tests pass.
+- Ordinary local startup must discard inherited `IHP_BROWSER_AUTH_ENABLED` and keep browser management disabled. Only an explicit opt-in on the disposable acceptance fixture may enable the candidate; do not enable it through `START-IHP.cmd`, standard `LocalStack` construction, or ambient environment configuration.
 
 ## TASK 031 handoff — Approval review and decision tracking — 2026-11-02
 

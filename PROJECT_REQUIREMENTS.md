@@ -1,6 +1,12 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
+## Current TASK 045 — M8 browser authentication acceptance record — 2026-11-10
+
+The signed browser-authentication candidate and trusted-prebuilt Dashboard operations remain default-disabled for ordinary startup. LocalStack must discard inherited `IHP_BROWSER_AUTH_ENABLED`; only the disposable acceptance fixture may enable the candidate through an explicit option. This prevents ambient process configuration from enabling private management through the regular local launcher. Preserve the existing M11 session, role, ownership, Origin/Host/Fetch Metadata/CSRF/replay checks and fixed Gateway allowlist.
+
+The final automated regression run passed 613 checks with no failures or skips, including the ordinary-startup default-off smoke assertion. These HTTP/WebCrypto protocol, DOM, and smoke results do not establish real-browser acceptance. No approved browser-control capability or operator-supplied browser session was available, so all 53 actual-browser scenarios remain NOT RUN and M8 remains IN PROGRESS. Production browser management remains disabled. M7 and M10-DB remain IN PROGRESS; M11 remains COMPLETED; Source Build remains disabled; D00–D29 remain PENDING. Exact evidence and the next operator step are in PROGRESS.md.
+
 ## Historical TASK 039 - M10-DB product decision package and readiness - 2026-11-03
 
 TASK 039 converts the existing DB-W0 findings into grouped product-owner decisions with current evidence, recommended options, alternatives, security/existing-application impact and exact confirmations. Recommendations remain recommendations. The TASK 023-approved first-use/KEEP/explicit replacement-authorization requirements are preserved; W0-12 remains approved, while unresolved path/import/runtime decisions remain pending. No application/platform source, schema, migration, runtime, database or existing application changed or ran. M7/M10-DB remain IN PROGRESS; Source Build stays disabled; D00-D29 remain PENDING. See section 9.1.19 and PROGRESS.md.
