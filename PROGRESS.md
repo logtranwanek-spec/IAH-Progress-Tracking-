@@ -1,6 +1,20 @@
 # Project Progress
 
-## Current TASK 046 — M8 real-browser acceptance readiness — 2026-11-10
+## Current TASK 047 — M8 operator-assisted real-browser acceptance — 2026-11-12
+
+### Operator results checkpoint
+
+An operator used the disposable manual fixture in an already-open approved Chrome browser and supplied sanitized outcomes. Results at this checkpoint: **13 PASS, 0 verified FAIL, 1 BLOCKED, 39 NOT RUN** out of 53. PASS: T01–T05, A01–A03 and A05–A09. T02 reported `secureContext=true`, `subtleAvailable=true`, `privateKeyIsP256=true`, `privateKeyExtractable=false`, `privateKeyExportRejected=true`. T05 reported `apiAvailable=true`, `controllerPresent=false`, `registrationsPresent=false`. T01/T03/T04 and A01–A03/A05–A09 were reported as expected outcomes; no raw credentials, tokens, headers, bodies or browser dumps were supplied.
+
+A04 was initially reported as an unexpected failure, then the operator clarified that the real wait/outcome could not be confirmed. It is therefore **BLOCKED**, not a verified failure: no confirmed wait beyond the 30-minute absolute expiry or resulting protected-request behavior is available. The remaining S01–S10, R01–R09, D01–D15 and U01–U05 scenarios are **NOT RUN**. S08/S09 and deployment lifecycle checks depend on a separate fresh reviewed-sample fixture as defined by the existing runbook.
+
+Agent-run read-only readiness checks on 2026-11-12 returned HTTP 200 for `http://127.0.0.1:5050/_platform/health`, `http://127.0.0.1:5050/_platform/api/system/health`, and `http://127.0.0.1:5050/admin/` (JSON, JSON and HTML respectively). These confirm local service responses only; they are not additional browser acceptance passes. No approved browser-control tool is exposed in this session; actual browser observations above came from the operator. No application code was changed and no automated tests or full regression suite were rerun for this checkpoint.
+
+M8 remains **IN PROGRESS**; production browser management remains disabled by default. M7 and M10-DB remain **IN PROGRESS**, M11 remains **COMPLETED**, Source Build remains disabled, and D00–D29 remain **PENDING**. No milestone status changed. Preserve the 2026-11-10 readiness report below as its historical snapshot; its 53 NOT RUN count predates this operator testing.
+
+**Next task:** continue with the remaining real-browser matrix using the already-provided consolidated checklist. Keep the current ordinary `--manual` fixture for checks that require it. Use the separate fresh `--manual --enable-reviewed-samples` fixture only for the reviewed sample deployment/route cases, with exact fingerprint review, distinct Administrator approval and current M11 authorization. Retain A04 as BLOCKED unless its real wait and result can be verified.
+
+## Historical TASK 046 — M8 real-browser acceptance readiness — 2026-11-10
 
 ### Environment and browser capability
 

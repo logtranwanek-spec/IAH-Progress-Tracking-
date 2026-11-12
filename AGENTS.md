@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 046 — M8 real-browser acceptance readiness — 2026-11-10
+## Current TASK 047 — M8 operator-assisted real-browser acceptance — 2026-11-12
+
+Record only sanitized observations from the operator's approved browser and disposable fixture. The current checkpoint in PROGRESS.md is 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), and 39 NOT RUN; loopback HTTP health checks are not browser evidence. Keep M8 IN PROGRESS and production browser management default-off. M7 and M10-DB remain IN PROGRESS, M11 remains COMPLETED, Source Build remains disabled and D00–D29 remain PENDING. Preserve SQLite-only, loopback, no-Docker, no-Administrator, no-security-change, no-secret and no-untrusted-execution restrictions. Continue from the existing 53-scenario matrix and `BROWSER_AUTHENTICATION.md`; D10 and dependent route tests require a separate fresh `--manual --enable-reviewed-samples` fixture, exact-fingerprint review, distinct Administrator approval and current M11 authorization. Do not count simulations or service readiness as browser PASS.
+
+## Historical TASK 046 — M8 real-browser acceptance readiness — 2026-11-10
 
 No approved browser-control tool or operator-supplied approved browser session was available; do not start the disposable fixture until both the operator and an already-open approved browser are ready. Keep all 53 scenarios NOT RUN unless individually observed in that real browser. The read-only `npm.cmd run doctor` and configured Registry `db:status` passed; no user Registry data/account was modified. Use the existing PROGRESS.md / BROWSER_AUTHENTICATION.md PowerShell runbook and its explicit disposable Registry; never seed the configured Registry or expose the test password. Preserve normal-startup browser auth default-off, loopback Gateway 5050, M11, M7 exact-package approval, SQLite-only and no-.exe restrictions. M7/M8/M10-DB remain IN PROGRESS, M11 remains COMPLETED, Source Build remains disabled, D00–D29 remain PENDING. See PROGRESS.md for actual environment results and operator steps.
 
