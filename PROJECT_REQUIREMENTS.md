@@ -1,9 +1,13 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 046 — M8 actual-browser acceptance status — 2026-11-10
+## Current TASK 048 — M9 Monitoring & Logging foundation — 2026-11-14
 
-No approved browser-control capability or operator-supplied approved browser session was available for TASK 046. The manual fixture was not started; all 53 actual-browser acceptance scenarios remain NOT RUN and M8 remains IN PROGRESS. Read-only environment checks (`npm.cmd run doctor` and configured Registry `db:status`) passed; no Registry data/account was modified. Use only the existing disposable-fixture procedure in PROGRESS.md and `BROWSER_AUTHENTICATION.md`; it must not run until an operator is ready and an approved browser is already open. Keep production browser management default-disabled, M7 and M10-DB IN PROGRESS, M11 COMPLETED, Source Build disabled, D00–D29 PENDING, and all M11 controls unchanged.
+The Product Owner discontinued the remaining manual M8 browser exercises and accepts the residual verification risk. Preserve the actual operator evidence at 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), and 39 NOT RUN; the unrun scenarios are not technical passes. M8 remains IN PROGRESS unless a documented completion gate changes through an authorized requirements decision. M9 is IN PROGRESS for an incremental monitoring slice: the Agent persists one latest CPU/working-set/health observation per application in the SQLite Platform Registry; the existing application-scoped M11 runtime API and Dashboard detail view show the sample timestamp, freshness and unknown/stale states. The default sampling interval is 15 seconds, configurable from 5 to 15 seconds; a sample is current only when it matches the running instance and is no older than 45 seconds. No PID, internal port, session identifier, application database content, or production Registry data is exposed or changed. This does not complete M9 logging/search/retention or centralized overview requirements. See PROGRESS.md for tests and the implemented boundary.
+
+## Historical TASK 046 — M8 actual-browser acceptance status — 2026-11-10
+
+No approved browser-control capability or operator-supplied approved browser session was available for TASK 046. The manual fixture was not started; all 53 actual-browser acceptance scenarios remained NOT RUN and M8 remained IN PROGRESS. Read-only environment checks (`npm.cmd run doctor` and configured Registry `db:status`) passed; no Registry data/account was modified. This is a historical snapshot; TASK 047 later recorded operator evidence. Keep production browser management default-disabled and all M11 controls unchanged.
 
 ## Historical TASK 045 — M8 browser authentication acceptance record — 2026-11-10
 

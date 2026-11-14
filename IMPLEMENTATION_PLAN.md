@@ -4,7 +4,9 @@
 
 Internal Application Hosting & Deployment Platform (project code: Internal Hosting Platform / IHP). The complete, canonical requirements are in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md).
 
-**Current assignment (2026-11-12): TASK 047 - M8 operator-assisted real-browser acceptance.** Operator-reported checkpoint: 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), and 39 NOT RUN. Read-only loopback health and Dashboard requests returned HTTP 200, but are not browser-acceptance evidence. M8 remains IN PROGRESS and private production browser management remains disabled by default. M7/M10-DB remain IN PROGRESS; M11 remains COMPLETED; Source Build remains disabled and D00-D29 remain PENDING. See PROGRESS.md and BROWSER_AUTHENTICATION.md for the exact matrix and runbook.
+**Current assignment (2026-11-14): TASK 048 - M9 Monitoring & Logging foundation.** The Product Owner discontinued the remaining manual browser exercises and accepts the residual verification risk. Preserve 13 PASS, 0 verified FAIL, 1 BLOCKED and 39 NOT RUN; do not convert unrun scenarios to passes. M8 remains IN PROGRESS and production browser management stays default-off. M9 is IN PROGRESS for the verified first telemetry slice: bounded per-application latest Agent observations are read through the existing M11 application-scoped runtime API and shown on the Dashboard detail view. Full M9 logging/search/retention and centralized overview acceptance remain outstanding. M7/M10-DB remain IN PROGRESS; M11 remains COMPLETED; Source Build remains disabled and D00-D29 remain PENDING. See PROGRESS.md for the exact change and test evidence.
+
+**Historical assignment (2026-11-12): TASK 047 - M8 operator-assisted real-browser acceptance.** Operator-reported checkpoint: 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), and 39 NOT RUN. Read-only loopback health and Dashboard requests returned HTTP 200, but are not browser-acceptance evidence. M8 remained IN PROGRESS and private production browser management remained disabled by default. See PROGRESS.md and BROWSER_AUTHENTICATION.md for the preserved matrix and runbook.
 
 **Historical assignment (2026-11-10): TASK 046 - M8 real-browser acceptance readiness.** No approved browser-control tool or operator-supplied browser session was available at that time, so the manual fixture was not started and all 53 actual-browser scenarios were NOT RUN. Read-only `npm.cmd run doctor` and configured Registry `db:status` passed; no IHP listener was active and no Registry/account data was changed. The operator runbook was revalidated. See PROGRESS.md for the historical environment report.
 
@@ -776,7 +778,14 @@ dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csp
 dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
 ```
 
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
+
+**TASK 048 first slice — verified, M9 remains IN PROGRESS:**
+
+- The Deployment Agent writes a single latest observation per application into the SQLite Platform Registry. Samples contain the runtime instance reference, sample time, health-check result, normalized CPU percentage and working-set bytes; they contain no PID, internal port, session ID, release path or application database data. The first CPU sample is `null` until a prior process CPU measurement exists.
+- The sample interval defaults to 15 seconds and may be configured from 5 to 15 seconds. Health is returned as `CURRENT` only when the snapshot matches the current RUNNING instance and is no older than 45 seconds. Otherwise the health state is `UNKNOWN`; old sample values are marked `STALE`.
+- The existing `GET /_platform/api/applications/:id/runtime` retains M11 `application.read` and ownership enforcement. The detail view shows health, CPU, memory, timestamp and freshness. Automated API tests cover app scoping, unauthorized access, safe fields and stale state; Dashboard tests cover current and stale/unknown presentation.
+- Remaining M9 acceptance includes a centralized application/system overview, platform/Gateway/health/process/user-action event integration, searchable/filterable/downloadable logs, configurable retention, and full operational failure/retention/redaction coverage. Existing bounded deployment logs are reused and were not replaced.
 
 ### M10 — Version Management and Rollback
 
@@ -1102,6 +1111,6 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                                                           | M11                                                                       |
 | Security, resilience, compatibility, docs, final acceptance                                         | M12                                                                       |
 
-M1–M6 and M11 are `COMPLETED`; SQLite-only policy/accepted gap remain. M7 and M8 are `IN PROGRESS` with source builds and approved browser authentication unavailable respectively. M9–M10 and M12 remain `NOT STARTED`; do not begin them. All .NET checks use published managed DLLs; uncreated later-milestone commands remain planned. Change status only with matching evidence and policy.
+M1–M6 and M11 are `COMPLETED`; SQLite-only policy/accepted gap remain. M7, M8, M9 and M10-DB are `IN PROGRESS`; Source Build remains disabled, M8 retains 39 NOT RUN and 1 BLOCKED operator scenarios, and M9 has only its initial telemetry slice verified. M10 and M12 remain `NOT STARTED`. All .NET checks use published managed DLLs; uncreated later-milestone commands remain planned. Change status only with matching evidence and policy.
 
 M10-DB is **IN PROGRESS for TASK 036 candidate metadata, TASK 037 prospective path validation, TASK 040 inert request metadata, TASK 041 review metadata, and TASK 043 product decisions**; its operational lifecycle acceptance remains incomplete. Product direction is recorded in PROJECT_REQUIREMENTS.md section 9.1.23, but it is not runtime implementation or IT/Security approval. Provisioning, import/association, runtime attachment, migrations, Platform backup/restore and Dashboard lifecycle controls remain unavailable or outside MVP. Final M12 review must account for this extension without treating these partial slices as lifecycle acceptance.

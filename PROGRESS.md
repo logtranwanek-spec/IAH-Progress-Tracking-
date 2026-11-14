@@ -1,6 +1,50 @@
 # Project Progress
 
-## Current TASK 047 — M8 operator-assisted real-browser acceptance — 2026-11-12
+## Current TASK 048 — M9 Monitoring & Logging foundation — 2026-11-14
+
+### Product Owner decision and M8 status
+
+The Product Owner discontinued the remaining manual browser exercises and accepts the residual verification risk. Preserve the operator-supplied results without reinterpretation: **13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN**. No scenario was converted to PASS, and no actual-browser test was performed in TASK 048. M8 remains **IN PROGRESS**; ordinary production browser management remains disabled by default. M7 and M10-DB remain **IN PROGRESS**, M11 remains **COMPLETED**, Source Build remains disabled, and D00–D29 remain **PENDING**.
+
+### Existing implementation reviewed
+
+- The Deployment Agent already supervises owned processes, performs loopback health probes, exposes internal status and current working set/cumulative CPU to its own local code, and captures bounded, redacted, release-scoped stdout/stderr in `deployment_logs`.
+- The M11-protected `GET /_platform/api/applications/:id/runtime` already returns safe persisted desired/runtime state, and the Dashboard detail page displays that state and bounded deployment logs. It deliberately does not expose PIDs, internal ports, start ticks or Agent sessions.
+- Existing Agent probes run in the lifecycle tick. TASK 048 reuses their actual result; it adds no external polling service, unrestricted process/network inspection, or application-facing API.
+
+### TASK 048 implementation
+
+- Added additive SQLite Registry migration `202611140010_runtime_observations`. It stores one latest record per application: runtime-instance reference, UTC sample timestamp, health result, CPU percentage and working-set bytes. The table contains no PID, port, session, release path or application data, and it keeps no unbounded sample history.
+- The Agent persists a first sample when a trusted reviewed runtime starts, then samples resource usage every 15 seconds by default. `IHP_MONITORING_SAMPLE_SECONDS` may set an interval from 5 through 15 seconds. Health-state transitions are recorded immediately. CPU is `null` until a previous CPU measurement exists; measured CPU is normalized by elapsed monotonic time and processor count, bounded to 0–100.
+- The existing app-scoped M11 runtime API adds `observation` metadata. A sample is `CURRENT` only when its instance matches the latest running instance, desired and Agent states are RUNNING, its timestamp is not in the future, and its age is at most 45 seconds. Otherwise an existing record is `STALE` and current health is `UNKNOWN`; absence is `NO_SAMPLE`/`UNKNOWN`. Unsafe/non-finite measurements are omitted.
+- The existing Dashboard runtime panel now displays health, sampled CPU, sampled memory, timestamp and freshness, including honest unavailable/stale/unknown states. No private browser capability was enabled. The full M9 central overview, platform/Gateway/user-action event collection, log search/filter/download and configurable log retention remain unimplemented.
+
+### Files created or modified locally
+
+- API schema and additive migration: `src/Api/prisma/schema.prisma`, `src/Api/prisma/migrations/202611140010_runtime_observations/migration.sql`.
+- Agent sample policy and persistence: `src/DeploymentAgent/EngineOptions.cs`, `src/DeploymentAgent/EngineStore.cs`, `src/DeploymentAgent/RuntimeEngine.cs`, `src/DeploymentAgent/Program.cs`.
+- API/UI and regressions: `src/Api/src/registry.ts`, `src/Api/test/auth.test.mjs`, `src/Api/test/database.test.mjs`, `src/Dashboard/src/api.ts`, `src/Dashboard/src/app.tsx`, `src/Dashboard/test/dashboard.test.mjs`, `tests/DeploymentAgent.Tests/Program.cs`.
+- Official tracking documents: this file, `IMPLEMENTATION_PLAN.md`, `PROJECT_REQUIREMENTS.md`, and `AGENTS.md`.
+- No configured/user Registry was migrated or modified. Migration verification used disposable SQLite fixtures. No application database or existing application was accessed. No source-build or production browser-management gate changed.
+
+### Verification evidence
+
+- `npm.cmd run test:agent`: **27 passed, 0 failed**. Includes published-DLL Agent lifecycle tests for the first and periodic CPU/memory/health sample, one-row-per-application storage, sample bounds and no process/session/port fields. Test processes were owned disposable fixtures and stopped cleanly.
+- `npm.cmd run test:auth --workspace @ihp/api`: **38 passed, 0 failed**. Includes M11 app-scoped runtime observation, redaction/non-disclosure, unauthorized/cross-application denial and stale-sample behavior.
+- `npm.cmd run test:dashboard`: **48 passed, 0 failed**. Includes CPU/memory rendering and stale/unknown state.
+- `npm.cmd run migration:test --workspace @ihp/api`: final run **15 passed, 0 failed**. Earlier attempts exposed the new BigInt/Float SQLite type mapping requirements in the existing schema consistency test; the mapping was corrected and the focused suite passed.
+- `npm.cmd run verify`: final full suite **613 passed, 0 failed, 0 skipped**, followed by successful loopback smoke cleanup. Breakdown: Node foundation 33; API 154 plus migration checks 15; Dashboard unit 48; signed-browser protocol/DOM simulation 54; .NET Foundation 27; Gateway 114; samples 82; Agent 27; routing integration 19; package/deployment 40. The 54 signed-browser tests are simulations and are not actual-browser acceptance evidence. All .NET publish/test execution used `dotnet publish ... -p:UseAppHost=false` and `dotnet <published>.dll`; published roots passed no-`.exe` checks.
+- The first full run found stale schema-count assertions and stopped at the API migration test; these were updated. A subsequent focused run found and corrected the SQLite `REAL` mapping assertion. Final full verification passed after those fixes. Prettier and TypeScript/.NET format checks passed in the final run.
+
+### Remaining M9 work and next task
+
+M9 is **IN PROGRESS**, not complete. The new sample is only per-application detail telemetry. Remaining requirements include a centralized application/system health and deployment overview; safe event collection across Agent, Gateway, health failures and user actions; searchable/filterable/downloadable bounded logs; configured retention; and broader failure/redaction tests. M8 remains IN PROGRESS with its preserved 13/0/1/39 checkpoint and default-off production browser management.
+
+**Exact next recommended task:** TASK 049 — add an application-list monitoring overview using the existing authorized runtime/observation data, with explicit UNKNOWN/STALE handling and no PID/internal-port exposure. Do not add log download/retention until its bounded authorization contract is separately scoped.
+
+**Session handoff:** The test suite stopped all owned sample/process fixtures and removed its disposable Registry/storage. No live IHP services were started, no corporate listeners/security settings were changed, and no production Registry was touched. Commit/push only the four tracking Markdown documents; leave application source and generated outputs out of the progress repository.
+
+## Historical TASK 047 — M8 operator-assisted real-browser acceptance — 2026-11-12
 
 ### Operator results checkpoint
 
