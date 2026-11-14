@@ -4,7 +4,9 @@
 
 Internal Application Hosting & Deployment Platform (project code: Internal Hosting Platform / IHP). The complete, canonical requirements are in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md).
 
-**Current assignment (2026-11-14): TASK 048 - M9 Monitoring & Logging foundation.** The Product Owner discontinued the remaining manual browser exercises and accepts the residual verification risk. Preserve 13 PASS, 0 verified FAIL, 1 BLOCKED and 39 NOT RUN; do not convert unrun scenarios to passes. M8 remains IN PROGRESS and production browser management stays default-off. M9 is IN PROGRESS for the verified first telemetry slice: bounded per-application latest Agent observations are read through the existing M11 application-scoped runtime API and shown on the Dashboard detail view. Full M9 logging/search/retention and centralized overview acceptance remain outstanding. M7/M10-DB remain IN PROGRESS; M11 remains COMPLETED; Source Build remains disabled and D00-D29 remain PENDING. See PROGRESS.md for the exact change and test evidence.
+**Current assignment (2026-11-14): TASK 049 - M9 Centralized Application Monitoring Overview.** A bounded, read-only M11-scoped monitoring API and Dashboard overview now use TASK 048 telemetry. Summary counts cover only applications visible to the principal; the table supports pagination and name/runtime/status/health filters; stale measurements are not presented as current. The signed browser candidate uses one explicit Gateway GET allowlist entry. Refresh is manual; production browser management remains default-off. M9 remains IN PROGRESS because event integration and searchable logs/retention remain outstanding. Preserve M8 at 13 PASS, 0 verified FAIL, 1 BLOCKED and 39 NOT RUN; these include no new browser acceptance. M7/M8/M10-DB remain IN PROGRESS; M11 COMPLETED; M10/M12 NOT STARTED; Source Build disabled; D00-D29 PENDING. See PROGRESS.md for exact tests and evidence.
+
+**Historical assignment (2026-11-14): TASK 048 - M9 Monitoring & Logging foundation.** Implemented bounded per-application latest Agent observations and their existing app-scoped M11 runtime API/detail view. The prior full verification passed 613 checks. This is preserved as the first M9 slice; TASK 049 adds a central overview without replacing it.
 
 **Historical assignment (2026-11-12): TASK 047 - M8 operator-assisted real-browser acceptance.** Operator-reported checkpoint: 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), and 39 NOT RUN. Read-only loopback health and Dashboard requests returned HTTP 200, but are not browser-acceptance evidence. M8 remained IN PROGRESS and private production browser management remained disabled by default. See PROGRESS.md and BROWSER_AUTHENTICATION.md for the preserved matrix and runbook.
 
@@ -765,27 +767,39 @@ npm.cmd run verify
 
 - Health and status changes are reflected in the dashboard/API.
 - Process CPU/RAM and health-check results are collected with documented sampling behavior.
+- An authenticated monitoring overview returns only applications visible to the caller, with summary counts, bounded pagination, validated filters and the latest safe freshness state.
+- Missing samples remain UNKNOWN; stale measurements are never represented as current. The Dashboard exposes no process IDs, internal ports or Agent session identifiers and refreshes only by an explicit bounded user action.
 - Logs are separated by application and release, searchable/filterable, downloadable, and retained according to configured policy.
 - Tests verify secret redaction and that credentials do not appear in logs or downloads.
 - Monitoring failure does not silently mark an unhealthy process as healthy.
 
-**Verification commands (planned):**
+**Verification commands:**
 
 ```powershell
-npm.cmd --prefix .\src\Api run test
-npm.cmd --prefix .\src\Dashboard run test
-dotnet publish .\tests\Platform.Integration.Tests\Platform.Integration.Tests.csproj -c Release --no-self-contained -p:UseAppHost=false
-dotnet .\tests\Platform.Integration.Tests\bin\Release\net8.0\publish\Platform.Integration.Tests.dll
+npm.cmd run test:auth --workspace @ihp/api
+npm.cmd run test:dashboard
+npm.cmd run test:browser --workspace @ihp/dashboard
+npm.cmd run test:gateway
+npm.cmd run verify
 ```
+
+All managed .NET projects are published by the approved task runner with `UseAppHost=false` and invoked as DLLs; do not run `.exe` files or VSTest/testhost.
 
 **Status:** IN PROGRESS
 
-**TASK 048 first slice — verified, M9 remains IN PROGRESS:**
+**Historical TASK 048 first slice — verified:**
 
 - The Deployment Agent writes a single latest observation per application into the SQLite Platform Registry. Samples contain the runtime instance reference, sample time, health-check result, normalized CPU percentage and working-set bytes; they contain no PID, internal port, session ID, release path or application database data. The first CPU sample is `null` until a prior process CPU measurement exists.
 - The sample interval defaults to 15 seconds and may be configured from 5 to 15 seconds. Health is returned as `CURRENT` only when the snapshot matches the current RUNNING instance and is no older than 45 seconds. Otherwise the health state is `UNKNOWN`; old sample values are marked `STALE`.
 - The existing `GET /_platform/api/applications/:id/runtime` retains M11 `application.read` and ownership enforcement. The detail view shows health, CPU, memory, timestamp and freshness. Automated API tests cover app scoping, unauthorized access, safe fields and stale state; Dashboard tests cover current and stale/unknown presentation.
-- Remaining M9 acceptance includes a centralized application/system overview, platform/Gateway/health/process/user-action event integration, searchable/filterable/downloadable logs, configurable retention, and full operational failure/retention/redaction coverage. Existing bounded deployment logs are reused and were not replaced.
+- TASK 048 verification is preserved in PROGRESS.md. Existing bounded deployment logs are reused and were not replaced.
+
+**TASK 049 centralized overview slice — verified, M9 remains IN PROGRESS:**
+
+- Added M11-protected `GET /_platform/api/applications/monitoring`. It bounds pagination to 100, validates filter values, computes summary counts from the principal's authorized application scope, and returns only safe runtime/health/freshness fields. The query is parameterized; CPU and memory values are included only for the matching current observation.
+- The React overview displays total/running/stopped/failed/unknown-health cards and a responsive table for application, runtime, current status, health, CPU, memory, observation time and freshness. Name/runtime/status/health filters, pagination, manual refresh and existing detail links are supported. It does not poll, invent telemetry, or display stale metrics as current.
+- Added one exact signed Gateway route for `GET /admin/browser/applications/monitoring`, allowing only `page`, `pageSize`, `search`, `runtime`, `status` and `health`. The existing ordinary-startup browser-management default-off gate and all M11 server authorization remain unchanged.
+- TASK 049 remaining M9 acceptance: platform/Gateway/user-action event integration, bounded log search/filter/download and retention policy, and their failure/redaction/operational acceptance. Actual-browser acceptance was not run; protocol and DOM tests are not browser evidence.
 
 ### M10 — Version Management and Rollback
 
@@ -1111,6 +1125,6 @@ Run manual compatibility/failure/security checks from requirements sections 19 a
 | Login, roles, ownership, approvals, audit                                                           | M11                                                                       |
 | Security, resilience, compatibility, docs, final acceptance                                         | M12                                                                       |
 
-M1–M6 and M11 are `COMPLETED`; SQLite-only policy/accepted gap remain. M7, M8, M9 and M10-DB are `IN PROGRESS`; Source Build remains disabled, M8 retains 39 NOT RUN and 1 BLOCKED operator scenarios, and M9 has only its initial telemetry slice verified. M10 and M12 remain `NOT STARTED`. All .NET checks use published managed DLLs; uncreated later-milestone commands remain planned. Change status only with matching evidence and policy.
+M1–M6 and M11 are `COMPLETED`; SQLite-only policy/accepted gap remain. M7, M8, M9 and M10-DB are `IN PROGRESS`; Source Build remains disabled, M8 retains 39 NOT RUN and 1 BLOCKED operator scenarios, and M9 has the TASK 048 telemetry slice plus TASK 049 centralized overview verified. M9 logging/event/retention acceptance remains open. M10 and M12 remain `NOT STARTED`. All .NET checks use published managed DLLs; uncreated later-milestone commands remain planned. Change status only with matching evidence and policy.
 
 M10-DB is **IN PROGRESS for TASK 036 candidate metadata, TASK 037 prospective path validation, TASK 040 inert request metadata, TASK 041 review metadata, and TASK 043 product decisions**; its operational lifecycle acceptance remains incomplete. Product direction is recorded in PROJECT_REQUIREMENTS.md section 9.1.23, but it is not runtime implementation or IT/Security approval. Provisioning, import/association, runtime attachment, migrations, Platform backup/restore and Dashboard lifecycle controls remain unavailable or outside MVP. Final M12 review must account for this extension without treating these partial slices as lifecycle acceptance.

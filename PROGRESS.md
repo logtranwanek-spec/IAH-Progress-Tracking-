@@ -1,6 +1,43 @@
 # Project Progress
 
-## Current TASK 048 — M9 Monitoring & Logging foundation — 2026-11-14
+## Current TASK 049 — Centralized Application Monitoring Overview — 2026-11-14
+
+### Outcome
+
+Implemented and verified the next M9 increment: an authorized, read-only central application monitoring overview reusing TASK 048's SQLite runtime observations. M9 remains **IN PROGRESS**; this does not complete platform event collection, log search/filter/download, retention, or M9 operational acceptance.
+
+### Implementation
+
+- Added `GET /_platform/api/applications/monitoring` to the Platform API. It requires the existing M11 principal and `applications.list`; Administrators see all registered applications, while other roles see only owned or explicitly granted applications. Summary counts are calculated over that authorized scope. Pagination is bounded to 100; runtime/status/health/search inputs are validated and SQL values remain parameterized.
+- The response includes only application ID/name/slug, runtime, current status, health status, current CPU/memory sample, observation time and freshness. A measurement is returned only if its observation still matches the sampled row and the sample is current. Missing health remains UNKNOWN; stale samples remain STALE and their CPU/memory values are omitted. No PID, internal port, Agent session, absolute path, database content or credentials are exposed.
+- Replaced the Dashboard workspace overview with summary cards, a responsive application monitoring table, name/runtime/status/health filters, bounded pagination, a manual refresh button and existing detail links. There is no automatic polling or fabricated telemetry. Loading, API error, empty, authorization-locked, stale and unknown states remain explicit.
+- Added one exact read-only signed Gateway mapping for `GET /admin/browser/applications/monitoring`; only `page`, `pageSize`, `search`, `runtime`, `status` and `health` query parameters are accepted. Other API proxy paths remain rejected. M11 authorization is still enforced by the API. The browser management candidate remains disabled in ordinary startup.
+
+### Files changed
+
+- API: `src/Api/src/controllers.ts`, `src/Api/src/registry.ts`, `src/Api/test/auth.test.mjs`.
+- Gateway: `src/Gateway/BrowserBoundary.cs`.
+- Dashboard: `src/Dashboard/src/api.ts`, `src/Dashboard/src/browser-session.ts`, `src/Dashboard/src/app.tsx`, `src/Dashboard/src/style.css`, `src/Dashboard/test/native-harness.mjs`, `src/Dashboard/test/dashboard.test.mjs`, `src/Dashboard/test/browser.test.mjs`.
+- Tracking: `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `PROGRESS.md`, `AGENTS.md`.
+
+### Verification evidence
+
+- The first full run exposed a DOM integration timeout because the new monitoring GET was absent from the Gateway's explicit signed-operation allowlist. Added only the exact read-only route and bounded query allowlist; expanded the signed integration case to create a disposable owned app, verify HTTP 200 through the signed Gateway protocol, render its monitoring row and verify logout clears it.
+- `npm.cmd run test:auth --workspace @ihp/api`: **39 passed, 0 failed, 0 skipped**.
+- `npm.cmd run test:dashboard`: **49 passed, 0 failed, 0 skipped**.
+- `npm.cmd run test:gateway`: **114 passed, 0 failed**.
+- `npm.cmd run test:browser --workspace @ihp/dashboard`: **54 passed, 0 failed, 0 skipped**. These are signed HTTP/WebCrypto/React DOM protocol checks, not actual-browser acceptance.
+- `npm.cmd run build`: passed; the repository build published .NET projects with `UseAppHost=false` and confirmed no `.exe` artifacts.
+- `npm.cmd run check`: passed formatting and TypeScript checks.
+- Final `npm.cmd run verify`: **615 passed, 0 failed, 0 skipped**, exit 0; breakdown: Node 33, API 155, migration 15, Dashboard 49, signed browser protocol/DOM 54, Foundation 27, Gateway 114, samples 82, Deployment Agent 27, routing integration 19, package verification 40. Loopback smoke verified the built Dashboard, health, API proxy, disabled deployment, structured Gateway logging and clean shutdown/storage cleanup. No actual-browser acceptance was performed.
+
+### Status and handoff
+
+M8 remains **IN PROGRESS** with the operator-reported checkpoint unchanged at 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), and 39 NOT RUN; no new browser evidence was obtained. Ordinary production browser management remains disabled by default. M7 and M10-DB remain **IN PROGRESS**; M11 remains **COMPLETED**; M10 and M12 remain **NOT STARTED**; Source Build remains disabled and D00–D29 remain **PENDING**. No application databases or production Registry were modified. SQLite-only, loopback-only, no-Docker, no-Administrator, no-security-change and no-untrusted-execution restrictions remain.
+
+Remaining M9 work includes platform/Gateway/user-action event integration, bounded searchable/filterable/downloadable logs, configurable retention and their redaction/failure acceptance. **Recommended TASK 050:** implement M9 bounded application/release log search and filtering with retention metadata and M11-scoped read APIs, reusing existing safe deployment logs.
+
+## Historical TASK 048 — M9 Monitoring & Logging foundation — 2026-11-14
 
 ### Product Owner decision and M8 status
 
@@ -36,11 +73,11 @@ The Product Owner discontinued the remaining manual browser exercises and accept
 - `npm.cmd run verify`: final full suite **613 passed, 0 failed, 0 skipped**, followed by successful loopback smoke cleanup. Breakdown: Node foundation 33; API 154 plus migration checks 15; Dashboard unit 48; signed-browser protocol/DOM simulation 54; .NET Foundation 27; Gateway 114; samples 82; Agent 27; routing integration 19; package/deployment 40. The 54 signed-browser tests are simulations and are not actual-browser acceptance evidence. All .NET publish/test execution used `dotnet publish ... -p:UseAppHost=false` and `dotnet <published>.dll`; published roots passed no-`.exe` checks.
 - The first full run found stale schema-count assertions and stopped at the API migration test; these were updated. A subsequent focused run found and corrected the SQLite `REAL` mapping assertion. Final full verification passed after those fixes. Prettier and TypeScript/.NET format checks passed in the final run.
 
-### Remaining M9 work and next task
+### M9 status at TASK 048 (historical snapshot)
 
-M9 is **IN PROGRESS**, not complete. The new sample is only per-application detail telemetry. Remaining requirements include a centralized application/system health and deployment overview; safe event collection across Agent, Gateway, health failures and user actions; searchable/filterable/downloadable bounded logs; configured retention; and broader failure/redaction tests. M8 remains IN PROGRESS with its preserved 13/0/1/39 checkpoint and default-off production browser management.
+At TASK 048 close, M9 was **IN PROGRESS** and the new sample provided per-application detail telemetry. TASK 049 has since implemented the authorized centralized application monitoring overview. Remaining M9 requirements include safe event collection across Agent, Gateway, health failures and user actions; searchable/filterable/downloadable bounded logs; configured retention; and broader failure/redaction tests. M8 remains IN PROGRESS with its preserved 13/0/1/39 checkpoint and default-off production browser management.
 
-**Exact next recommended task:** TASK 049 — add an application-list monitoring overview using the existing authorized runtime/observation data, with explicit UNKNOWN/STALE handling and no PID/internal-port exposure. Do not add log download/retention until its bounded authorization contract is separately scoped.
+**Historical next recommendation at TASK 048 close (now completed by TASK 049):** add an application-list monitoring overview using the existing authorized runtime/observation data, with explicit UNKNOWN/STALE handling and no PID/internal-port exposure.
 
 **Session handoff:** The test suite stopped all owned sample/process fixtures and removed its disposable Registry/storage. No live IHP services were started, no corporate listeners/security settings were changed, and no production Registry was touched. Commit/push only the four tracking Markdown documents; leave application source and generated outputs out of the progress repository.
 

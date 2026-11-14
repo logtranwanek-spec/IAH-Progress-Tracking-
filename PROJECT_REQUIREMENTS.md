@@ -1,7 +1,15 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 048 — M9 Monitoring & Logging foundation — 2026-11-14
+## Current TASK 049 — Centralized Application Monitoring Overview — 2026-11-14
+
+The M9 monitoring overview reuses the TASK 048 runtime-observation records and existing M11 authorization. Its read-only API is `GET /_platform/api/applications/monitoring`; listing and summary counts are restricted to applications visible to the authenticated principal and queries are bounded to pages of at most 100 records. The signed Dashboard candidate routes only the exact corresponding GET operation through the Gateway allowlist and accepts only `page`, `pageSize`, `search`, `runtime`, `status` and `health` query fields. Ordinary production browser management remains disabled by default.
+
+The Dashboard overview presents total/running/stopped/failed/unknown-health counts, plus application name, runtime, current status, health, current CPU/memory sample, last observation and freshness. It supports name/runtime/status/health filtering, pagination, existing application-detail links and a manual refresh without polling. Missing observations remain unknown; stale samples never appear as current, and stale CPU/memory values are omitted. Do not expose process IDs, internal ports, Agent sessions, absolute paths, secrets or unbounded telemetry. These features use SQLite Platform Registry metadata only and do not access application database contents.
+
+This is a partial M9 increment, not M9 completion. Platform/Gateway/user-action event integration and searchable/filterable/downloadable logs with configurable retention remain outstanding. Automated protocol/DOM checks are not actual-browser acceptance. Preserve the M8 operator checkpoint at 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN; M8 remains IN PROGRESS and production browser management remains default-off. M7 and M10-DB remain IN PROGRESS, M11 COMPLETED, M10 and M12 NOT STARTED, Source Build disabled, and D00–D29 PENDING.
+
+## Historical TASK 048 — M9 Monitoring & Logging foundation — 2026-11-14
 
 The Product Owner discontinued the remaining manual M8 browser exercises and accepts the residual verification risk. Preserve the actual operator evidence at 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), and 39 NOT RUN; the unrun scenarios are not technical passes. M8 remains IN PROGRESS unless a documented completion gate changes through an authorized requirements decision. M9 is IN PROGRESS for an incremental monitoring slice: the Agent persists one latest CPU/working-set/health observation per application in the SQLite Platform Registry; the existing application-scoped M11 runtime API and Dashboard detail view show the sample timestamp, freshness and unknown/stale states. The default sampling interval is 15 seconds, configurable from 5 to 15 seconds; a sample is current only when it matches the running instance and is no older than 45 seconds. No PID, internal port, session identifier, application database content, or production Registry data is exposed or changed. This does not complete M9 logging/search/retention or centralized overview requirements. See PROGRESS.md for tests and the implemented boundary.
 
@@ -2107,18 +2115,18 @@ Develop a centralized monitoring interface.
 
 ## 11.1. Application Monitoring
 
-Display:
+Display truthful, application-scoped operational data:
 
 ```text
 Application Status
 CPU Usage
 RAM Usage
-Process ID
-Uptime
-Internal Port
-Last Deployment
 Health Check Status
+Last Observation
+Data Freshness
 ```
+
+Security boundary: process IDs, internal runtime ports and Agent session identifiers are internal and must not be exposed through ordinary Platform APIs or the Dashboard. Unavailable or stale metrics must be shown as unavailable/unknown, never inferred or presented as current. Last-deployment information may be shown only from an existing authorized API record; the M9 monitoring overview does not synthesize it.
 
 Example:
 
