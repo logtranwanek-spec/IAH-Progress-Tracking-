@@ -1,7 +1,13 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 049 — Centralized Application Monitoring Overview — 2026-11-14
+## Current TASK 050 — M9 Centralized Application Logs Management — 2026-11-17
+
+Implemented the first centralized application-log management slice. The M11-protected `GET /_platform/api/applications/:id/logs` provides app-scoped paged search/filter across releases; the signed Gateway exposes only `GET /admin/browser/applications/:id/logs` with a fixed query allowlist. Dashboard pages contain up to 50 sanitized Agent log entries and can be downloaded as JSONL for the current page. API page size is capped at 100. Search is capped at 100 characters; supported filters are level, UTC time range and validated release version. Per-release Agent log retention defaults to 1,000 entries and may be set to 100–10,000 with `IHP_DEPLOYMENT_LOG_RETENTION_PER_RELEASE`; configure matching values for API and Agent processes. No schema migration was required.
+
+This implements only existing Deployment Agent stdout/stderr and lifecycle log records. Platform, Gateway, API and user-action event streams, age-based retention, and full operational retention/download acceptance remain incomplete. M9 remains IN PROGRESS. The default production browser client is still disabled; the signed candidate remains explicit opt-in, and protocol/DOM verification is not actual-browser acceptance. Preserve M7/M8/M10-DB IN PROGRESS, M11 COMPLETED, M10/M12 NOT STARTED, Source Build disabled and D00–D29 PENDING. See PROGRESS.md and IMPLEMENTATION_PLAN.md for evidence and remaining acceptance.
+
+## Historical TASK 049 — Centralized Application Monitoring Overview — 2026-11-14
 
 The M9 monitoring overview reuses the TASK 048 runtime-observation records and existing M11 authorization. Its read-only API is `GET /_platform/api/applications/monitoring`; listing and summary counts are restricted to applications visible to the authenticated principal and queries are bounded to pages of at most 100 records. The signed Dashboard candidate routes only the exact corresponding GET operation through the Gateway allowlist and accepts only `page`, `pageSize`, `search`, `runtime`, `status` and `health` query fields. Ordinary production browser management remains disabled by default.
 
@@ -2167,6 +2173,8 @@ Support:
 - Secret redaction.
 
 Application logs must be separated by application and release.
+
+**TASK 050 implementation snapshot (partial M9):** The M11 application-scoped logs API currently searches and filters Deployment Agent stdout/stderr and lifecycle records only. API pages are capped at 100 rows; the Dashboard requests 50 rows and downloads only the sanitized current page as JSONL. The per-release record cap defaults to 1,000 and is configurable from 100 to 10,000 with `IHP_DEPLOYMENT_LOG_RETENTION_PER_RELEASE` (the API and Agent configurations must match). Secret and local-path redaction is applied before returned data is rendered/exported. Platform, Gateway, API and user-action event collection, age-based retention and broader operational acceptance remain incomplete; M9 remains IN PROGRESS. This implementation does not enable ordinary-startup private browser management and has no actual-browser acceptance claim.
 
 ---
 

@@ -1,6 +1,51 @@
 # Project Progress
 
-## Current TASK 049 — Centralized Application Monitoring Overview — 2026-11-14
+## Current TASK 050 — M9 Centralized Application Logs Management — 2026-11-17
+
+### Outcome
+
+TASK 050 is complete as a bounded M9 logs-management increment. Existing per-release Agent logs can now be searched and filtered across an authorized application, displayed in a Dashboard Logs view and downloaded one sanitized page at a time. M9 remains **IN PROGRESS** because Platform/Gateway/API/user-action event integration and full operational retention/download acceptance remain unfinished. This task did not run real-browser acceptance; the production browser management default-off gate is unchanged.
+
+### Existing state and implementation
+
+- Before TASK 050, the API exposed only `GET /_platform/api/applications/:id/packages/:deploymentId/logs?limit=1..100`; it had no application-wide page/search/level/time/release filters, central Dashboard Logs page, or download action. Agent log retention was hard-coded at 1,000 entries per deployment/release.
+- Added `GET /_platform/api/applications/:id/logs` under existing M11 `application.read`. It returns newest-first bounded pages (API max 100) across the authorized application's releases and supports case-insensitive substring search (max 100 characters), `INFO|WARN|ERROR` level, UTC `from`/`to` timestamps and a validated release-version filter. Invalid query values fail closed; start/end ordering is checked. A Prisma transaction reads page rows and total count consistently.
+- Application ownership/grants remain enforced by the existing server-side M11 interceptor. Anonymous requests fail 401; cross-application requests are concealed as 404. The API selects only log ID, level, bounded sanitized message, timestamp and release version; existing credential and local-path redaction is reused. It exposes no process IDs, ports, Agent sessions, filesystem paths, secrets or application database contents. No Registry schema migration was required.
+- Added a fixed Gateway signed GET allowlist entry `/admin/browser/applications/:id/logs` and explicit query allowlist (`page`, `pageSize`, `search`, `level`, `from`, `to`, `release`). No generic proxy or management write route was added. Ordinary startup still uses the disabled `BrowserApi`; this feature requires the already existing explicit signed browser candidate.
+- Added an Application logs Dashboard navigation page. Users select an accessible app, filter by release/search/level/time, page through up to 50 records, refresh explicitly, and download the current page as JSONL. Export is intentionally limited to the current sanitized page and does not claim a full-history export. Loading, API error and empty states are shown. UI role visibility is not the authorization boundary.
+- Agent retention now uses `IHP_DEPLOYMENT_LOG_RETENTION_PER_RELEASE`, defaults to 1,000 per release, and accepts only 100–10,000. Oldest rows are pruned when new rows are written. Set the same value for API and Agent processes so the reported policy matches the writer. No age-based retention controls or changes to collected log sources were made.
+- Collector source remains only Agent application stdout/stderr plus lifecycle/startup/exit/health messages already written by the Agent. Platform, Gateway, API request and user-action events remain separate/not integrated. This task did not add a schema migration, M9 audit event ingestion, M10/M10-DB functionality or Source Build execution.
+
+### Files changed locally
+
+- API: `src/Api/src/app.ts`, `src/Api/src/controllers.ts`, `src/Api/src/packages.ts`, `src/Api/src/registry.ts`, `src/Api/test/auth.test.mjs`.
+- Gateway: `src/Gateway/BrowserBoundary.cs`.
+- Dashboard: `src/Dashboard/src/api.ts`, `src/Dashboard/src/browser-session.ts`, `src/Dashboard/src/model.ts`, `src/Dashboard/src/app.tsx`, `src/Dashboard/src/style.css`, `src/Dashboard/test/browser.test.mjs`, `src/Dashboard/test/dashboard.test.mjs`, `src/Dashboard/test/native-harness.mjs`.
+- Agent: `src/DeploymentAgent/EngineOptions.cs`, `src/DeploymentAgent/EngineStore.cs`, `src/DeploymentAgent/Program.cs`, `tests/DeploymentAgent.Tests/Program.cs`.
+- Tracking: all four official Markdown files. No source files, generated assets, build artifacts, databases or logs were staged for the tracking repository.
+
+### Verification evidence
+
+- Focused `npm.cmd run test:auth`: **40 passed, 0 failed, 0 skipped**. Covers bounded retention configuration, M11 owner/grant roles, anonymous/cross-app denial, search/level/time/release filters, invalid query rejection and redaction.
+- Focused `npm.cmd run test:agent`: **28 passed, 0 failed**. Includes configurable retention pruning, option bounds, published-DLL process lifecycle and no `.exe` publish inputs.
+- Focused `npm.cmd --workspace @ihp/dashboard test`: **50 passed, 0 failed, 0 skipped**. Covers accessible navigation, log filter/page/retention display and safe JSONL format helper.
+- Focused `npm.cmd run test:browser`: **54 passed, 0 failed, 0 skipped**. The signed Gateway protocol test calls the new exact application logs mapping and checks its query allowlist and no-native-token boundary. This is service/protocol and DOM automation, not actual-browser acceptance.
+- Full `npm.cmd run verify`: **618 passed, 0 failed, 0 skipped**. Breakdown: Node readiness/config 33; API/auth/routing/intake/DB metadata 156; SQLite migration/Prisma 15; Dashboard 50; signed browser protocol/DOM 54; Foundation 27; Gateway 114; samples 82; Deployment Agent 28; routing integration 19; package deployment 40. Build and formatting/type checks passed. All .NET projects were published with `UseAppHost=false`; publish checks found no `.exe` artifacts. Owned loopback smoke verified Gateway/API/Dashboard health and assets, default browser-auth rejection, structured Gateway logs, listeners on loopback only, then stopped owned components, released ports and removed temporary test storage.
+- Earlier attempts and corrections: initial API focused compile lacked imports for `choice`, `text` and `Prisma`; added imports and reran 40/40. Initial Agent test compile lacked `CultureInfo`; added the import and reran 28/28. Initial Dashboard test runs raced the asynchronous app list/selected an item before the accessible list populated; changed the test to wait for a real returned option, then the Dashboard suite passed 50/50. The first full verification stopped at the Prettier gate for eight changed files; formatted only those files, and the full rerun proceeded through every suite and successful smoke cleanup. An exploratory `npm.cmd --workspace @ihp/dashboard exec -- node ...` warned that it would install an unlisted `node` package; it was interrupted immediately before installation, and no package manifest/lockfile change resulted. Standard project scripts were used for verification.
+- Actual-browser acceptance: **not performed**. Existing M8 checkpoint remains 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN. Signed protocol/DOM tests do not change that checkpoint.
+
+### Status and handoff
+
+- TASK 050 bounded log-management slice: **COMPLETED** by automated evidence above.
+- M9: **IN PROGRESS**. Remaining work is platform/Gateway/API/user-action event source integration and operational failure/redaction/retention acceptance. Current-page download is bounded; download of an entire filtered history is not implemented.
+- M7/M8/M10-DB remain **IN PROGRESS**; M11 **COMPLETED**; M10/M12 **NOT STARTED**; Source Build disabled; D00–D29 **PENDING**. M8 browser checkpoint unchanged.
+- No manual browser session was requested or performed. No company network, production Registry, existing application, Windows security setting, application database, firewall or non-loopback listener was touched.
+
+**Recommended TASK 051:** implement bounded Platform/Gateway/API/user-action event integration into the existing safe diagnostic/log view, with source allowlisting, M11 application scoping, secret/path redaction, retention behavior and failure/authorization tests. Do not add age-based retention, broaden log sources, enable production browser management or start M10 until separately scoped and verified.
+
+---
+
+## Historical TASK 049 — Centralized Application Monitoring Overview — 2026-11-14
 
 ### Outcome
 
