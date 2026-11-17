@@ -6,6 +6,28 @@
 
 TASK 050 is complete as a bounded M9 logs-management increment. Existing per-release Agent logs can now be searched and filtered across an authorized application, displayed in a Dashboard Logs view and downloaded one sanitized page at a time. M9 remains **IN PROGRESS** because Platform/Gateway/API/user-action event integration and full operational retention/download acceptance remain unfinished. This task did not run real-browser acceptance; the production browser management default-off gate is unchanged.
 
+### TASK 050 completion revalidation — 2026-11-17
+
+TASK 050 was present in the local source workspace and the latest tracking `origin/main` before this revalidation; its implementation was not duplicated or changed. Requirement classification against the source, M9 plan, and automated evidence:
+
+| Requirement                             | Classification           | Evidence and boundary                                                                                                                                          |
+| --------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authorized centralized log viewing      | IMPLEMENTED AND VERIFIED | M11 `application.read` API plus fixed signed Gateway GET operation; protocol tests exercise the signed mapping.                                                |
+| Application-scoped access               | IMPLEMENTED AND VERIFIED | Query joins logs to deployments and filters by application; API tests cover ownership/grants, anonymous and cross-application denial.                          |
+| Bounded search and filtering            | IMPLEMENTED AND VERIFIED | Search is capped at 100 characters; level, UTC range and validated release filters are parameterized and tested.                                               |
+| Pagination and deterministic ordering   | IMPLEMENTED AND VERIFIED | API page size is capped at 100; `timestamp DESC, rowid DESC` ordering and pagination are exercised by API tests.                                               |
+| Release and timestamp metadata          | IMPLEMENTED AND VERIFIED | Response rows carry validated release version and timestamp; API/Dashboard cases verify fields and rendering.                                                  |
+| Severity filtering                      | IMPLEMENTED AND VERIFIED | Only `INFO`, `WARN`, and `ERROR` are accepted; invalid levels fail closed in API and Gateway tests.                                                            |
+| Redaction and sensitive-data protection | IMPLEMENTED AND VERIFIED | Existing safe-log redaction is applied to returned bounded messages; canary/secret tests assert values are absent.                                             |
+| Retention metadata and bounded policy   | IMPLEMENTED AND VERIFIED | API reports per-release record cap; Agent validates 100–10,000 and prunes older rows on insertion; focused Agent/API tests pass. There is no age-based policy. |
+| Dashboard log interface                 | IMPLEMENTED AND VERIFIED | Dashboard supports filtering, paging, refresh, states and current-page JSONL export; DOM tests cover behavior, not actual-browser download acceptance.         |
+| Gateway allowlisting                    | IMPLEMENTED AND VERIFIED | Only the exact signed application logs GET and its explicit query allowlist are exposed; signed protocol tests verify it.                                      |
+| Security/regression tests               | IMPLEMENTED AND VERIFIED | Focused and full suite results below; no real-browser acceptance is inferred.                                                                                  |
+
+**Fresh verification:** `npm.cmd run test:auth` passed 40/40; `npm.cmd run test:agent` passed 28/28; `npm.cmd run test:dashboard` passed 50/50; `npm.cmd run test:browser` passed 54/54. Final `npm.cmd run verify` completed with 618 passed, 0 failed, 0 skipped. The suite built the API/Dashboard, passed formatting/type checks, published .NET projects using `UseAppHost=false`, ran published DLLs with no `.exe` publish artifacts, completed the managed regression suites, then passed owned loopback smoke checks and cleanup. Aggregate: readiness/config 33, API/auth/routing/intake/metadata 156, SQLite/migration/Prisma 15, Dashboard 50, signed Gateway protocol/DOM 54, Foundation 27, Gateway 114, samples 82, Agent 28, routing integration 19, packages 40.
+
+**Transient verification note:** the first full-suite attempt reported 53/54 in the signed browser protocol suite because the test `native browser issuer fixes server expiry at thirty minutes and rejects lifetime overrides` measured outside its asserted interval once. It passed when run alone (1/1), in the next full browser suite (54/54), and during the final full verification (54/54). Root cause was not established; no code change was made and the test reliability issue is not claimed fixed. A React `act(...)` warning appeared during a passing protocol test; it did not produce a failing/skipped test. No actual-browser test was performed; the preserved M8 checkpoint remains 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN.
+
 ### Existing state and implementation
 
 - Before TASK 050, the API exposed only `GET /_platform/api/applications/:id/packages/:deploymentId/logs?limit=1..100`; it had no application-wide page/search/level/time/release filters, central Dashboard Logs page, or download action. Agent log retention was hard-coded at 1,000 entries per deployment/release.
