@@ -1,8 +1,46 @@
 # Project Progress
 
-## TASK 051 Phase A — verification recovery — 2026-11-18
+## TASK 051 — Verification Recovery and M9 Operational Event Integration — 2026-11-18
 
-**Status: BLOCKED before M9 feature work; Phase B has NOT STARTED.** TASK 050 remains the latest completed task as a bounded M9 logs increment. Before any new event-integration work, TASK 051 requires recovery and re-verification of four failed ZIP upload cases plus a complete passing `npm.cmd run verify`.
+**Status: COMPLETED as a bounded task. M9 remains IN PROGRESS.** Phase A passed before Phase B started. The prior 50 MiB upload errors did not recur with adequate capacity; no upload implementation change was made to explain them, so their original root cause remains unconfirmed.
+
+### Phase A — verification recovery
+
+- At resumption C: had **16,016,674,816 bytes free**. No cleanup was performed. After final verification C: had **15,838,584,832 bytes free**.
+- The four requested integration boundaries passed: signed Gateway and direct Platform API each accepted **52,428,799 bytes** and exactly **52,428,800 bytes**. The focused runner included the fixture prerequisite, so it reported **5 PASS, 0 FAIL, 0 SKIPPED** (one setup plus four target cases). The complete suite repeated those cases successfully.
+- The earlier 500/503 responses were not reproduced. Disk capacity was substantially higher; this correlation makes storage pressure plausible, but no filesystem failure was captured in the failed requests, so the prior cause is not declared proven.
+
+### Phase B — implemented event integration
+
+- Added additive SQLite migration `202611180010_operational_log_sources`: `deployment_logs.source` defaults historical/existing rows to `AGENT` and is constrained to `AGENT`, `API`, or `GATEWAY`, with a source/timestamp index. No separate event table or duplicate event store was added.
+- Existing `deployment_events` are projected as safe `deployment` activity. A fixed allowlist of existing application `audit_logs` actions is projected as `platform` activity. Raw audit details and actors are not returned; records without an application-owned resource reference are excluded.
+- Authorized application API internal failures are recorded only after existing M11 principal, ownership and permission checks. The recorder accepts one fixed API failure code/message, deduplicates per application/source/code, writes only for a single current running runtime, and prunes `deployment_logs` to the already configured per-release limit.
+- Active dynamic Gateway route proxy errors are reported to `POST /_platform/api/routing/gateway-events` through a separate random in-memory/local-stack capability. The request contains only a canonical `registry-<uuid>` route ID and one of three fixed codes. The Gateway queue is bounded and rate-limited; delivery uses fixed `127.0.0.1:<API port>`, no proxy/cookies/redirects, a 2-second request budget, and best-effort failure handling. The API resolves route ownership internally; stale/unknown route IDs receive the same accepted response without creating a record. Event writing does not use or expand `IHP_ROUTING_TOKEN`.
+- Central log search now supports fixed `source` values and returns a deterministic merged page across deployment logs, allowlisted deployment state events and app-scoped user-action audit records. API/Gateway exception messages are constant; response fields exclude event payload/details, credentials, request data, paths, PID and Agent session IDs. Existing M11 `application.read`/ownership enforcement remains unchanged.
+- Dashboard shows source filtering and source labels; JSONL for the current bounded page includes `source`. Production browser management remains disabled by default; protocol/DOM evidence is not real-browser acceptance.
+
+### Files changed in the source workspace
+
+- API: `src/Api/prisma/schema.prisma`, `src/Api/prisma/migrations/202611180010_operational_log_sources/migration.sql`, `src/Api/src/access.ts`, `app.ts`, `controllers.ts`, `http.ts`, `packages.ts`, `registry.ts`, `routing.ts`, and `src/Api/test/auth.test.mjs`, `routing.test.mjs`, `database.test.mjs`.
+- Gateway and local process setup: `src/Gateway/GatewayHost.cs`, `src/Gateway/Routing/GatewayOperationalEventReporter.cs`, and `tools/local.mjs`.
+- Agent, Dashboard and managed verification: `src/DeploymentAgent/EngineStore.cs`; Dashboard `api.ts`, `browser-session.ts`, `app.tsx`, `model.ts`, `dashboard.test.mjs`, `browser.test.mjs`; `tests/Gateway.Tests/UnitChecks.cs`; `tests/DeploymentAgent.Tests/Program.cs`.
+- This source workspace is not tracked by the local documentation-only progress Git repository. No source files, databases, credentials, logs or artifacts were staged for GitHub.
+
+### Verification evidence
+
+- Focused: ZIP integration prerequisite + four boundary cases **5/5**; API authorization/routing/event checks **52/52**; Dashboard **50/50**; managed Gateway **115/115**; Deployment Agent **28/28**; SQLite Registry migration **15/15**.
+- Full `npm.cmd run verify`: **620 PASS, 0 FAIL, 0 SKIPPED**, exit code 0. Build and Prettier/TypeScript/.NET-format checks passed. Suite subtotals: readiness/config 33; API 157; Registry/migration/Prisma 15; Dashboard 50; signed Gateway protocol/DOM 54; Foundation 27; Gateway 115; samples 82; Agent 28; routing integration 19; package checks 40. All .NET test applications were published with `UseAppHost=false` and invoked by DLL; publish scanners found no `.exe` artifacts.
+- Owned loopback smoke passed dashboard bundle/CSP/API health, disabled browser-auth rejection, structured Gateway logging, component readiness and loopback socket checks. It stopped owned processes, released ports, and removed only its own temporary test storage. Post-run checks found no listeners on 5050, 5065, 5173, 5266, 5273, 56955, 56956, 62451 or 62452.
+- An early full attempt caught outdated test expectations for 11 rather than 10 migrations; those Registry and Agent verification assertions were updated and their focused suites passed. One overlapping Gateway/dashboard focused run collided on fixed port 5050; Gateway passed when run serially. A direct Dashboard subworkspace browser command used a stale previously published Gateway; the root full verification rebuilt Gateway and passed all 54 protocol/DOM tests. These invocation/order issues are not product acceptance claims. A React `act(...)` warning appeared during one passing DOM test; no failure resulted.
+- No actual-browser acceptance ran. Preserve M8's operator-reported checkpoint as **13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN**.
+
+### Remaining work and security status
+
+M9 remains IN PROGRESS because broader operational retention/download acceptance and end-to-end operational behavior for all joined event sources remain to be accepted. The existing configured per-release count cap applies to `deployment_logs`; no age-based deletion, audit-log deletion, whole-history export, or destructive retention policy was added. Keep M7/M8/M10-DB IN PROGRESS; M11 COMPLETED; M10/M12 NOT STARTED. Source Build remains disabled and D00–D29 remain PENDING. No Windows security/firewall change, Docker, Administrator privilege, corporate-network listener, production access, real application DB operation, untrusted source execution or real browser was used.
+
+## TASK 051 initial Phase A inspection snapshot (superseded) — 2026-11-18
+
+**Status at initial inspection only: BLOCKED before M9 feature work; Phase B had NOT STARTED.** This snapshot is retained as history and was superseded later on 2026-11-18 when Phase A passed and Phase B was implemented and verified, as recorded in the current TASK 051 entry above. At the time of this snapshot, TASK 050 was the latest completed task as a bounded M9 logs increment.
 
 ### Current-state and disk inspection
 
@@ -18,9 +56,9 @@
 - Last complete passing verification remains the earlier 2026-11-17 `npm.cmd run verify`: **618 passed, 0 failed, 0 skipped**, with DLL-only .NET publish/test execution and owned loopback smoke cleanup. It is historical, not a current pass.
 - Phase A exit criteria are unmet: adequate test space is not available, four upload cases have not passed, and no full suite completed successfully after the failures. Per the task gate, M9 operational event integration was not started. Reclaiming space must be done only by the operator or from positively identified, task-owned disposable artifacts; after that, rerun the four ZIP cases and then `npm.cmd run verify`. If the cases still fail, inspect server-side causes before any feature work.
 
-### GitHub visibility and synchronization baseline
+### GitHub visibility and initial synchronization baseline
 
-Anonymous `git ls-remote` and `git fetch` succeeded without credentials. The current remote tree contains exactly `AGENTS.md`, `IMPLEMENTATION_PLAN.md`, `PROGRESS.md`, and `PROJECT_REQUIREMENTS.md`; the repository is publicly readable. Visibility was not changed. Synchronization for this blocked checkpoint is pending the documentation update below.
+Anonymous `git ls-remote` and `git fetch` succeeded without credentials. At the time of this initial snapshot, the remote tree contained exactly `AGENTS.md`, `IMPLEMENTATION_PLAN.md`, `PROGRESS.md`, and `PROJECT_REQUIREMENTS.md`; the repository was publicly readable. Visibility was not changed. The later TASK 051 synchronization and current remote SHA are recorded in the checkpoint below.
 
 ## Historical TASK 050 — M9 Centralized Application Logs Management — 2026-11-17
 
@@ -4241,13 +4279,13 @@ Record actual outputs, failures, and test results before updating milestone stat
 
 ## CURRENT PROJECT CHECKPOINT
 
-- **Latest completed task:** TASK 050 — Centralized Application Logs Management; complete as a bounded M9 increment and reverified 2026-11-17.
-- **Current task and status:** TASK 051 Phase A — Verification Recovery is **BLOCKED**; Phase B M9 operational event integration has **NOT STARTED**. C: free space varied from about 198 MiB initially to about 56 MiB at its low point; the latest observed value was about 60 MiB. No cleanup occurred and the variation is unexplained. No recent, sufficiently large test-owned temp artifact was found for safe cleanup. The four ZIP cases and full suite must pass before feature work begins.
-- **Latest automated results:** No tests were run on 2026-11-18 because available C: space was inadequate for the known upload workload. The latest actual `npm.cmd run verify` attempt (2026-11-17) **FAILED / incomplete**: build/check passed; completed test groups reported **304 passed, 4 failed, 0 skipped** (readiness/config 33, API 156, SQLite/migration 15, Dashboard 50, browser protocol/DOM 50 pass/4 fail). Four valid 50 MiB ZIP uploads through signed Gateway/direct API returned HTTP 500/503. Disk exhaustion is likely but the request errors are not confirmed root-caused. .NET test stages and owned smoke were not reached. The last complete passing run remains historical at 618/0/0. No actual-browser acceptance was run.
-- **Current milestone statuses:** M1–M6 and M11 COMPLETED; M7, M8, M9, and M10-DB IN PROGRESS; M10 and M12 NOT STARTED. Source Build disabled; D00–D29 PENDING. M8 operator checkpoint remains 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN.
-- **Outstanding blockers:** Insufficient C: capacity for safely rerunning the large ZIP workload; no cleanup of unrelated user data or unverified directories is authorized or performed. The four earlier 500/503 responses remain unexplained beyond likely disk pressure. M9 still lacks Platform/Gateway/API/user-action event integration and broader operational retention/download acceptance. M7 source builds remain blocked pending written IT/Security approval and an approved isolated worker. M8 browser management remains default-off; automated protocol/DOM checks do not establish real-browser acceptance. M10-DB operational lifecycle remains unimplemented.
-- **Recommended next task number:** TASK 051 (resume Phase A only).
-- **Recommended next task title:** Verification Recovery, then M9 Operational Event Integration.
-- **Recommended next task scope:** Have the operator restore adequate C: space or identify an approved test workspace on a volume the tests can safely use. Rerun the four ZIP integration cases and `npm.cmd run verify`; diagnose persistent 500/503 responses at the server/storage layer. Enter Phase B only after every Phase A gate passes, then add bounded approved Platform/Gateway/API/user-action events to the existing logs view with M11 application scope, source/type allowlists, redaction, limits, deterministic paging, retention behavior and focused security tests. Do not add unrestricted export or destructive retention.
-- **Latest verified four-file synchronization commit:** `181bb62293108ea59080b24cb3538d5f56edeafe` (`Record TASK 051 verification blocker`). Push succeeded; remote `main` matched this SHA, and the commit contains exactly the four authorized Markdown files. This SHA is recorded here by a follow-up checkpoint-only update because a commit cannot contain its own resulting SHA. The remote was fetched anonymously; all four documents are publicly readable.
-- **Files changed in this synchronization:** `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `PROGRESS.md`, and `AGENTS.md`. Source-code changes: none. TASK 050 implementation paths and detailed evidence remain in the TASK 050 record above; no source files will be pushed to the tracking repository.
+- **Latest completed task:** TASK 051 — Verification Recovery and M9 Operational Event Integration; completed as a bounded task on 2026-11-18. M9 remains IN PROGRESS.
+- **Current task and status:** No implementation task is active. TASK 051 Phase A and Phase B are complete and verified. No later task has started.
+- **Latest automated results:** Latest `npm.cmd run verify` on 2026-11-18 exited 0 with **620 PASS, 0 FAIL, 0 SKIPPED**. Focused ZIP boundary runner was **5/5** (one setup plus four Gateway/direct API cases); API auth/routing 52/52; Dashboard 50/50; Gateway 115/115; Agent 28/28; migration 15/15. Build, formatting/type checks and owned loopback smoke passed. Protocol/DOM tests are not actual-browser acceptance. No actual browser was used. The prior 500/503 upload errors did not recur, but their root cause remains unconfirmed.
+- **Current milestone statuses:** M1–M6 and M11 COMPLETED; M7, M8, M9 and M10-DB IN PROGRESS; M10 and M12 NOT STARTED. Source Build disabled; D00–D29 PENDING. Preserve M8's operator checkpoint exactly: 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN.
+- **Outstanding blockers:** M9 broader operational retention/download acceptance remains open; no destructive or age-based retention was added. M7 Source Build awaits written IT/Security approval and verified isolated worker provisioning. M8 production browser management remains default-off and actual-browser acceptance remains incomplete. M10-DB operational lifecycle remains unimplemented. No test failure or security finding remains from the latest full verification.
+- **Recommended next task number:** TASK 052.
+- **Recommended next task title:** M9 Operational Log Acceptance and Retention Review.
+- **Recommended next task scope:** Inspect and verify retention behavior and end-to-end visibility for the existing Agent, deployment, platform, API and Gateway log sources; resolve operational acceptance gaps using bounded, app-scoped tests. Do not add destructive age-based/audit retention, broader exports, actual-browser claims, or another milestone without authorization.
+- **Latest verified four-file synchronization commit:** To be recorded after this documentation commit is pushed and verified; a follow-up checkpoint-only commit will record its SHA. The tracking repository is anonymously readable, and its remote tree is limited to the four authorized Markdown files.
+- **Files changed in TASK 051:** Source workspace changes are listed in the TASK 051 record above and are not tracked by the documentation-only Git repository. This task's tracking sync stages only `PROJECT_REQUIREMENTS.md`, `IMPLEMENTATION_PLAN.md`, `PROGRESS.md`, and `AGENTS.md`; no source, database, credential, log, or build artifact is included.

@@ -1,8 +1,16 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 051 — Verification Recovery Gate — 2026-11-18
+## Current TASK 051 — Verification Recovery and M9 Operational Event Integration — 2026-11-18
 
-TASK 051 Phase A is BLOCKED before feature development. The source still contains TASK 050's bounded M9 logs slice; do not begin operational event integration until the four large ZIP upload cases pass and a full `npm.cmd run verify` completes. During this read-only task C: free space varied from 207,392,768 bytes initially to a 58,679,296-byte low point; the latest observation was 63,348,736 bytes. No cleanup was performed and the variation is unexplained. Large-upload tests place disposable storage under the user profile on C:. Inspection found only small/stale test-named directories and small build output; no current-run disposable directory with enough reclaimable space was identified. Do not delete user files, application databases, deployed apps, unverified directories, dependency directories or caches. If space is restored safely, rerun the four cases and full suite; if upload failures persist, diagnose their actual server cause. M9 event integration has NOT STARTED. Preserve SQLite-only, loopback-only, no-Docker, no-Administrator, no-security-change, no-secrets and no-untrusted-execution restrictions.
+TASK 051 Phase A and Phase B are COMPLETED as a bounded task after the four 50 MiB ZIP boundary cases passed and `npm.cmd run verify` passed 620/620. Initial free space was 16,016,674,816 bytes on C:; after full verification it was 15,838,584,832 bytes. No cleanup was performed. The prior HTTP 500/503 upload failures did not recur, but their original root cause was not independently established. Phase B reuses existing SQLite deployment logs/events/audits with constrained sources and fixed API/Gateway event messages; M11 app scoping, retention bounds, a separate ephemeral loopback Gateway writer capability, secret/data minimization and Dashboard source filtering are covered by automated tests. M9 remains IN PROGRESS for broader operational retention/download acceptance. Do not add destructive retention or broader event/request capture without authorization. Keep production browser management default-off; preserve M7/M8/M10-DB IN PROGRESS, M11 COMPLETED, M10/M12 NOT STARTED, Source Build disabled, D00–D29 PENDING and the exact M8 operator checkpoint. Continue SQLite-only, loopback-only, no-Docker, no-Administrator, no-security-change, no-secrets and no-untrusted-execution restrictions.
+
+## Permanent M9 event logging rules
+
+- Reuse the existing app-scoped `deployment_logs`, `deployment_events` and `audit_logs`; do not add duplicate event storage without approved architectural justification.
+- Treat event source/type lists and messages as allowlists. Never persist raw exceptions, request bodies, headers, credentials, tokens, cookies, paths, PIDs or Agent session identifiers as operational-event data.
+- Gateway-to-API operational reports must use a separate narrow ephemeral loopback capability, accept only canonical active application route IDs and fixed codes, remain bounded/best-effort, and never reuse or widen the read-only route-reader capability.
+- Resolve event route ownership server-side, require a current running application instance before writing to per-release logs, and retain M11 application-level authorization for log reads. Default production browser management remains disabled.
+- Keep any age-based, destructive or cross-store retention changes out of scope absent explicit authorization; preserve the established per-release cap.
 
 ## Historical TASK 050 — M9 Centralized Application Logs Management — 2026-11-17
 
