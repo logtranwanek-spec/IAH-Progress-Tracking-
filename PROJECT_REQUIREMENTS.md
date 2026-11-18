@@ -1,13 +1,17 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Current TASK 050 — M9 Centralized Application Logs Management — 2026-11-17
+## Latest completed TASK 050 — M9 Centralized Application Logs Management — 2026-11-17
 
 Implemented the first centralized application-log management slice. The M11-protected `GET /_platform/api/applications/:id/logs` provides app-scoped paged search/filter across releases; the signed Gateway exposes only `GET /admin/browser/applications/:id/logs` with a fixed query allowlist. Dashboard pages contain up to 50 sanitized Agent log entries and can be downloaded as JSONL for the current page. API page size is capped at 100. Search is capped at 100 characters; supported filters are level, UTC time range and validated release version. Per-release Agent log retention defaults to 1,000 entries and may be set to 100–10,000 with `IHP_DEPLOYMENT_LOG_RETENTION_PER_RELEASE`; configure matching values for API and Agent processes. No schema migration was required.
 
 This implements only existing Deployment Agent stdout/stderr and lifecycle log records. Platform, Gateway, API and user-action event streams, age-based retention, and full operational retention/download acceptance remain incomplete. M9 remains IN PROGRESS. The default production browser client is still disabled; the signed candidate remains explicit opt-in, and protocol/DOM verification is not actual-browser acceptance. Preserve M7/M8/M10-DB IN PROGRESS, M11 COMPLETED, M10/M12 NOT STARTED, Source Build disabled and D00–D29 PENDING. See PROGRESS.md and IMPLEMENTATION_PLAN.md for evidence and remaining acceptance.
 
 The last complete passing TASK 050 verification on 2026-11-17 reported 618 passed, 0 failed and 0 skipped, with successful owned loopback smoke cleanup. A subsequent synchronization recheck on the same date passed build/check but failed during the test phase: 304 completed checks passed and four 50 MiB ZIP upload integration cases returned 500/503. An earlier attempt failed with `ENOSPC`; after the retry C: had 17,756,160 bytes free. Disk exhaustion is the likely environmental cause, but the four HTTP failures remain untriaged; they are not claimed fixed. The .NET test stages and smoke were not reached. Treat 618/0/0 as the previous successful baseline, not the latest run. No actual-browser acceptance was performed. See PROGRESS.md for commands and detailed evidence.
+
+## TASK 051 Phase A — verification recovery status — 2026-11-18
+
+TASK 051 has not passed its mandatory Phase A gate, so M9 operational event integration has not started. During read-only inspection C: free space varied from 207,392,768 bytes initially to a 58,679,296-byte low point; the latest observation was 63,348,736 bytes. No cleanup occurred and the variation is unexplained. The previous full verification attempt exhausted substantially more space, and the failing upload fixtures stage beneath the C: user profile. Known IHP test directories are small and mostly dated October 29, with one dated November 3; current-run test roots were not found. Published output and compiled distribution folders are small. No cleanup was performed because no sufficiently large, current-run, positively identified disposable artifact was available; existing dependency/cache directories and unrelated user data were left untouched. Do not proceed to Phase B until the four large ZIP upload cases and the full suite pass. See PROGRESS.md for exact inspection and verification status.
 
 ## Progress tracking and implementation status record
 
