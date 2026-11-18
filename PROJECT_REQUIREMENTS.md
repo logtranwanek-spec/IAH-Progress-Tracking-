@@ -1,7 +1,11 @@
 # MASTER PROMPT
 # INTERNAL APPLICATION HOSTING & DEPLOYMENT PLATFORM
 
-## Latest completed TASK 051 — Verification Recovery and M9 Operational Event Integration — 2026-11-18
+## Latest completed TASK 052 — M9 Operational Log Acceptance and Retention Review — 2026-11-18
+
+Verified all five supported application-log sources, sanitized search, UTC ordering, bounded JSONL download, and shared per-release count retention. The live Gateway-to-API failure and Agent restart visibility passed in disposable loopback fixtures. Full verification passed 626 checks, with zero failures/skips. See section 11.2 and PROGRESS.md for scope and limits. M9 remains IN PROGRESS.
+
+## Historical TASK 051 — Verification Recovery and M9 Operational Event Integration — 2026-11-18
 
 TASK 051 Phase A passed: with 16,016,674,816 bytes free on C: at resumption, the four signed-Gateway/direct-API ZIP boundary cases passed at 52,428,799 and 52,428,800 bytes, and the complete root `npm.cmd run verify` later passed 620 checks, with 0 failures and 0 skips. Post-run C: free space was 15,838,584,832 bytes. No cleanup was performed. The earlier 500/503 upload failures were not reproduced; disk pressure is a plausible cause but was not independently proven.
 
@@ -2183,6 +2187,12 @@ Support:
 - Secret redaction.
 
 Application logs must be separated by application and release.
+
+**TASK 052 operational log behavior (partial M9):** The existing M11 application-scoped view shows Agent output, deployment transitions, allowlisted Platform audit actions, and bounded API/Gateway failures. Search operates on the same sanitized text returned to the Dashboard. Accept real UTC calendar times and order by normalized timestamp with source and record ID tie-breakers. A response's count and page share a transaction. Offset pages can shift between requests if new events arrive or retained events are pruned.
+
+The configured 100–10,000 record cap (default 1,000) is shared by Agent, API, and Gateway records for each release. Deployment history and projected audit history are separate from that cap. Apply the same `IHP_DEPLOYMENT_LOG_RETENTION_PER_RELEASE` setting to the API and Agent. The Dashboard downloads only its current sanitized page of at most 50 records, and downloads are disabled while its application, page, or filters are reloading. Source-scoped and whole-page reads keep the existing M11 authorization checks. Gateway/API failure reporting remains best effort. A late Gateway report resolves the route and running release at ingestion because the current event contract carries no release or runtime generation.
+
+Source Build logs depend on the approved isolated Build Worker. Age-based retention, audit/history deletion, and bulk export remain outside this increment. Application authors must keep sensitive data out of stdout and stderr. Redaction covers recognized formats and fields and cannot identify arbitrary unlabeled values.
 
 **TASK 050 implementation snapshot (partial M9):** The M11 application-scoped logs API currently searches and filters Deployment Agent stdout/stderr and lifecycle records only. API pages are capped at 100 rows; the Dashboard requests 50 rows and downloads only the sanitized current page as JSONL. The per-release record cap defaults to 1,000 and is configurable from 100 to 10,000 with `IHP_DEPLOYMENT_LOG_RETENTION_PER_RELEASE` (the API and Agent configurations must match). Secret and local-path redaction is applied before returned data is rendered/exported. Platform, Gateway, API and user-action event collection, age-based retention and broader operational acceptance remain incomplete; M9 remains IN PROGRESS. This implementation does not enable ordinary-startup private browser management and has no actual-browser acceptance claim.
 

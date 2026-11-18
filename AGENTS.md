@@ -1,6 +1,10 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current TASK 051 — Verification Recovery and M9 Operational Event Integration — 2026-11-18
+## Current checkpoint after TASK 052 — M9 Operational Log Acceptance and Retention Review — 2026-11-18
+
+TASK 052 is COMPLETED for the bounded logs scope. Full verification passed 626 checks, with zero failures/skips and owned loopback cleanup. Search and counts use sanitized text, ordering uses normalized UTC time, and downloads follow the loaded application's current filter and page. The shared record cap is per release for Agent, API, and Gateway log rows. Deployment and audit projections keep their separate history. M9 remains IN PROGRESS. The next recommended task is TASK 053, M9 Health and Process Exit Log Acceptance. Keep Source Build disabled and preserve M8's operator checkpoint and default-off production browser management. See PROGRESS.md for evidence and limitations.
+
+## Historical TASK 051 — Verification Recovery and M9 Operational Event Integration — 2026-11-18
 
 TASK 051 Phase A and Phase B are COMPLETED as a bounded task after the four 50 MiB ZIP boundary cases passed and `npm.cmd run verify` passed 620/620. Initial free space was 16,016,674,816 bytes on C:; after full verification it was 15,838,584,832 bytes. No cleanup was performed. The prior HTTP 500/503 upload failures did not recur, but their original root cause was not independently established. Phase B reuses existing SQLite deployment logs/events/audits with constrained sources and fixed API/Gateway event messages; M11 app scoping, retention bounds, a separate ephemeral loopback Gateway writer capability, secret/data minimization and Dashboard source filtering are covered by automated tests. M9 remains IN PROGRESS for broader operational retention/download acceptance. Do not add destructive retention or broader event/request capture without authorization. Keep production browser management default-off; preserve M7/M8/M10-DB IN PROGRESS, M11 COMPLETED, M10/M12 NOT STARTED, Source Build disabled, D00–D29 PENDING and the exact M8 operator checkpoint. Continue SQLite-only, loopback-only, no-Docker, no-Administrator, no-security-change, no-secrets and no-untrusted-execution restrictions.
 
@@ -11,6 +15,8 @@ TASK 051 Phase A and Phase B are COMPLETED as a bounded task after the four 50 M
 - Gateway-to-API operational reports must use a separate narrow ephemeral loopback capability, accept only canonical active application route IDs and fixed codes, remain bounded/best-effort, and never reuse or widen the read-only route-reader capability.
 - Resolve event route ownership server-side, require a current running application instance before writing to per-release logs, and retain M11 application-level authorization for log reads. Default production browser management remains disabled.
 - Keep any age-based, destructive or cross-store retention changes out of scope absent explicit authorization; preserve the established per-release cap.
+- Apply the same sanitization to log search, counts, API responses and Dashboard downloads. Order mixed Registry timestamp formats by their UTC value and keep deterministic tie-breakers. Do not present offset pages as a snapshot across requests.
+- Keep Agent/API/Gateway insert and per-release count pruning atomic. The matching API/Agent default is 1,000 with a permitted range of 100–10,000. Projected deployment and audit histories are outside this count cap. Disable downloads until the visible application's selected page and filters have loaded.
 
 ## Historical TASK 050 — M9 Centralized Application Logs Management — 2026-11-17
 
