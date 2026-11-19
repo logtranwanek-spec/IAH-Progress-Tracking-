@@ -1,8 +1,12 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current checkpoint after TASK 053 — 2026-11-19
+## Current checkpoint after TASK 054 Phase A — 2026-11-19
 
-TASK 053 is COMPLETED as a bounded M9 health/process-exit acceptance task; M9 remains IN PROGRESS. The full `npm.cmd run verify` passed 630 checks (0 failed, 0 skipped), with owned loopback cleanup. Live disposable health-failure and process-exit records were followed through Registry, M11-scoped API, and signed Dashboard protocol/DOM tests. Agent restart/retry recovery, release association, abnormal-event retention, UTC ordering and startup-failure de-duplication are covered. No real-browser acceptance was performed. Source Build remains disabled pending written IT/Security approval and a verified isolated worker; keep M7/M8/M9/M10-DB IN PROGRESS, M11 COMPLETED, M10/M12 NOT STARTED, D00–D29 PENDING, and preserve the M8 checkpoint at 13 PASS, 0 verified FAIL, 1 BLOCKED, 39 NOT RUN. See PROGRESS.md for exact evidence and the handoff.
+TASK 054 Phase A is complete with readiness **BLOCKED**; Phase B is **NOT STARTED**. The approval review found 0/30 D00–D29 decisions approved and all 30 remain PENDING. The project workspace and supplied records contain no traceable written IT/Security authorization or Build Worker provisioning/isolation evidence; read-only GitHub issue/PR searches returned no relevant approval record. Product-owner-reported permissions remain context only. Approval expiry/supersession cannot be evaluated because no approval instrument was found. The 16-item worker checklist has no fully cleared item and worker readiness is NOT READY. TASK 033 remains metadata-only with an inert `BLOCKED_WORKER_UNAPPROVED` boundary; no worker endpoint, credential, network client, process launcher, build log ingestion, or `BUILD` log source exists. No source code changed and no app tests/full suite ran in TASK 054. The prior TASK 053 full-suite result is historical: 630 PASS, 0 FAIL, 0 SKIPPED. Keep Source Build disabled; preserve M7/M8/M9/M10-DB IN PROGRESS, M11 COMPLETED, M10/M12 NOT STARTED and the M8 checkpoint at 13 PASS, 0 verified FAIL, 1 BLOCKED, 39 NOT RUN. See PROGRESS.md for evidence and the minimum next action.
+
+## Historical checkpoint after TASK 053 — 2026-11-19
+
+TASK 053 is COMPLETED as a bounded M9 health/process-exit acceptance task; M9 remains IN PROGRESS. The full `npm.cmd run verify` passed 630 checks (0 failed, 0 skipped), with owned loopback cleanup. Live disposable health-failure and process-exit records were followed through Registry, M11-scoped API, and signed Dashboard protocol/DOM tests. Agent restart/retry recovery, release association, abnormal-event retention, UTC ordering and startup-failure de-duplication are covered. No real-browser acceptance was performed. See PROGRESS.md for exact evidence.
 
 ## Historical checkpoint after TASK 052 — M9 Operational Log Acceptance and Retention Review — 2026-11-18
 
@@ -25,6 +29,7 @@ TASK 051 Phase A and Phase B are COMPLETED as a bounded task after the four 50 M
 - Keep any age-based, destructive or cross-store retention changes out of scope absent explicit authorization; preserve the established per-release cap.
 - Apply the same sanitization to log search, counts, API responses and Dashboard downloads. Order mixed Registry timestamp formats by their UTC value and keep deterministic tie-breakers. Do not present offset pages as a snapshot across requests.
 - Keep Agent/API/Gateway insert and per-release count pruning atomic. The matching API/Agent default is 1,000 with a permitted range of 100–10,000. Projected deployment and audit histories are outside this count cap. Disable downloads until the visible application's selected page and filters have loaded.
+- Source Build log ingestion is separately approval-gated. Do not add a `BUILD` source, worker endpoint, credential, network client, or log-ingestion API from TASK 054 Phase A evidence alone. Require applicable written D00–D29 authorization, verified provisioned-worker controls, and a separate Phase B implementation assignment first; preserve M11 scope, bounded redaction/retention, exact-artifact Administrator review, and the disabled Source Build gate.
 
 ## Historical TASK 050 — M9 Centralized Application Logs Management — 2026-11-17
 

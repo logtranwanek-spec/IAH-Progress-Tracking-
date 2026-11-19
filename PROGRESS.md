@@ -1,5 +1,44 @@
 # Project Progress
 
+## TASK 054 — M9 Source Build Log Integration Readiness Gate — 2026-11-19
+
+**Phase A: COMPLETED with readiness BLOCKED. Phase B: NOT STARTED. TASK 054 remains blocked pending external evidence; M9 remains IN PROGRESS.** The local tracking branch and fetched remote initially matched `ecdca63e6fac84221deb57f2f5f9e0f03c6e7cef`. No source code or application behavior changed.
+
+### Approval and worker readiness evidence
+
+- Re-read the four authoritative tracking files and reviewed the TASK 030–035 approval records, TASK 033 metadata-only Build Job implementation, TASK 048–053 M9 implementation/evidence, and the 16-item worker checklist/readiness gate.
+- The D00–D29 register applies to the mandatory Source Build execution and its worker/log path. **0/30 decisions are approved; all 30 remain PENDING.** Product-owner-reported permissions in the existing record are contextual input only and do not satisfy the written IT/Security evidence fields. No approval instrument was available to validate reviewer authority, applicability, expiry, or supersession; expiry/supersession is UNKNOWN.
+- Read-only searches of the project workspace and supplied records found no approval or worker-provisioning evidence. The progress repository has only the four documentation files; GitHub issue and pull-request searches for Source Build worker approval returned no relevant records. No reviewer was contacted and no approval request was submitted.
+- **Worker readiness: NOT READY; 0/16 checklist items fully cleared.** No approved/selected host, named service owner, dedicated service identity, binary/version/hash inventory, written executable-policy scope, OS/filesystem/process isolation evidence, endpoint/authentication, dependency allowlist, quotas/timeouts, worker log/retention policy, monitoring/incident route, artifact provenance/quarantine approval, or recovery/cleanup/operational sign-off was available. The current IHP host's no-`.exe` policy and all other restrictions remain unchanged.
+
+| Gate                                                                                     | Classification | Evidence / missing condition                                                                               |
+| ---------------------------------------------------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------- |
+| Written IT/Security authorization for applicable D00–D29                                 | PENDING        | Register has 0 APPROVED and 30 PENDING; no traceable authorized reviewer decision was supplied.            |
+| Source Build log content, access, redaction, retention and export policy (including D16) | PENDING        | No written log policy or worker-output test evidence; existing logs do not accept build output.            |
+| Approved worker provisioning and accountable owner                                       | PENDING        | No service/host provisioning record, named owner, or support/runbook evidence.                             |
+| Isolation, identity, toolchain and executable scope                                      | PENDING        | No worker boundary tests, service identity, approved binary hashes, or policy citation.                    |
+| Worker-to-Platform channel and authentication                                            | PENDING        | No approved endpoint, route, protocol/certificates, credential, or fail-closed communication tests.        |
+| Dependencies, quotas, monitoring, cleanup and recovery                                   | PENDING        | No approved mirror list, enforced resource values, telemetry/incident evidence, or cleanup/recovery tests. |
+| Approval expiry/supersession                                                             | UNKNOWN        | No approval document exists in the reviewed evidence to inspect.                                           |
+
+The product-owner-reported policy clarification is **not** a rejection or written approval. No status was changed in D00–D29. M7 remains IN PROGRESS and Source Build remains disabled.
+
+### Existing M9 integration boundary review
+
+- `deployment_logs.source` is constrained to `AGENT`, `API`, or `GATEWAY`; deployment and platform rows are safe projections from existing deployment/audit records. Existing reads are bounded, sanitized and M11 application-scoped; the Dashboard source filter/current-page JSONL uses that established API.
+- TASK 033 exposes only authenticated application-scoped Build Job metadata create/list/detail/cancel operations. It statically validates a staged source snapshot and ends at `BLOCKED_WORKER_UNAPPROVED`. `UnapprovedBuildWorker` is inert: no endpoint, credentials, network client, dispatcher, process launcher or build output exists. Build Job events are metadata state history, not captured worker stdout/stderr. There is no `BUILD` log source or build-log ingress.
+- A future authorized boundary would need an immutable Build Job-to-application association; server-validated job/release linkage (the current target release label is intent metadata, not a release); bounded authenticated ingestion; explicit source/event allowlists; redaction/size limits/retention; application-scoped M11 retrieval; audit linkage; and an exact Gateway/Dashboard allowlist. Any migration/source addition requires separate authorization and tests. This review made no such change.
+
+### Work performed and verification
+
+- Read-only checks: inspected source and policy documents; searched local approval/provisioning material; searched GitHub issues and PRs for approval evidence; checked local/fetched `main` state. No worker connection, provisioning, toolchain execution, source build, application/database operation, network/security change, or system setting change occurred.
+- Source changes: **none**. Build/test changes: **none**. Application tests and `npm.cmd run verify`: **NOT RUN** for TASK 054 because Phase A was read-only and Phase B is blocked. The latest full verification remains the historical TASK 053 result: **630 PASS, 0 FAIL, 0 SKIPPED**; it is not a TASK 054 run.
+- Documentation validation passed: Prettier check for all four Markdown files; cross-file TASK 054/M9 status and final-checkpoint consistency; authoritative D00–D29 register 30/30 PENDING; 16-item worker checklist 16/16 PENDING; `git diff --check` clean.
+
+### Decision and next action
+
+**Phase A exit decision: BLOCKED. Phase B: NOT STARTED.** The minimum next action is for the Product Owner to supply traceable written decisions from the applicable authorized IT/Security reviewers and evidence that the approved worker is actually provisioned/configured. Do not ask the owner to repeat the existing product-direction answers. Once evidence arrives, re-evaluate every applicable decision and checklist gate; only a fully verified gate plus a separate implementation authorization can permit Phase B. No new implementation feature/task is started while the gate is unmet.
+
 ## TASK 053 — M9 Health and Process Exit Log Acceptance — 2026-11-19
 
 **Status: COMPLETED as a bounded M9 acceptance task. M9 remains IN PROGRESS.** The local source workspace and tracking-only Git repository were reviewed. Remote `main` initially matched `d2627ca06f0d9ae98af0c3d0af40af19f492b02f`; source files are outside this documentation repository's tracked set.
@@ -4355,11 +4394,11 @@ Record actual outputs, failures, and test results before updating milestone stat
 ## CURRENT PROJECT CHECKPOINT
 
 - **Latest completed task:** TASK 053 — M9 Health and Process Exit Log Acceptance (2026-11-19), completed for its bounded acceptance scope.
-- **Current task and status:** TASK 053 is complete; no implementation task is active. M9 remains IN PROGRESS.
-- **Latest automated results:** `npm.cmd run verify` exited 0 with **630 PASS, 0 FAIL, 0 SKIPPED**. `npm.cmd run test:agent` passed 30/30; `npm.cmd run test:routing` passed Gateway 115/115 and managed integration 22/22; `npm.cmd run test:browser` passed 55/55 protocol/DOM checks. Full breakdown and smoke evidence are in the TASK 053 record above.
+- **Current task and status:** TASK 054 Phase A is complete with readiness BLOCKED; TASK 054 Phase B is NOT STARTED. M9 remains IN PROGRESS.
+- **Latest automated results:** No application tests/full suite ran for TASK 054. The latest actual full run is historical TASK 053: `npm.cmd run verify` exited 0 with **630 PASS, 0 FAIL, 0 SKIPPED**. Its focused Agent 30/30, Gateway 115/115, managed integration 22/22 and Dashboard protocol/DOM 55/55 results are recorded in the TASK 053 section.
 - **Current milestone statuses:** M1–M6 and M11 COMPLETED. M7, M8, M9 and M10-DB IN PROGRESS. M10 and M12 NOT STARTED. Source Build disabled and D00–D29 PENDING. The M8 operator checkpoint remains 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN. Production browser management remains default-off.
-- **Outstanding blockers and limits:** Source Build log integration requires written IT/Security approvals and an approved isolated worker; D00–D29 remain PENDING. No real-browser acceptance was performed; preserve the M8 checkpoint exactly at 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN. Broader age-based/destructive retention or unrestricted export is not authorized. Gateway event delivery is best-effort and offset pages may shift. M10-DB lifecycle remains outside implemented scope.
-- **Recommended next task number and title:** TASK 054 — M9 Source Build Log Integration Readiness Gate.
-- **Recommended next task scope:** Resume only after traceable IT/Security approvals and verified isolated-worker provisioning. First verify the readiness gate; then implement the narrow approved worker-log integration. If the gate remains unmet, record the blocker and do not connect a worker or enable Source Build.
-- **Last verified GitHub content commit:** `2f1fb1f852a5b88bc9912db541ee47dfe0131dc3`. Remote `main` matched this SHA, and the commit contained only the four authorized tracking files. This checkpoint-only follow-up records the verified content SHA.
-- **Tracking delivery:** The tracking repository remains documentation-only. TASK 053 application source and tests are local to the source workspace and are not included in the tracking repository.
+- **Outstanding blockers and limits:** No written IT/Security approvals or worker provisioning/isolation evidence was found; D00–D29 remain PENDING (0 approved), the 16-item readiness checklist has 0 fully cleared items, and Source Build log integration remains blocked. No real-browser acceptance was performed; preserve the M8 checkpoint exactly at 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN. Broader age-based/destructive retention or unrestricted export is not authorized. Gateway event delivery is best-effort and offset pages may shift. M10-DB lifecycle remains outside implemented scope.
+- **Recommended next task number and title:** TASK 054 Phase B — Conditional M9 Source Build Log Integration (BLOCKED; not started).
+- **Recommended next task scope:** Wait for traceable IT/Security approvals for applicable D00–D29 items and evidence of approved worker provisioning/configuration. Re-run the objective readiness gate. Begin narrow log integration only after every mandatory gate is VERIFIED APPROVED/READY and a separate Phase B authorization is present; otherwise keep Source Build disabled.
+- **Last verified GitHub content commit:** Pending TASK 054 documentation synchronization; update after the four-file content commit is verified on remote `main`.
+- **Tracking delivery:** The tracking repository remains documentation-only. TASK 054 changed only the four tracking documents; no source code, tests, databases, logs or build artifacts are included.
