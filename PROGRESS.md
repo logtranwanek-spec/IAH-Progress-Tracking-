@@ -1,5 +1,33 @@
 # Project Progress
 
+## TASK 053 — M9 Health and Process Exit Log Acceptance — 2026-11-19
+
+**Status: COMPLETED as a bounded M9 acceptance task. M9 remains IN PROGRESS.** The local source workspace and tracking-only Git repository were reviewed. Remote `main` initially matched `d2627ca06f0d9ae98af0c3d0af40af19f492b02f`; source files are outside this documentation repository's tracked set.
+
+### Implementation and verified behavior
+
+- Inspected the Deployment Agent, SQLite Registry, application-scoped M11 APIs, Gateway, and Dashboard. Failed runtime health probes produce `health_failed`; after the existing three-failure policy the owned child is stopped, status enters `BACKOFF`, and its old observation becomes `STALE`/`UNKNOWN`. An unexpected child exit produces `unexpected_exit` and follows the existing bounded retry policy. Intentional stop remains distinct. No new public health state, event table, schema, or API contract was added.
+- Fixed one confirmed defect in `src/DeploymentAgent/RuntimeEngine.cs`: unhealthy startup cleanup had already recorded `startup_failed`, then the catch path recorded a duplicate. The fallback is now emitted only when cleanup did not record it; cancellation still records its separate `agent_stopping` event.
+- Added/expanded regression coverage in `tests/DeploymentAgent.Tests/Program.cs`, `tests/Platform.Integration.Tests/Program.cs`, and `src/Dashboard/test/browser.test.mjs`.
+- Disposable trusted fixtures verified a healthy-to-unhealthy transition, `BACKOFF`, stale `UNKNOWN` health, and an ERROR `health_failed` log in the authenticated application-scoped API. A separate child crash produced ERROR `unexpected_exit` with exit code 23. Retried crashes recovered under the existing bounded policy and ultimately exhausted at the configured attempt bound; the event history survived Agent restart, remained associated with release `v1`, and returned newest-first UTC timestamps. Health-failure history also survived Agent restart, recovered on retry, and remained release-associated. Abnormal records were retained under the configured per-release cap.
+- The combined test path exercised the real disposable application, Deployment Agent, SQLite Registry, authorized API, signed Dashboard operation, and Dashboard overview/log components under JSDOM. It confirmed the Dashboard log view displays the live `health_failed` event and the overview shows `BACKOFF`/`UNKNOWN`. This is automated protocol/DOM evidence, **not real-browser acceptance**.
+- Security checks rejected anonymous and unauthorized application reads, invalid application/release identifiers, and did not expose process/instance identifiers or fixture paths. Tests also confirmed only one startup-failure event, expected exit code handling, no cross-release event attribution, and existing cleanup/port ownership behavior.
+
+### Verification evidence
+
+- `npm.cmd run check`: passed (Prettier, TypeScript and .NET formatting checks).
+- `npm.cmd run test:agent`: **30 passed, 0 failed**.
+- `npm.cmd run test:routing`: Gateway **115 passed, 0 failed**; managed API/Gateway integration **22 passed, 0 failed**.
+- `npm.cmd run test:browser`: **55 passed, 0 failed, 0 skipped**. This suite uses protocol and JSDOM checks and is not actual-browser acceptance. An initial test-harness timeout was corrected to wait for the asynchronously rendered selector; a prior Agent assertion was corrected to respect retention insert/prune ordering. The final focused runs passed.
+- Full `npm.cmd run verify`: **630 PASS, 0 FAIL, 0 SKIPPED**, exit 0. Breakdown: readiness/config 33; API 160; SQLite/Prisma 15; Dashboard DOM 51; signed Gateway protocol/DOM 55; Foundation 27; Gateway 115; samples 82; Agent 30; managed routing integration 22; package checks 40. Build, formatting, TypeScript and .NET format checks passed. The runner published .NET applications with `UseAppHost=false`, executed managed DLLs, and verified published outputs contained no `.exe` artifacts. Owned smoke verified Gateway `127.0.0.1:5050`, API/Dashboard loopback listeners, health/assets/proxy behavior and default-off browser management, then stopped owned components, released ports and removed owned temporary storage. Log: `%TEMP%\IhpTask053Verify-20261119-final.log`.
+- A React `act(...)` warning appeared in a passing Dashboard protocol/DOM test. No actual-browser acceptance was run. No code was changed after the final full suite.
+
+### Remaining M9 scope and restrictions
+
+TASK 053 closes its abnormal health/exit acceptance scope. M9 remains **IN PROGRESS**: Source Build log integration depends on written IT/Security approval and an approved isolated worker; no source build or worker is enabled. Broader age-based/destructive retention and unrestricted export remain unauthorized/out of scope. Existing Gateway event delivery is best-effort and offset pages can shift as rows change. The M8 actual-browser checkpoint remains exactly 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN; production browser management remains default-off.
+
+Keep M7/M8/M9/M10-DB IN PROGRESS; M11 COMPLETED; M10/M12 NOT STARTED; Source Build disabled; D00–D29 PENDING. SQLite-only, loopback-only, no-Docker, no-Administrator, no-security-change, no-secrets, no-untrusted-execution, and managed-DLL restrictions remain in force. The next task should address the approval-gated Source Build log dependency only after the worker approvals/readiness gate is satisfied; until then, continue only independently authorized M9 acceptance work.
+
 ## TASK 052 — M9 Operational Log Acceptance and Retention Review — 2026-11-18
 
 **Status: COMPLETED for the bounded operational logs increment. M9 remains IN PROGRESS.**
@@ -4326,12 +4354,13 @@ Record actual outputs, failures, and test results before updating milestone stat
 
 ## CURRENT PROJECT CHECKPOINT
 
-- **Latest completed task:** TASK 052 — M9 Operational Log Acceptance and Retention Review (2026-11-18).
-- **Current task and status:** TASK 052 is complete and verified for the bounded operational logs scope. No implementation task is active.
-- **Latest automated results:** `npm.cmd run verify` exited 0 with **626 PASS, 0 FAIL, 0 SKIPPED**. Build/static checks and owned loopback smoke/cleanup passed. Focused results and all eleven suite totals appear in the TASK 052 record above.
+- **Latest completed task:** TASK 053 — M9 Health and Process Exit Log Acceptance (2026-11-19), completed for its bounded acceptance scope.
+- **Current task and status:** TASK 053 is complete; no implementation task is active. M9 remains IN PROGRESS.
+- **Latest automated results:** `npm.cmd run verify` exited 0 with **630 PASS, 0 FAIL, 0 SKIPPED**. `npm.cmd run test:agent` passed 30/30; `npm.cmd run test:routing` passed Gateway 115/115 and managed integration 22/22; `npm.cmd run test:browser` passed 55/55 protocol/DOM checks. Full breakdown and smoke evidence are in the TASK 053 record above.
 - **Current milestone statuses:** M1–M6 and M11 COMPLETED. M7, M8, M9 and M10-DB IN PROGRESS. M10 and M12 NOT STARTED. Source Build disabled and D00–D29 PENDING. The M8 operator checkpoint remains 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN. Production browser management remains default-off.
-- **Outstanding blockers and limits:** M9 abnormal health and exit visibility still needs end-to-end acceptance. Build logs depend on an approved isolated worker. Any broader retention or export needs explicit scope. Offset pages can shift during writes/pruning and Gateway event delivery is best effort. M8 actual-browser acceptance remains incomplete. M10-DB lifecycle remains outside the implemented scope.
-- **Recommended next task number and title:** TASK 053 — M9 Health and Process Exit Log Acceptance.
-- **Recommended next task scope:** Exercise unhealthy-runtime and unexpected-exit scenarios using disposable trusted fixtures. Verify Registry records and authorized application log visibility and correct only confirmed gaps in the existing pipeline.
-- **Last verified GitHub content commit:** `5a917efc02c7dfce2b9c38abe8d347cf17f2372f`. Remote `main` matched this commit after the push, and its tree and changes contained only the four tracking files. This checkpoint-only follow-up records the verified SHA.
-- **Tracking delivery:** The four official Markdown files contain the evidence and handoff. Source and verification changes are local to the application workspace and listed above.
+- **Outstanding blockers and limits:** Source Build log integration requires written IT/Security approvals and an approved isolated worker; D00–D29 remain PENDING. No real-browser acceptance was performed; preserve the M8 checkpoint exactly at 13 PASS, 0 verified FAIL, 1 BLOCKED (A04 wait/outcome unconfirmed), 39 NOT RUN. Broader age-based/destructive retention or unrestricted export is not authorized. Gateway event delivery is best-effort and offset pages may shift. M10-DB lifecycle remains outside implemented scope.
+- **Current milestone statuses:** M1–M6 and M11 COMPLETED. M7, M8, M9 and M10-DB IN PROGRESS. M10 and M12 NOT STARTED. Source Build disabled; D00–D29 PENDING; production browser management default-off.
+- **Recommended next task number and title:** TASK 054 — M9 Source Build Log Integration Readiness Gate.
+- **Recommended next task scope:** Resume only after traceable IT/Security approvals and verified isolated-worker provisioning. First verify the readiness gate; then implement the narrow approved worker-log integration. If the gate remains unmet, record the blocker and do not connect a worker or enable Source Build.
+- **Last verified GitHub commit:** Pending TASK 053 documentation synchronization; update this field after remote `main` has been verified.
+- **Tracking delivery:** The tracking repository remains documentation-only. TASK 053 application source and tests are local to the source workspace and are not included in the tracking repository.

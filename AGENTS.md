@@ -1,8 +1,16 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current checkpoint after TASK 052 — M9 Operational Log Acceptance and Retention Review — 2026-11-18
+## Current checkpoint after TASK 053 — 2026-11-19
+
+TASK 053 is COMPLETED as a bounded M9 health/process-exit acceptance task; M9 remains IN PROGRESS. The full `npm.cmd run verify` passed 630 checks (0 failed, 0 skipped), with owned loopback cleanup. Live disposable health-failure and process-exit records were followed through Registry, M11-scoped API, and signed Dashboard protocol/DOM tests. Agent restart/retry recovery, release association, abnormal-event retention, UTC ordering and startup-failure de-duplication are covered. No real-browser acceptance was performed. Source Build remains disabled pending written IT/Security approval and a verified isolated worker; keep M7/M8/M9/M10-DB IN PROGRESS, M11 COMPLETED, M10/M12 NOT STARTED, D00–D29 PENDING, and preserve the M8 checkpoint at 13 PASS, 0 verified FAIL, 1 BLOCKED, 39 NOT RUN. See PROGRESS.md for exact evidence and the handoff.
+
+## Historical checkpoint after TASK 052 — M9 Operational Log Acceptance and Retention Review — 2026-11-18
 
 TASK 052 is COMPLETED for the bounded logs scope. Full verification passed 626 checks, with zero failures/skips and owned loopback cleanup. Search and counts use sanitized text, ordering uses normalized UTC time, and downloads follow the loaded application's current filter and page. The shared record cap is per release for Agent, API, and Gateway log rows. Deployment and audit projections keep their separate history. M9 remains IN PROGRESS. The next recommended task is TASK 053, M9 Health and Process Exit Log Acceptance. Keep Source Build disabled and preserve M8's operator checkpoint and default-off production browser management. See PROGRESS.md for evidence and limitations.
+
+## Historical TASK 053 — Health and Process Exit Log Acceptance — 2026-11-19
+
+The task corrected duplicate `startup_failed` logging and added Agent, managed integration, and Dashboard protocol/DOM acceptance. The final full verification passed 630/630. The Dashboard evidence is not real-browser acceptance. Keep M9 IN PROGRESS for approval-gated Source Build log integration and any separately authorized remaining acceptance. Do not change M8 browser status, production browser gates, M7 source-build restrictions, or existing SQLite/loopback policies.
 
 ## Historical TASK 051 — Verification Recovery and M9 Operational Event Integration — 2026-11-18
 
