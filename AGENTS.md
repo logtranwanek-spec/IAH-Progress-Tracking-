@@ -1,8 +1,12 @@
 # Repository Instructions for Codex and Development Agents
 
-## Current checkpoint after TASK 054 Phase A — 2026-11-19
+## Current checkpoint after TASK 054 approval-package preparation — 2026-11-19
 
-TASK 054 Phase A is complete with readiness **BLOCKED**; Phase B is **NOT STARTED**. The approval review found 0/30 D00–D29 decisions approved and all 30 remain PENDING. The project workspace and supplied records contain no traceable written IT/Security authorization or Build Worker provisioning/isolation evidence; read-only GitHub issue/PR searches returned no relevant approval record. Product-owner-reported permissions remain context only. Approval expiry/supersession cannot be evaluated because no approval instrument was found. The 16-item worker checklist has no fully cleared item and worker readiness is NOT READY. TASK 033 remains metadata-only with an inert `BLOCKED_WORKER_UNAPPROVED` boundary; no worker endpoint, credential, network client, process launcher, build log ingestion, or `BUILD` log source exists. No source code changed and no app tests/full suite ran in TASK 054. The prior TASK 053 full-suite result is historical: 630 PASS, 0 FAIL, 0 SKIPPED. Keep Source Build disabled; preserve M7/M8/M9/M10-DB IN PROGRESS, M11 COMPLETED, M10/M12 NOT STARTED and the M8 checkpoint at 13 PASS, 0 verified FAIL, 1 BLOCKED, 39 NOT RUN. See PROGRESS.md for evidence and the minimum next action.
+TASK 054 Phase A is complete with readiness **BLOCKED**; Source Build log-integration Phase B is **NOT STARTED**. The documentation-only approval-package preparation is complete; the full draft is local at `docs/approval/TASK054-IT-SECURITY-APPROVAL-PACKAGE.md` and is not published to the public tracking repository. D00–D29 remain 30 PENDING / 0 APPROVED; worker readiness is 0/16 cleared. No traceable written IT/Security authorization or worker provisioning/isolation evidence exists in the reviewed record; product-owner-reported permissions remain context only. TASK 033 remains metadata-only at `BLOCKED_WORKER_UNAPPROVED`; no worker endpoint, credential, network client, process launcher, build-log ingestion or `BUILD` source exists. No application code/tests changed or ran for this documentation follow-up. Historical TASK 053 verification remains 630 PASS, 0 FAIL, 0 SKIPPED. Keep Source Build disabled; preserve M7/M8/M9/M10-DB IN PROGRESS, M11 COMPLETED, M10/M12 NOT STARTED and the exact M8 checkpoint at 13 PASS, 0 verified FAIL, 1 BLOCKED, 39 NOT RUN. See PROGRESS.md for the next action.
+
+### TASK 054 approval-package preparation — completed documentation follow-up
+
+The local draft covers D00–D29, the 16 readiness items, proposed architecture, build-log policy questions, reviewer letter, Product Owner checklist, evidence IDs EV-01–EV-16, and the final gate. Its proposals do not change approval states. Only a sanitized status summary is synchronized to the public tracking repository. Phase A remains BLOCKED; Phase B is NOT STARTED; Source Build is disabled; M9 remains IN PROGRESS.
 
 ## Historical checkpoint after TASK 053 — 2026-11-19
 
@@ -48,6 +52,7 @@ Preserve M8's operator-reported checkpoint exactly: 13 PASS, 0 verified FAIL, 1 
 - The tracking repository is documentation-only. Review and stage exactly the four authorized Markdown files; never use `git add -A` or include application source, databases, credentials, logs, or generated artifacts.
 - Commit on `main`, push without force, then verify `git ls-remote origin refs/heads/main` equals the committed local SHA and verify the commit contains only the four tracking files. If the remote moved or push fails, fetch and reconcile safely; never overwrite unrelated remote changes or claim an unverified push.
 - If local Git does not track the application source workspace, report that state accurately and keep source code out of the progress repository. The final user response is a summary; it is not a substitute for updating and verifying GitHub.
+- Keep full IT/Security approval packages containing non-public review detail outside the public tracking repository unless publication is explicitly authorized. Synchronize only a sanitized status summary; never treat a local draft, recommendation, or Product Owner report as approval evidence.
 
 ## Historical TASK 049 — M9 Centralized Application Monitoring Overview — 2026-11-14
 
